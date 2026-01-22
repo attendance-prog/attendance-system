@@ -15,10 +15,8 @@ function login(){
   localStorage.setItem("faculty",email);
   location.href="dashboard.html";
  } else alert("Unauthorized");
-}
 if("serviceWorker" in navigator){
  navigator.serviceWorker.register("../pwa/service-worker.js");
-}
 </script>
 </body>
 </html>
