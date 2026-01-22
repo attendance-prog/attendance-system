@@ -1,0 +1,6 @@
+{
+"name":"Smart Attendance",
+"short_name":"Attendance",
+"start_url":"../pages/index.html",
+"display":"standalone"
+}
