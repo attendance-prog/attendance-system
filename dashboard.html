@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Faculty Dashboard</h2>
+<a href="create.html">Create Attendance</a><br>
+<a href="analytics.html">Attendance Percentage</a><br>
+<a href="charts.html">Charts</a><br>
+<button onclick="logout()">Logout</button>
+<script>
+if(!localStorage.getItem("faculty")) location.href="index.html";
+function logout(){localStorage.clear();location.href="index.html";}
+</script>
+</body>
+</html>

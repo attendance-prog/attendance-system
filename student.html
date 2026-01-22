@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h3>Checking GPS...</h3>
+<script>
+navigator.geolocation.getCurrentPosition(p=>{
+ if(p.coords.latitude){ location.href="https://forms.google.com"; }
+});
+</script>
+</body>
+</html>

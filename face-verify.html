@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h3>Face Verification</h3>
+<video id="v" autoplay width="300"></video><br>
+<button onclick="cap()">Capture</button>
+<canvas id="c" width="300" height="200" hidden></canvas>
+<script>
+navigator.mediaDevices.getUserMedia({video:true}).then(s=>v.srcObject=s);
+function cap(){
+ c.getContext("2d").drawImage(v,0,0,300,200);
+ location.href="student.html";
+}
+</script>
+</body>
+</html>

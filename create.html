@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h3>Create Attendance</h3>
+<input id="subject" placeholder="Subject">
+<button onclick="gen()">Generate QR</button>
+<div id="qr"></div>
+<script>
+function gen(){
+ document.getElementById("qr").innerHTML =
+ '<img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=face-verify.html">';
+}
+</script>
+</body>
+</html>
