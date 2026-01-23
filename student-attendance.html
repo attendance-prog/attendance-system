@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Attendance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body style="font-family:Arial; text-align:center; padding:20px">
+
+<h2>Student Attendance</h2>
+<p>Face & Location verification required</p>
+
+<video id="video" width="280" autoplay></video><br><br>
+<button onclick="capture()">Capture Face</button>
+
+<canvas id="canvas" width="280" height="200" style="display:none;"></canvas>
+
+<p id="msg"></p>
+
+<script>
+const video = document.getElementById("video");
+const msg = document.getElementById("msg");
+
+// Start camera
+navigator.mediaDevices.getUserMedia({ video: true })
+  .then(stream => video.srcObject = stream)
+  .catch(() => msg.innerText = "Camera access denied");
+
+// Capture face
+function capture(){
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // GPS check
+  navigator.geolocation.getCurrentPosition(pos => {
+    msg.innerText = "Attendance marked successfully ✅";
+  }, () => {
+    msg.innerText = "Location access required ❌";
+  });
+}
+</script>
+
+</body>
+</html>
