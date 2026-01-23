@@ -3,40 +3,73 @@
 <head>
   <title>Student Attendance</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body { font-family: Arial; text-align:center; padding:20px; }
+    video { border:1px solid #ccc; }
+    button { padding:10px; font-size:16px; margin-top:10px; }
+  </style>
 </head>
 
-<body style="font-family:Arial; text-align:center; padding:20px">
+<body>
 
-<h2>Student Attendance</h2>
-<p>Face & Location verification required</p>
+<h2>Room 603 – Attendance Verification</h2>
+<p id="status">Verifying QR & Location...</p>
 
-<video id="video" width="280" autoplay></video><br><br>
+<video id="video" width="280" autoplay></video><br>
 <button onclick="capture()">Capture Face</button>
 
 <canvas id="canvas" width="280" height="200" style="display:none;"></canvas>
 
-<p id="msg"></p>
-
 <script>
+// ================= QR EXPIRY CHECK =================
+const params = new URLSearchParams(window.location.search);
+const expiry = params.get("expiry");
+
+if (!expiry || Date.now() > expiry) {
+  document.body.innerHTML =
+    "<h2>❌ QR Code Expired</h2><p>Please ask faculty for a new QR.</p>";
+}
+
+// ================= ROOM 603 GPS COORDINATES =================
+// Approx coordinates of Block-7, SSBS, Sharda University
+const ROOM_LAT = 28.4729;   // example latitude
+const ROOM_LNG = 77.4823;   // example longitude
+const ALLOWED_RADIUS = 0.0008; // ~80 meters
+
 const video = document.getElementById("video");
-const msg = document.getElementById("msg");
 
 // Start camera
 navigator.mediaDevices.getUserMedia({ video: true })
-  .then(stream => video.srcObject = stream)
-  .catch(() => msg.innerText = "Camera access denied");
+  .then(stream => video.srcObject = stream);
 
-// Capture face
-function capture(){
-  const canvas = document.getElementById("canvas");
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+// Capture face + check location
+function capture() {
 
-  // GPS check
   navigator.geolocation.getCurrentPosition(pos => {
-    msg.innerText = "Attendance marked successfully ✅";
+
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+
+    const distance =
+      Math.sqrt(Math.pow(lat - ROOM_LAT, 2) + Math.pow(lng - ROOM_LNG, 2));
+
+    if (distance > ALLOWED_RADIUS) {
+      document.body.innerHTML =
+        "<h2>❌ You are not within Room 603</h2><p>Attendance allowed only inside Block-7, SSBS.</p>";
+      return;
+    }
+
+    // Capture face (demo purpose)
+    const canvas = document.getElementById("canvas");
+    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    document.body.innerHTML =
+      "<h2>✅ Attendance Marked Successfully</h2><p>Thank you.</p>";
+
   }, () => {
-    msg.innerText = "Location access required ❌";
+    document.body.innerHTML =
+      "<h2>❌ Location Access Required</h2>";
   });
 }
 </script>
