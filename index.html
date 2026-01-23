@@ -10,13 +10,17 @@
 <button onclick="login()">Login</button>
 <script>
 function login(){
- let email=document.getElementById("email").value;
- if(email.endsWith("@gmail.com")){
-  localStorage.setItem("faculty",email);
-  location.href="dashboard.html";
- } else alert("Unauthorized");
+  let email = document.getElementById("email").value;
+
+  if(email.endsWith("@gmail.com")){
+    localStorage.setItem("faculty", email);
+    location.href = "dashboard.html";
+  } else {
+    alert("Unauthorized");
+  }
+}
+
 if("serviceWorker" in navigator){
- navigator.serviceWorker.register("../pwa/service-worker.js");
+  navigator.serviceWorker.register("service-worker.js");
+}
 </script>
-</body>
-</html>
