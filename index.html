@@ -1,27 +1,124 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Faculty Login</title>
-<link rel="manifest" href="../pwa/manifest.json">
+  <title>Faculty Login – SSBS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-box {
+      background: white;
+      padding: 25px;
+      width: 320px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      color: #0a5fb4;
+    }
+
+    p {
+      font-size: 14px;
+      color: #555;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 12px;
+      font-size: 15px;
+      background: #0a5fb4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #084a8f;
+    }
+
+    #otpSection {
+      display: none;
+      margin-top: 10px;
+    }
+  </style>
 </head>
+
 <body>
-<h2>Faculty Login</h2>
-<input type="email" id="email" placeholder="Faculty Email">
-<button onclick="login()">Login</button>
+
+<div class="login-box">
+  <h2>Faculty Login</h2>
+  <p>SSBS – Sharda University</p>
+
+  <!-- Faculty Email -->
+  <input type="email" id="email" placeholder="Faculty Email (@sharda.ac.in)">
+
+  <!-- Send OTP -->
+  <button onclick="sendOTP()">Send OTP</button>
+
+  <!-- OTP Section -->
+  <div id="otpSection">
+    <input type="number" id="otp" placeholder="Enter OTP">
+    <button onclick="verifyOTP()">Verify & Login</button>
+  </div>
+</div>
+
 <script>
-function login(){
-  let email = document.getElementById("email").value.trim();
+  let generatedOTP = "";
 
-  if(email.endsWith("@gmail.com")){
-    localStorage.setItem("faculty", "true");
-    location.replace("dashboard.html");
-  } else {
-    alert("Unauthorized");
+  function sendOTP() {
+    const email = document.getElementById("email").value.trim();
+
+    if (!email.endsWith("@sharda.ac.in")) {
+      alert("Only Sharda University faculty email is allowed");
+      return;
+    }
+
+    // Generate 6-digit OTP
+    generatedOTP = Math.floor(100000 + Math.random() * 900000);
+
+    // Demo OTP display (for project/demo purpose)
+    alert("Demo OTP (for project): " + generatedOTP);
+
+    document.getElementById("otpSection").style.display = "block";
   }
-}
 
-// Register service worker safely
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
-}
+  function verifyOTP() {
+    const enteredOTP = document.getElementById("otp").value.trim();
+
+    if (enteredOTP === generatedOTP.toString()) {
+      localStorage.setItem("faculty", "true");
+      location.replace("dashboard.html");
+    } else {
+      alert("Invalid OTP. Please try again.");
+    }
+  }
+
+  // Register service worker (optional PWA support)
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+  }
 </script>
+
+</body>
+</html>
