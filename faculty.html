@@ -1,34 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Generate QR</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body{font-family:Arial;background:#f4f6f8;}
-.box{
-  background:#fff;
-  margin:20px;
-  padding:20px;
-  border-radius:8px;
-}
-select,button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-}
-button{background:#0a5fb4;color:#fff;border:none;}
-</style>
+  <title>Go Green – Generate QR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{font-family:Arial;background:#f4f6f8;padding:20px;}
+    h1{color:#1e8449;text-align:center;}
+    .box{
+      background:#fff;
+      padding:20px;
+      border-radius:8px;
+    }
+    select,button{
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+    }
+    button{background:#0a5fb4;color:#fff;border:none;}
+    .logout{background:#c0392b;}
+  </style>
 </head>
 <body>
 
 <script>
-if (localStorage.getItem("login") !== "true") {
-  window.location.replace("./index.html");
+if(
+  localStorage.getItem("loggedIn")!=="true" ||
+  !localStorage.getItem("email")
+){
+  window.location.href="index.html";
 }
 </script>
 
+<h1>🌱 GO GREEN</h1>
+
 <div class="box">
-  <h2>Generate Attendance QR</h2>
+  <h3>Generate Attendance QR</h3>
 
   <select id="subject">
     <option>Loading subjects...</option>
@@ -38,37 +44,35 @@ if (localStorage.getItem("login") !== "true") {
 
   <div id="qr"></div>
 
-  <button style="background:#c0392b" onclick="logout()">Logout</button>
+  <button class="logout" onclick="logout()">Logout</button>
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 
+// TEMP SUBJECT LOAD (DEBUG)
 fetch(`${SCRIPT_URL}?action=getSubjects`)
   .then(r=>r.json())
-  .then(data=>{
+  .then(list=>{
     const s=document.getElementById("subject");
     s.innerHTML="";
-    data.forEach(d=>{
+    list.forEach(x=>{
       const o=document.createElement("option");
-      o.value=d.id;
-      o.text=d.name;
+      o.value=x.subjectId;
+      o.text=x.subjectName;
       s.appendChild(o);
     });
   });
 
 function generateQR(){
-  const id=document.getElementById("subject").value;
-  fetch(`${SCRIPT_URL}?action=generateQR&subjectId=${id}`)
-    .then(r=>r.text())
-    .then(url=>{
-      document.getElementById("qr").innerHTML=`<img src="${url}" width="100%">`;
-    });
+  const sub=document.getElementById("subject").value;
+  document.getElementById("qr").innerHTML=
+    "<p>QR will be generated here (next step)</p>";
 }
 
 function logout(){
   localStorage.clear();
-  window.location.replace("./index.html");
+  window.location.href="index.html";
 }
 </script>
 
