@@ -1,34 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Faculty Login</title>
+  <title>Faculty Login - SSBS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .box {
+      background: white;
+      padding: 25px;
+      width: 320px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 15px;
+    }
+    button {
+      background: #0a5fb4;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
 </head>
+
 <body>
 
-<h2>Faculty Login</h2>
+<div class="box">
+  <h2>Faculty Login</h2>
+  <p>SSBS – Sharda University</p>
 
-<input id="email" placeholder="Faculty Email">
-<button onclick="sendOTP()">Send OTP</button>
+  <input id="email" placeholder="Faculty Email" />
+  <button onclick="sendOTP()">Send OTP</button>
 
-<div id="otpBox" style="display:none;">
-  <input id="otp" placeholder="Enter OTP">
-  <button onclick="verifyOTP()">Verify & Login</button>
+  <div id="otpBox" style="display:none;">
+    <input id="otp" placeholder="Enter OTP" />
+    <button onclick="verifyOTP()">Verify & Login</button>
+  </div>
 </div>
 
 <script>
-const SCRIPT_URL = "1yQUmffUb3o_8HpStMYwsYDu03TxaQ65lMEHt2aaFLVU";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
 let lockedEmail = "";
 
 function sendOTP() {
   lockedEmail = document.getElementById("email").value.trim().toLowerCase();
+
+  if (
+    !lockedEmail.endsWith("@sharda.ac.in") &&
+    !lockedEmail.endsWith("@pg.sharda.ac.in")
+  ) {
+    alert("Only Sharda University email allowed");
+    return;
+  }
 
   fetch(`${SCRIPT_URL}?action=sendOTP&email=${encodeURIComponent(lockedEmail)}`)
     .then(r => r.text())
     .then(res => {
       if (res === "OTP_SENT") {
         document.getElementById("otpBox").style.display = "block";
-        alert("OTP sent");
+        alert("OTP sent to email");
       } else {
         alert(res);
       }
@@ -41,9 +86,12 @@ function verifyOTP() {
   fetch(`${SCRIPT_URL}?action=verifyOTP&email=${encodeURIComponent(lockedEmail)}&otp=${otp}`)
     .then(r => r.text())
     .then(res => {
-      if (res === "VERIFIED") {
-        localStorage.setItem("facultyEmail", lockedEmail);
-        location.href = "faculty.html";
+      if (res.startsWith("VERIFIED")) {
+        localStorage.setItem("login", "true");
+        localStorage.setItem("email", lockedEmail);
+
+        // ✅ FIXED PATH (IMPORTANT)
+        window.location.href = "./dashboard.html";
       } else {
         alert(res);
       }
