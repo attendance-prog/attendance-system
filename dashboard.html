@@ -3,64 +3,46 @@
 <head>
   <title>Go Green – Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <style>
-    body {
-      font-family: Arial;
-      background: #f4f6f8;
-      margin: 0;
-      padding: 20px;
+    body{font-family:Arial;background:#f4f6f8;padding:20px;}
+    h1{color:#1e8449;text-align:center;}
+    .card{
+      background:#fff;
+      padding:15px;
+      margin-bottom:15px;
+      border-radius:8px;
     }
-    h1 {
-      color: #1e8449;
-      text-align: center;
+    button{
+      width:100%;
+      padding:12px;
+      background:#0a5fb4;
+      color:#fff;
+      border:none;
     }
-    .card {
-      background: white;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #0a5fb4;
-      color: white;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .logout {
-      background: #c0392b;
-    }
+    .logout{background:#c0392b;}
   </style>
 </head>
-
 <body>
 
 <script>
-if (
-  localStorage.getItem("loggedIn") !== "true" ||
+if(
+  localStorage.getItem("loggedIn")!=="true" ||
   !localStorage.getItem("role")
-) {
-  window.location.href = "index.html";
+){
+  window.location.href="index.html";
 }
 </script>
 
 <h1>🌱 GO GREEN</h1>
 
 <div class="card">
-  <h2>Dashboard</h2>
+  <h3>Dashboard</h3>
   <p><b>Role:</b> <span id="roleText"></span></p>
 </div>
 
 <div class="card">
-  <h3>Generate Attendance QR</h3>
-
-  <!-- ✅ DIRECT LINK (NO JS, NO 404) -->
   <a href="faculty.html">
-    <button>Generate QR</button>
+    <button>Generate Attendance QR</button>
   </a>
 </div>
 
@@ -72,9 +54,9 @@ if (
 document.getElementById("roleText").innerText =
   localStorage.getItem("role");
 
-function logout() {
+function logout(){
   localStorage.clear();
-  window.location.href = "index.html";
+  window.location.href="index.html";
 }
 </script>
 
