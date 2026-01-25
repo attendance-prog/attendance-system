@@ -1,109 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Faculty Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      margin: 0;
-      padding: 0;
-    }
-
-    header {
-      background: #0a5fb4;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 20px;
-    }
-
-    .container {
-      padding: 20px;
-    }
-
-    .card {
-      background: white;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    .card button {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      background: #0a5fb4;
-      color: white;
-      cursor: pointer;
-    }
-
-    .card button:hover {
-      background: #084a8f;
-    }
-
-    .logout {
-      background: #d9534f !important;
-    }
-
-    .logout:hover {
-      background: #b52b27 !important;
-    }
-  </style>
-
-  <!-- 🔐 LOGIN PROTECTION -->
-  <script>
-    if (localStorage.getItem("faculty") !== "true") {
-      location.replace("index.html");
-    }
-  </script>
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
 <body>
-
-<header>
-  Faculty Dashboard
-</header>
-
-<div class="container">
-
-  <div class="card">
-    <h3>Create Attendance</h3>
-    <p>Generate QR code and start attendance session.</p>
-    <button onclick="go('create.html')">Create Attendance</button>
-  </div>
-
-  <div class="card">
-    <h3>Attendance Analytics</h3>
-    <p>View attendance percentage and reports.</p>
-    <button onclick="go('analytics.html')">View Analytics</button>
-  </div>
-
-  <div class="card">
-    <h3>Charts & Reports</h3>
-    <p>Graphical representation of attendance.</p>
-    <button onclick="go('charts.html')">View Charts</button>
-  </div>
-
-  <div class="card">
-    <button class="logout" onclick="logout()">Logout</button>
-  </div>
-
-</div>
-
 <script>
-  function go(page) {
-    location.href = page;
-  }
+const role = localStorage.getItem("role");
 
-  function logout() {
-    localStorage.removeItem("faculty");
-    location.replace("index.html");
-  }
+if (!role) {
+  location.href = "index.html";
+}
+
+if (role === "FACULTY") {
+  location.href = "faculty.html";
+}
+else if (role === "ADMIN") {
+  document.body.innerHTML = "<h2>Admin Dashboard (Coming Next)</h2>";
+}
+else if (role === "HOD") {
+  document.body.innerHTML = "<h2>HOD Dashboard (Coming Next)</h2>";
+}
+else if (role === "COORDINATOR") {
+  document.body.innerHTML = "<h2>Coordinator Dashboard (Coming Next)</h2>";
+}
+else {
+  alert("Invalid Role");
+  location.href = "index.html";
+}
+</script>
+</body>
+</html>
+
 </script>
 
 </body>
