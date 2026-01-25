@@ -40,12 +40,11 @@
 <body>
 
 <script>
-const loggedIn = localStorage.getItem("loggedIn");
-const role = localStorage.getItem("role");
-
-if (!loggedIn || !role) {
-  alert("Session expired. Please login again.");
-  window.location.href = "./index.html";
+if (
+  localStorage.getItem("loggedIn") !== "true" ||
+  !localStorage.getItem("role")
+) {
+  window.location.href = "index.html";
 }
 </script>
 
@@ -58,13 +57,11 @@ if (!loggedIn || !role) {
 
 <div class="card">
   <h3>Generate Attendance QR</h3>
-  <!-- ✅ FIXED PATH -->
-  <button onclick="goQR()">Generate QR</button>
-</div>
 
-<div class="card" id="adminCard" style="display:none">
-  <h3>Admin / HOD Panel</h3>
-  <button onclick="alert('Admin features coming soon')">Manage System</button>
+  <!-- ✅ DIRECT LINK (NO JS, NO 404) -->
+  <a href="faculty.html">
+    <button>Generate QR</button>
+  </a>
 </div>
 
 <div class="card">
@@ -72,20 +69,12 @@ if (!loggedIn || !role) {
 </div>
 
 <script>
-document.getElementById("roleText").innerText = role;
-
-if (role === "ADMIN" || role === "HOD") {
-  document.getElementById("adminCard").style.display = "block";
-}
-
-function goQR() {
-  // ✅ POINT TO faculty.html ONLY
-  window.location.href = "./faculty.html";
-}
+document.getElementById("roleText").innerText =
+  localStorage.getItem("role");
 
 function logout() {
   localStorage.clear();
-  window.location.href = "./index.html";
+  window.location.href = "index.html";
 }
 </script>
 
