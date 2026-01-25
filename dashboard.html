@@ -3,7 +3,7 @@
 <head>
   <title>Go Green – Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  
+
   <style>
     body {
       font-family: Arial;
@@ -30,7 +30,6 @@
       border: none;
       font-size: 16px;
       cursor: pointer;
-      margin-top: 10px;
     }
     .logout {
       background: #c0392b;
@@ -46,7 +45,7 @@ const role = localStorage.getItem("role");
 
 if (!loggedIn || !role) {
   alert("Session expired. Please login again.");
-  window.location.href = "index.html";
+  window.location.href = "./index.html";
 }
 </script>
 
@@ -59,6 +58,7 @@ if (!loggedIn || !role) {
 
 <div class="card">
   <h3>Generate Attendance QR</h3>
+  <!-- ✅ FIXED PATH -->
   <button onclick="goQR()">Generate QR</button>
 </div>
 
@@ -79,12 +79,13 @@ if (role === "ADMIN" || role === "HOD") {
 }
 
 function goQR() {
-  window.location.href = "generate-qr.html";
+  // ✅ POINT TO faculty.html ONLY
+  window.location.href = "./faculty.html";
 }
 
 function logout() {
   localStorage.clear();
-  window.location.href = "index.html";
+  window.location.href = "./index.html";
 }
 </script>
 
