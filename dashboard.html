@@ -4,35 +4,36 @@
   <title>Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-
 <body>
+
 <script>
 const role = localStorage.getItem("role");
 
-if (!role) {
-  location.href = "index.html";
+if(!role){
+  location.href="index.html";
 }
 
-if (role === "FACULTY") {
-  location.href = "faculty.html";
+if(role==="FACULTY"){
+  location.href="faculty.html";
 }
-else if (role === "ADMIN") {
-  document.body.innerHTML = "<h2>Admin Dashboard (Coming Next)</h2>";
+else if(role==="ADMIN"){
+  document.body.innerHTML="<h2>Admin Dashboard (Manage via Google Sheets)</h2><button onclick='logout()'>Logout</button>";
 }
-else if (role === "HOD") {
-  document.body.innerHTML = "<h2>HOD Dashboard (Coming Next)</h2>";
+else if(role==="HOD"){
+  document.body.innerHTML="<h2>HOD Dashboard</h2><button onclick='logout()'>Logout</button>";
 }
-else if (role === "COORDINATOR") {
-  document.body.innerHTML = "<h2>Coordinator Dashboard (Coming Next)</h2>";
+else if(role==="COORDINATOR"){
+  document.body.innerHTML="<h2>Coordinator Dashboard</h2><button onclick='logout()'>Logout</button>";
 }
-else {
-  alert("Invalid Role");
-  location.href = "index.html";
+else{
+  alert("Invalid role");
+  location.href="index.html";
 }
-</script>
-</body>
-</html>
 
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
 </script>
 
 </body>
