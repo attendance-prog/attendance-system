@@ -1,87 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Faculty Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <style>
-    body {
-      font-family: Arial;
-      background: #f4f6f8;
-      margin: 0;
-    }
-    header {
-      background: #0a5fb4;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 18px;
-    }
-    .container {
-      padding: 20px;
-    }
-    .card {
-      background: white;
-      padding: 20px;
-      margin-bottom: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #0a5fb4;
-      color: white;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .logout {
-      background: #c0392b;
-    }
-  </style>
-
-  <script>
-    // 🔒 Login protection
-    if (localStorage.getItem("login") !== "true") {
-      window.location.replace("./index.html");
-    }
-  </script>
+<title>Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Arial;background:#f4f6f8;}
+.card{
+  background:#fff;
+  padding:20px;
+  margin:15px;
+  border-radius:8px;
+}
+button{
+  width:100%;
+  padding:12px;
+  background:#0a5fb4;
+  color:#fff;
+  border:none;
+}
+.logout{background:#c0392b;}
+</style>
 </head>
-
 <body>
 
-<header>
-  Faculty Dashboard
-</header>
+<script>
+if (localStorage.getItem("login") !== "true") {
+  window.location.replace("./index.html");
+}
+</script>
 
-<div class="container">
+<div class="card">
+  <h3>Create Attendance</h3>
+  <button onclick="go('./faculty.html')">Generate Attendance QR</button>
+</div>
 
-  <div class="card">
-    <h3>Generate Attendance QR</h3>
-    <p>Create QR for subject-wise attendance</p>
-    <button onclick="goToQR()">Generate QR</button>
-  </div>
-
-  <div class="card">
-    <h3>Attendance Reports</h3>
-    <p>View attendance records</p>
-    <button onclick="alert('Coming soon')">View Reports</button>
-  </div>
-
-  <div class="card">
-    <button class="logout" onclick="logout()">Logout</button>
-  </div>
-
+<div class="card">
+  <button class="logout" onclick="logout()">Logout</button>
 </div>
 
 <script>
-function goToQR() {
-  // if file is qr.html or faculty.html, adjust name
-  window.location.href = "./faculty.html";
+function go(page){
+  window.location.href = page;
 }
-
-function logout() {
+function logout(){
   localStorage.clear();
   window.location.replace("./index.html");
 }
