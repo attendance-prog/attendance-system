@@ -1,110 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Generate Attendance QR</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <style>
-    body {
-      font-family: Arial;
-      background: #f4f6f8;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .box {
-      background: white;
-      padding: 25px;
-      width: 330px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      text-align: center;
-    }
-    select, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 12px;
-      font-size: 15px;
-    }
-    button {
-      background: #0a5fb4;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    .logout {
-      background: #c0392b;
-    }
-    img {
-      margin-top: 15px;
-      width: 100%;
-    }
-  </style>
-
-  <script>
-    // ✅ LOGIN PROTECTION (FIXED)
-    if (localStorage.getItem("login") !== "true") {
-      window.location.replace("./index.html");
-    }
-  </script>
+<title>Generate QR</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Arial;background:#f4f6f8;}
+.box{
+  background:#fff;
+  margin:20px;
+  padding:20px;
+  border-radius:8px;
+}
+select,button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+}
+button{background:#0a5fb4;color:#fff;border:none;}
+</style>
 </head>
-
 <body>
+
+<script>
+if (localStorage.getItem("login") !== "true") {
+  window.location.replace("./index.html");
+}
+</script>
 
 <div class="box">
   <h2>Generate Attendance QR</h2>
 
   <select id="subject">
-    <option value="">Loading subjects...</option>
+    <option>Loading subjects...</option>
   </select>
 
   <button onclick="generateQR()">Generate QR</button>
 
   <div id="qr"></div>
 
-  <button class="logout" onclick="logout()">Logout</button>
+  <button style="background:#c0392b" onclick="logout()">Logout</button>
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
 
-const email = localStorage.getItem("email");
-
-// ✅ LOAD SUBJECTS
-fetch(`${SCRIPT_URL}?action=getSubjects&email=${encodeURIComponent(email)}`)
-  .then(r => r.json())
-  .then(data => {
-    const sel = document.getElementById("subject");
-    sel.innerHTML = '<option value="">Select Subject</option>';
-
-    data.forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s.id;
-      opt.textContent = `${s.id} - ${s.name}`;
-      sel.appendChild(opt);
+fetch(`${SCRIPT_URL}?action=getSubjects`)
+  .then(r=>r.json())
+  .then(data=>{
+    const s=document.getElementById("subject");
+    s.innerHTML="";
+    data.forEach(d=>{
+      const o=document.createElement("option");
+      o.value=d.id;
+      o.text=d.name;
+      s.appendChild(o);
     });
   });
 
-// ✅ GENERATE QR
-function generateQR() {
-  const subjectId = document.getElementById("subject").value;
-
-  if (!subjectId) {
-    alert("Select subject first");
-    return;
-  }
-
-  fetch(`${SCRIPT_URL}?action=generateQR&subjectId=${subjectId}&email=${encodeURIComponent(email)}`)
-    .then(r => r.text())
-    .then(url => {
-      document.getElementById("qr").innerHTML =
-        `<img src="${url}"><p>QR Generated</p>`;
+function generateQR(){
+  const id=document.getElementById("subject").value;
+  fetch(`${SCRIPT_URL}?action=generateQR&subjectId=${id}`)
+    .then(r=>r.text())
+    .then(url=>{
+      document.getElementById("qr").innerHTML=`<img src="${url}" width="100%">`;
     });
 }
 
-function logout() {
+function logout(){
   localStorage.clear();
   window.location.replace("./index.html");
 }
