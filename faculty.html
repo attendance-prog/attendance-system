@@ -1,31 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Faculty Attendance</title>
+  <title>Faculty QR</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      font-family: Arial;
-      background: #f4f6f8;
-      padding: 20px;
+    body{
+      font-family:Arial;
+      background:#f4f6f8;
+      padding:20px;
     }
-    .box {
-      background: white;
-      padding: 20px;
-      max-width: 400px;
-      margin: auto;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-      text-align: center;
+    .box{
+      background:#fff;
+      padding:20px;
+      max-width:400px;
+      margin:auto;
+      border-radius:8px;
+      box-shadow:0 2px 10px rgba(0,0,0,.15);
+      text-align:center;
     }
-    select, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
+    select,button{
+      width:100%;
+      padding:10px;
+      margin-top:10px;
     }
-    img {
-      margin-top: 20px;
-      width: 250px;
+    img{
+      margin-top:20px;
+      width:250px;
     }
   </style>
 </head>
@@ -34,51 +34,60 @@
 <div class="box">
   <h3>Generate Attendance QR</h3>
 
-  <select id="subject"></select>
+  <select id="subject">
+    <option>Loading subjects...</option>
+  </select>
 
   <button onclick="generateQR()">Generate QR</button>
 
   <div id="qr"></div>
 
-  <button style="background:#c0392b;color:white;" onclick="logout()">Logout</button>
+  <button style="background:#c0392b;color:white" onclick="logout()">Logout</button>
 </div>
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email = localStorage.getItem("email");
 
-if (!email) location.href = "index.html";
+if(!email){
+  location.href="index.html";
+}
 
+/* LOAD SUBJECTS */
 fetch(`${SCRIPT_URL}?action=getSubjects&email=${encodeURIComponent(email)}`)
-  .then(r => r.json())
-  .then(list => {
+  .then(r=>r.text())
+  .then(txt=>{
+    const list = JSON.parse(txt);
     const sel = document.getElementById("subject");
-    if (list.length === 0) {
-      sel.innerHTML = "<option>No subjects assigned</option>";
+    sel.innerHTML="";
+
+    if(list.length===0){
+      sel.innerHTML="<option>No subjects assigned</option>";
       return;
     }
-    list.forEach(s => {
-      const o = document.createElement("option");
-      o.value = s.id;
-      o.text = s.name;
+
+    list.forEach(s=>{
+      const o=document.createElement("option");
+      o.value=s.id;
+      o.textContent=s.name;
       sel.appendChild(o);
     });
   });
 
-function generateQR() {
-  const subjectId = document.getElementById("subject").value;
+function generateQR(){
+  const subjectId=document.getElementById("subject").value;
 
   fetch(`${SCRIPT_URL}?action=generateQR&email=${encodeURIComponent(email)}&subjectId=${subjectId}`)
-    .then(r => r.text())
-    .then(url => {
-      document.getElementById("qr").innerHTML =
-        `<img src="${url}"><p>QR generated for this session</p>`;
+    .then(r=>r.text())
+    .then(url=>{
+      document.getElementById("qr").innerHTML=
+        `<img src="${url}"><p>QR generated for this subject</p>`;
     });
 }
 
-function logout() {
+function logout(){
   localStorage.clear();
-  location.href = "index.html";
+  location.href="index.html";
 }
 </script>
 </body>
