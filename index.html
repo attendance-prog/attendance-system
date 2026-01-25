@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Faculty Login - SSBS</title>
+  <title>SSBS Faculty Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
@@ -11,9 +11,10 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0;
     }
     .box {
-      background: white;
+      background: #fff;
       padding: 25px;
       width: 320px;
       border-radius: 8px;
@@ -36,12 +37,11 @@
 </head>
 
 <body>
-
 <div class="box">
-  <h2>Faculty Login</h2>
-  <p>SSBS – Sharda University</p>
+  <h2>SSBS Login</h2>
+  <p>Sharda University</p>
 
-  <input id="email" placeholder="Faculty Email" />
+  <input id="email" placeholder="Official Email" />
   <button onclick="sendOTP()">Send OTP</button>
 
   <div id="otpBox" style="display:none;">
@@ -51,20 +51,14 @@
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec"
 let lockedEmail = "";
 
 function sendOTP() {
-  lockedEmail = document.getElementById("email").value
-    .toLowerCase()
-    .trim();
+  lockedEmail = document.getElementById("email").value.trim().toLowerCase();
 
-  if (
-    !lockedEmail.endsWith("@sharda.ac.in") &&
-    !lockedEmail.endsWith("@pg.sharda.ac.in")
-  ) {
-    alert("Only Sharda University email allowed");
+  if (!lockedEmail) {
+    alert("Email required");
     return;
   }
 
@@ -86,15 +80,16 @@ function verifyOTP() {
   fetch(`${SCRIPT_URL}?action=verifyOTP&email=${encodeURIComponent(lockedEmail)}&otp=${otp}`)
     .then(r => r.text())
     .then(res => {
-      if (res === "VERIFIED_FACULTY") {
-        localStorage.setItem("faculty", "true");
-        window.location.href = "dashboard.html";
+      if (res.startsWith("VERIFIED_")) {
+        const role = res.replace("VERIFIED_", "");
+        localStorage.setItem("role", role);
+        localStorage.setItem("email", lockedEmail);
+        location.href = "dashboard.html";
       } else {
         alert(res);
       }
     });
 }
 </script>
-
 </body>
 </html>
