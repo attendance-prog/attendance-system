@@ -157,3 +157,28 @@ function logout() {
 
 </body>
 </html>
+<script>
+const API_URL = "YOUR_SCRIPT_URL";
+
+function markStaff() {
+  const email = localStorage.getItem("email");
+  const role = localStorage.getItem("role");
+
+  if (!navigator.geolocation) {
+    alert("GPS not supported");
+    return;
+  }
+
+  // Face placeholder (demo)
+  alert("Face captured (demo placeholder)");
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+
+    fetch(`${API_URL}?action=markStaffAttendance&email=${email}&role=${role}&lat=${lat}&lng=${lng}`)
+      .then(res => res.text())
+      .then(msg => alert(msg));
+  }, () => alert("Allow GPS access"));
+}
+</script>
