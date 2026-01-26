@@ -1,31 +1,94 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>GO GREEN – Student Attendance</title>
-</head>
-<body>
-<h2>Mark Attendance</h2>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<input id="name" placeholder="Student Name">
-<input id="roll" placeholder="Roll No">
-<button onclick="mark()">Submit</button>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f6f8;
+      padding: 20px;
+    }
+    .box {
+      max-width: 400px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    button {
+      background: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>GO GREEN</h2>
+  <p>Student Attendance</p>
+
+  <input id="name" placeholder="Student Name">
+  <input id="roll" placeholder="Roll Number">
+
+  <button onclick="markAttendance()">Mark Attendance</button>
+
+  <p id="msg"></p>
+</div>
 
 <script>
-const urlParams = new URLSearchParams(window.location.search);
-const sessionId = urlParams.get("sessionId");
+  // 🔴 SAME SCRIPT URL AS FACULTY
+  const API_URL = "YOUR_SCRIPT_URL";
 
-function mark() {
-  navigator.geolocation.getCurrentPosition(pos => {
-    const lat = pos.coords.latitude;
-    const lng = pos.coords.longitude;
-    const name = document.getElementById("name").value;
-    const roll = document.getElementById("roll").value;
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get("sessionId");
 
-    fetch(`${API_URL}?action=markStudentAttendance&sessionId=${sessionId}&name=${name}&roll=${roll}&lat=${lat}&lng=${lng}`)
-      .then(r => r.text())
-      .then(alert);
-  });
-}
+  if (!sessionId) {
+    document.getElementById("msg").innerText = "Invalid QR";
+  }
+
+  function markAttendance() {
+    const name = document.getElementById("name").value.trim();
+    const roll = document.getElementById("roll").value.trim();
+
+    if (!name || !roll) {
+      alert("Enter all details");
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      alert("GPS not supported");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      fetch(`${API_URL}?action=markStudentAttendance&sessionId=${sessionId}&name=${encodeURIComponent(name)}&roll=${encodeURIComponent(roll)}&lat=${lat}&lng=${lng}`)
+        .then(res => res.text())
+        .then(resp => {
+          document.getElementById("msg").innerText = resp;
+        });
+
+    }, () => {
+      alert("Allow GPS access");
+    });
+  }
 </script>
+
 </body>
 </html>
