@@ -170,25 +170,36 @@ function logout() {
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 
-function markStaff() {
+async function markStaff() {
   const email = localStorage.getItem("email");
   const role = localStorage.getItem("role");
 
+  // 1️⃣ CAMERA MUST OPEN
+  try {
+    await navigator.mediaDevices.getUserMedia({ video: true });
+  } catch (e) {
+    alert("Camera permission is required");
+    return;
+  }
+
+  // 2️⃣ GPS MUST BE ALLOWED
   if (!navigator.geolocation) {
     alert("GPS not supported");
     return;
   }
 
-  // Face placeholder (demo)
-  alert("Face captured (demo placeholder)");
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
 
-  navigator.geolocation.getCurrentPosition(pos => {
-    const lat = pos.coords.latitude;
-    const lng = pos.coords.longitude;
-
-    fetch(`${API_URL}?action=markStaffAttendance&email=${email}&role=${role}&lat=${lat}&lng=${lng}`)
-      .then(res => res.text())
-      .then(msg => alert(msg));
-  }, () => alert("Allow GPS access"));
+      fetch(`${API_URL}?action=markStaffAttendance&email=${email}&role=${role}&lat=${lat}&lng=${lng}`)
+        .then(res => res.text())
+        .then(msg => alert(msg));
+    },
+    () => {
+      alert("GPS permission is required");
+    }
+  );
 }
 </script>
