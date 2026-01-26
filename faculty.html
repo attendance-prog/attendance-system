@@ -1,116 +1,168 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>GO GREEN – Generate QR</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>GO GREEN – Faculty Panel</title>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       background: #f4f6f8;
-      padding: 20px;
+      margin: 0;
+      padding: 0;
     }
-    h1 {
-      text-align: center;
-      color: #1e8449;
-    }
-    .box {
-      background: #fff;
+
+    .card {
       max-width: 400px;
-      margin: auto;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin: 40px auto;
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
     }
+
+    h1 {
+      margin-bottom: 5px;
+      color: #2e7d32;
+    }
+
+    h3 {
+      margin-top: 0;
+      color: #555;
+    }
+
     select, button {
       width: 100%;
       padding: 12px;
-      margin-top: 10px;
+      margin-top: 12px;
+      font-size: 16px;
     }
+
     button {
-      background: #0a5fb4;
+      background: #2e7d32;
       color: #fff;
       border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
-    #qr {
+
+    button:hover {
+      background: #1b5e20;
+    }
+
+    #qrBox img {
+      margin-top: 15px;
+    }
+
+    .logout {
+      background: #c62828;
       margin-top: 20px;
-      text-align: center;
     }
   </style>
 </head>
 
 <body>
 
-<script>
-const email = localStorage.getItem("email");
-const role = localStorage.getItem("role");
+  <div class="card">
+    <h1>GO GREEN</h1>
+    <h3>Faculty Dashboard</h3>
 
-if (!email || role !== "FACULTY") {
-  window.location.href = "dashboard.html";
-}
-</script>
+    <!-- SUBJECT DROPDOWN -->
+    <select id="subjectSelect">
+      <option value="">Loading subjects...</option>
+    </select>
 
-<h1>🌱 GO GREEN</h1>
+    <!-- GENERATE QR BUTTON -->
+    <button onclick="generateQR()">Generate Attendance QR</button>
 
-<div class="box">
-  <h3>Generate Lecture QR</h3>
+    <!-- QR DISPLAY -->
+    <div id="qrBox"></div>
 
-  <select id="subject">
-    <option>Loading subjects...</option>
-  </select>
+    <!-- LOGOUT -->
+    <button class="logout" onclick="logout()">Logout</button>
+  </div>
 
-  <button onclick="generateQR()">Generate QR</button>
+  <!-- ================= SCRIPT ================= -->
+  <script>
+    // 🔴 CHANGE ONLY THIS
+    const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 
-  <div id="qr"></div>
-  <p id="msg"></p>
-</div>
+    // Load subjects on page load
+    window.onload = function () {
+      const email = localStorage.getItem("email");
 
-<script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-
-/* LOAD SUBJECTS */
-fetch(`${SCRIPT_URL}?action=getFacultySubjects&email=${encodeURIComponent(email)}`)
-  .then(r => r.json())
-  .then(list => {
-    const s = document.getElementById("subject");
-    s.innerHTML = "";
-    list.forEach(x => {
-      const o = document.createElement("option");
-      o.value = x.subjectId;
-      o.text = x.subjectName;
-      s.appendChild(o);
-    });
-  });
-
-function generateQR() {
-  const subjectId = document.getElementById("subject").value;
-
-  fetch(`${SCRIPT_URL}?action=generateQR&email=${encodeURIComponent(email)}&subjectId=${subjectId}`)
-    .then(r => r.text())
-    .then(res => {
-      if (res === "NO_ACTIVE_LECTURE") {
-        document.getElementById("msg").innerText =
-          "No active lecture right now.";
+      if (!email) {
+        alert("Session expired. Login again.");
+        window.location.href = "index.html";
         return;
       }
 
-      const data = JSON.parse(res);
-      document.getElementById("qr").innerHTML = "";
+      fetch(`${API_URL}?action=getFacultySubjects&email=${email}`)
+        .then(res => res.json())
+        .then(data => {
+          const select = document.getElementById("subjectSelect");
+          select.innerHTML = '<option value="">Select Subject</option>';
 
-      const qrData = JSON.stringify({
-        sessionId: data.sessionId,
-        subjectId: data.subjectId
-      });
+          if (data.length === 0) {
+            select.innerHTML = '<option value="">No subjects assigned</option>';
+            return;
+          }
 
-      new QRCode(document.getElementById("qr"), qrData);
+          data.forEach(s => {
+            const opt = document.createElement("option");
+            opt.value = s.subjectId;
+            opt.textContent = s.subjectName;
+            select.appendChild(opt);
+          });
+        })
+        .catch(() => {
+          alert("Error loading subjects");
+        });
+    };
 
-      document.getElementById("msg").innerText =
-        "QR valid till " + data.endTime;
-    });
-}
-</script>
+    // Generate QR
+    function generateQR() {
+      const subjectId = document.getElementById("subjectSelect").value;
+      const email = localStorage.getItem("email");
+
+      if (!subjectId) {
+        alert("Please select a subject");
+        return;
+      }
+
+      fetch(`${API_URL}?action=generateQR&email=${email}&subjectId=${subjectId}`)
+        .then(res => res.text())
+        .then(resp => {
+          if (resp === "NO_ACTIVE_LECTURE") {
+            alert("No active lecture at this time");
+            return;
+          }
+
+          const session = JSON.parse(resp);
+
+          const qrLink =
+            `${API_URL}?action=markStudentAttendance&sessionId=${session.sessionId}`;
+
+          document.getElementById("qrBox").innerHTML = `
+            <p><b>Room:</b> ${session.room}</p>
+            <p><b>Valid till:</b> ${session.endTime}</p>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrLink)}">
+          `;
+        })
+        .catch(() => {
+          alert("QR generation failed");
+        });
+    }
+
+    // Logout
+    function logout() {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+  </script>
 
 </body>
 </html>
