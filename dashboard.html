@@ -195,7 +195,15 @@ async function markStaff() {
 
       fetch(`${API_URL}?action=markStaffAttendance&email=${email}&role=${role}&lat=${lat}&lng=${lng}`)
         .then(res => res.text())
-        .then(msg => alert(msg));
+        .then(msg => {
+  if (msg === "OUT_OF_ALLOWED_LOCATION") {
+    alert("❌ You are not inside the classroom");
+  } else if (msg === "STAFF_ATTENDANCE_MARKED") {
+    alert("✅ Attendance marked successfully");
+  } else {
+    alert(msg);
+  }
+});
     },
     () => {
       alert("GPS permission is required");
