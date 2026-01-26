@@ -89,36 +89,46 @@ if (loggedIn !== "true" || !role || !email) {
 <!-- ================= ADMIN ================= -->
 <div class="card hidden" id="adminPanel">
   <h4>ADMIN PANEL</h4>
-  <button onclick="alert('Employees management – Phase 4')">Manage Employees</button>
-  <button onclick="alert('Roles management – Phase 4')">Manage Roles</button>
-  <button onclick="alert('Locations management – Phase 4')">Manage Locations</button>
-  <button onclick="alert('Staff attendance view – Phase 4')">View Staff Attendance</button>
-  <button onclick="alert('Student attendance view – Phase 4')">View Student Attendance</button>
-  <button onclick="alert('Admin attendance – Phase 4')">Mark My Attendance</button>
+ <button>Manage Employees</button>
+<button>Manage Roles</button>
+<button>Manage Locations</button>
+<button>View Staff Attendance</button>
+<button>View Student Attendance</button>
+<button onclick="markStaff()">Mark My Attendance</button>
+
 </div>
 
 <!-- ================= HOD ================= -->
 <div class="card hidden" id="hodPanel">
   <h4>HOD PANEL</h4>
-  <button onclick="alert('Timetable setup – Phase 4')">Set Timetable</button>
-  <button onclick="alert('Subject assignment – Phase 4')">Assign Subjects</button>
-  <button onclick="alert('Attendance view – Phase 4')">View Department Attendance</button>
-  <button onclick="alert('HOD attendance – Phase 4')">Mark My Attendance</button>
+
+  <button>Set Timetable</button>
+
+  <button>Assign Subjects</button>
+
+  <button>View Department Attendance</button>
+
+  <button onclick="markStaff()">Mark My Attendance</button>
 </div>
 
 <!-- ================= FACULTY ================= -->
 <div class="card hidden" id="facultyPanel">
   <h4>FACULTY PANEL</h4>
   <button onclick="goQR()">Generate QR (Per Subject)</button>
-  <button onclick="alert('Faculty attendance – Phase 4')">Mark My Attendance</button>
-  <button onclick="alert('Subject-wise attendance – Phase 4')">View My Attendance</button>
+ <button onclick="markStaff()">Mark My Attendance</button>
+<button>View My Attendance</button>
+
 </div>
 
 <!-- ================= COORDINATOR ================= -->
 <div class="card hidden" id="coordPanel">
   <h4>COORDINATOR PANEL</h4>
-  <button onclick="alert('Assist faculty – Phase 4')">Assist Faculty</button>
-  <button onclick="alert('Read-only attendance – Phase 4')">View Attendance</button>
+
+  <button>Assist Faculty</button>
+
+  <button>View Attendance</button>
+
+  <button onclick="markStaff()">Mark My Attendance</button>
 </div>
 
 <div class="card">
