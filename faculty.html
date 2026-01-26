@@ -142,10 +142,8 @@
           }
 
           const session = JSON.parse(resp);
-
-          const qrLink =
-            `${API_URL}?action=markStudentAttendance&sessionId=${session.sessionId}`;
-
+          
+            const qrLink = `https://attendance-prog.github.io/attendance-system/student.html?sessionId=${session.sessionId}`;
           document.getElementById("qrBox").innerHTML = `
             <p><b>Room:</b> ${session.room}</p>
             <p><b>Valid till:</b> ${session.endTime}</p>
