@@ -1,49 +1,124 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Go Green – Dashboard</title>
+  <title>GO GREEN – Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
-    body{font-family:Arial;background:#f4f6f8;padding:20px;}
-    h1{color:#1e8449;text-align:center;}
-    .card{
-      background:#fff;
-      padding:15px;
-      margin-bottom:15px;
-      border-radius:8px;
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 20px;
     }
-    button{
-      width:100%;
-      padding:12px;
-      background:#0a5fb4;
-      color:#fff;
-      border:none;
+
+    h1 {
+      color: #1e8449;
+      text-align: center;
+      margin-bottom: 5px;
     }
-    .logout{background:#c0392b;}
+
+    h3 {
+      text-align: center;
+      color: #555;
+      margin-top: 0;
+    }
+
+    .card {
+      background: #fff;
+      padding: 15px;
+      margin: 15px auto;
+      max-width: 500px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .card h4 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 15px;
+      background: #0a5fb4;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #084c91;
+    }
+
+    .logout {
+      background: #c0392b;
+    }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
+
 <body>
 
 <script>
-if(
-  localStorage.getItem("loggedIn")!=="true" ||
-  !localStorage.getItem("role")
-){
-  window.location.href="index.html";
+/* 🔐 SESSION CHECK */
+const loggedIn = localStorage.getItem("loggedIn");
+const role = localStorage.getItem("role");
+const email = localStorage.getItem("email");
+
+if (loggedIn !== "true" || !role || !email) {
+  window.location.href = "index.html";
 }
 </script>
 
 <h1>🌱 GO GREEN</h1>
+<h3>Smart Attendance System</h3>
 
 <div class="card">
-  <h3>Dashboard</h3>
+  <h4>Welcome</h4>
+  <p><b>Email:</b> <span id="emailText"></span></p>
   <p><b>Role:</b> <span id="roleText"></span></p>
 </div>
 
-<div class="card">
-  <a href="faculty.html">
-    <button>Generate Attendance QR</button>
-  </a>
+<!-- ================= ADMIN ================= -->
+<div class="card hidden" id="adminPanel">
+  <h4>ADMIN PANEL</h4>
+  <button onclick="alert('Employees management – Phase 4')">Manage Employees</button>
+  <button onclick="alert('Roles management – Phase 4')">Manage Roles</button>
+  <button onclick="alert('Locations management – Phase 4')">Manage Locations</button>
+  <button onclick="alert('Staff attendance view – Phase 4')">View Staff Attendance</button>
+  <button onclick="alert('Student attendance view – Phase 4')">View Student Attendance</button>
+  <button onclick="alert('Admin attendance – Phase 4')">Mark My Attendance</button>
+</div>
+
+<!-- ================= HOD ================= -->
+<div class="card hidden" id="hodPanel">
+  <h4>HOD PANEL</h4>
+  <button onclick="alert('Timetable setup – Phase 4')">Set Timetable</button>
+  <button onclick="alert('Subject assignment – Phase 4')">Assign Subjects</button>
+  <button onclick="alert('Attendance view – Phase 4')">View Department Attendance</button>
+  <button onclick="alert('HOD attendance – Phase 4')">Mark My Attendance</button>
+</div>
+
+<!-- ================= FACULTY ================= -->
+<div class="card hidden" id="facultyPanel">
+  <h4>FACULTY PANEL</h4>
+  <button onclick="goQR()">Generate QR (Per Subject)</button>
+  <button onclick="alert('Faculty attendance – Phase 4')">Mark My Attendance</button>
+  <button onclick="alert('Subject-wise attendance – Phase 4')">View My Attendance</button>
+</div>
+
+<!-- ================= COORDINATOR ================= -->
+<div class="card hidden" id="coordPanel">
+  <h4>COORDINATOR PANEL</h4>
+  <button onclick="alert('Assist faculty – Phase 4')">Assist Faculty</button>
+  <button onclick="alert('Read-only attendance – Phase 4')">View Attendance</button>
 </div>
 
 <div class="card">
@@ -51,12 +126,32 @@ if(
 </div>
 
 <script>
-document.getElementById("roleText").innerText =
-  localStorage.getItem("role");
+/* SHOW USER INFO */
+document.getElementById("emailText").innerText = email;
+document.getElementById("roleText").innerText = role;
 
-function logout(){
+/* ROLE-BASED UI */
+if (role === "ADMIN") {
+  document.getElementById("adminPanel").classList.remove("hidden");
+}
+if (role === "HOD") {
+  document.getElementById("hodPanel").classList.remove("hidden");
+}
+if (role === "FACULTY") {
+  document.getElementById("facultyPanel").classList.remove("hidden");
+}
+if (role === "COORDINATOR") {
+  document.getElementById("coordPanel").classList.remove("hidden");
+}
+
+/* NAVIGATION */
+function goQR() {
+  window.location.href = "faculty.html";
+}
+
+function logout() {
   localStorage.clear();
-  window.location.href="index.html";
+  window.location.href = "index.html";
 }
 </script>
 
