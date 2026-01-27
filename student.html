@@ -73,9 +73,7 @@ if (
 <!-- ================= MENU ================= -->
 <div class="card">
   <!-- ✅ STEP 4: START QR SCANNER -->
-  <button onclick="showSection('scan'); startQRScanner();">
-    📷 Scan QR & Mark Attendance
-  </button>
+  <button onclick="openScan()">📷 Scan QR & Mark Attendance</button>
   <button onclick="showSection('overall')">📊 My Attendance (Overall)</button>
   <button onclick="showSection('subject')">📘 Per Subject Attendance</button>
   <button onclick="showSection('timetable')">🗓 Timetable (View Only)</button>
@@ -88,7 +86,9 @@ if (
 
   <!-- ✅ STEP 2: QR CAMERA -->
   <div id="qr-reader" style="width:100%"></div>
-  <input id="sessionId" placeholder="Session ID" readonly>
+ <div id="qr-reader" style="width:100%; margin-bottom:10px;"></div>
+<input id="sessionId" placeholder="Session ID" readonly>
+
 
   <p><b>Enter Details</b></p>
   <input id="roll" placeholder="Roll Number">
