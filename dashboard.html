@@ -134,6 +134,15 @@ if (loggedIn !== "true" || !role || !email) {
 <div class="card">
   <button class="logout" onclick="logout()">Logout</button>
 </div>
+  <!-- ================= STUDENT ================= -->
+<div class="card hidden" id="studentPanel">
+  <h4>STUDENT PANEL</h4>
+
+  <button onclick="goStudentScan()">📷 Scan QR & Mark Attendance</button>
+  <button onclick="goStudentOverall()">📊 My Attendance (Overall)</button>
+  <button onclick="goStudentSubject()">📘 Per Subject Attendance</button>
+  <button onclick="goStudentTimetable()">🗓 Timetable (View Only)</button>
+</div>
 
 <script>
 /* SHOW USER INFO */
@@ -152,6 +161,9 @@ if (role === "FACULTY") {
 }
 if (role === "COORDINATOR") {
   document.getElementById("coordPanel").classList.remove("hidden");
+}
+if (role === "STUDENT") {
+  document.getElementById("studentPanel").classList.remove("hidden");
 }
 
 /* NAVIGATION */
@@ -210,4 +222,245 @@ async function markStaff() {
     }
   );
 }
+  <!DOCTYPE html>
+<html>
+<head>
+  <title>GO GREEN – Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #1e8449;
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    h3 {
+      text-align: center;
+      color: #555;
+      margin-top: 0;
+    }
+
+    .card {
+      background: #fff;
+      padding: 15px;
+      margin: 15px auto;
+      max-width: 500px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .card h4 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 15px;
+      background: #0a5fb4;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #084c91;
+    }
+
+    .logout {
+      background: #c0392b;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<script>
+/* 🔐 SESSION CHECK */
+const loggedIn = localStorage.getItem("loggedIn");
+const role = localStorage.getItem("role");
+const email = localStorage.getItem("email");
+
+if (loggedIn !== "true" || !role || !email) {
+  window.location.href = "index.html";
+}
 </script>
+
+<h1>🌱 GO GREEN</h1>
+<h3>Smart Attendance System</h3>
+
+<div class="card">
+  <h4>Welcome</h4>
+  <p><b>Email:</b> <span id="emailText"></span></p>
+  <p><b>Role:</b> <span id="roleText"></span></p>
+</div>
+
+<!-- ================= ADMIN ================= -->
+<div class="card hidden" id="adminPanel">
+  <h4>ADMIN PANEL</h4>
+ <button>Manage Employees</button>
+<button>Manage Roles</button>
+<button>Manage Locations</button>
+<button>View Staff Attendance</button>
+<button>View Student Attendance</button>
+<button onclick="markStaff()">Mark My Attendance</button>
+
+</div>
+
+<!-- ================= HOD ================= -->
+<div class="card hidden" id="hodPanel">
+  <h4>HOD PANEL</h4>
+
+  <button>Set Timetable</button>
+
+  <button>Assign Subjects</button>
+
+  <button>View Department Attendance</button>
+
+  <button onclick="markStaff()">Mark My Attendance</button>
+</div>
+
+<!-- ================= FACULTY ================= -->
+<div class="card hidden" id="facultyPanel">
+  <h4>FACULTY PANEL</h4>
+  <button onclick="goQR()">Generate QR (Per Subject)</button>
+ <button onclick="markStaff()">Mark My Attendance</button>
+<button>View My Attendance</button>
+
+</div>
+
+<!-- ================= COORDINATOR ================= -->
+<div class="card hidden" id="coordPanel">
+  <h4>COORDINATOR PANEL</h4>
+
+  <button>Assist Faculty</button>
+
+  <button>View Attendance</button>
+
+  <button onclick="markStaff()">Mark My Attendance</button>
+</div>
+
+<div class="card">
+  <button class="logout" onclick="logout()">Logout</button>
+</div>
+  <!-- ================= STUDENT ================= -->
+<div class="card hidden" id="studentPanel">
+  <h4>STUDENT PANEL</h4>
+
+  <button onclick="goStudentScan()">📷 Scan QR & Mark Attendance</button>
+  <button onclick="goStudentOverall()">📊 My Attendance (Overall)</button>
+  <button onclick="goStudentSubject()">📘 Per Subject Attendance</button>
+  <button onclick="goStudentTimetable()">🗓 Timetable (View Only)</button>
+</div>
+
+<script>
+/* SHOW USER INFO */
+document.getElementById("emailText").innerText = email;
+document.getElementById("roleText").innerText = role;
+
+/* ROLE-BASED UI */
+if (role === "ADMIN") {
+  document.getElementById("adminPanel").classList.remove("hidden");
+}
+if (role === "HOD") {
+  document.getElementById("hodPanel").classList.remove("hidden");
+}
+if (role === "FACULTY") {
+  document.getElementById("facultyPanel").classList.remove("hidden");
+}
+if (role === "COORDINATOR") {
+  document.getElementById("coordPanel").classList.remove("hidden");
+}
+if (role === "STUDENT") {
+  document.getElementById("studentPanel").classList.remove("hidden");
+}
+
+/* NAVIGATION */
+function goQR() {
+  window.location.href = "faculty.html";
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "index.html";
+}
+</script>
+</body>
+</html>
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+async function markStaff() {
+  const email = localStorage.getItem("email");
+  const role = localStorage.getItem("role");
+
+  // 1️⃣ CAMERA MUST OPEN
+  try {
+    await navigator.mediaDevices.getUserMedia({ video: true });
+  } catch (e) {
+    alert("Camera permission is required");
+    return;
+  }
+
+  // 2️⃣ GPS MUST BE ALLOWED
+  if (!navigator.geolocation) {
+    alert("GPS not supported");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      fetch(`${API_URL}?action=markStaffAttendance&email=${email}&role=${role}&lat=${lat}&lng=${lng}`)
+        .then(res => res.text())
+        .then(msg => {
+  if (msg === "OUT_OF_ALLOWED_LOCATION") {
+    alert("❌ You are not inside the classroom");
+  } else if (msg === "STAFF_ATTENDANCE_MARKED") {
+    alert("✅ Attendance marked successfully");
+  } else {
+    alert(msg);
+  }
+});
+    },
+    () => {
+      alert("GPS permission is required");
+    }
+  );
+}
+</script>
+function goStudentScan() {
+  window.location.href = "student.html";
+}
+
+function goStudentOverall() {
+  alert("Overall attendance – Phase 5");
+}
+
+function goStudentSubject() {
+  alert("Per subject attendance – Phase 5");
+}
+
+function goStudentTimetable() {
+  alert("Timetable view – Phase 5");
+}
+
+</script>
+</body>
+</html>
