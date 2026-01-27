@@ -1,0 +1,15 @@
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const email = localStorage.getItem("email");
+
+fetch(`${API_URL}?action=getStudentOverall&email=${email}`)
+  .then(res => res.json())
+  .then(d => {
+    document.body.innerHTML = `
+      <h3>Overall Attendance</h3>
+      <p>Total: ${d.total}</p>
+      <p>Present: ${d.present}</p>
+      <p>Percentage: ${d.percentage}%</p>
+    `;
+  });
+</script>
