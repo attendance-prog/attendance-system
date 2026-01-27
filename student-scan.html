@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Scan QR</title>
+</head>
+<body>
+
+<h3>📷 Scan QR & Mark Attendance</h3>
+<video id="video" width="300" autoplay></video>
+<p id="result"></p>
+
+<script>
+navigator.mediaDevices.getUserMedia({ video: true })
+  .then(stream => {
+    document.getElementById("video").srcObject = stream;
+  })
+  .catch(() => alert("Camera permission required"));
+
+// QR decoding can be added later (Phase-2 enhancement)
+</script>
+
+</body>
+</html>
