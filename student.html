@@ -50,6 +50,8 @@
       margin-top: 8px;
     }
     .hidden { display: none; }
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
   </style>
 </head>
 
@@ -199,6 +201,29 @@ function logout() {
   localStorage.clear();
   window.location.href = "index.html";
 }
+  let qrScanner = null;
+
+function openScan() {
+  showSection('scan');
+
+  if (qrScanner) {
+    qrScanner.stop().catch(() => {});
+  }
+
+  qrScanner = new Html5Qrcode("qr-reader");
+
+  qrScanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    decodedText => {
+      document.getElementById("sessionId").value = decodedText;
+      qrScanner.stop();
+      alert("QR scanned successfully");
+    },
+    error => {}
+  );
+}
+
 </script>
 
 </body>
