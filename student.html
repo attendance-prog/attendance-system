@@ -63,11 +63,27 @@ if (
 
 <!-- ================= MENU ================= -->
 <div class="card">
-  <button onclick="goToScan()">📷 Scan QR & Mark Attendance</button>
-  <button onclick="showSection('overall')">📊 My Attendance (Overall)</button>
-  <button onclick="showSection('subject')">📘 Per Subject Attendance</button>
-  <button onclick="showSection('timetable')">🗓 Timetable (View Only)</button>
-  <button class="danger" onclick="logout()">Logout</button>
+
+  <!-- ✅ DIRECT NAVIGATION (NO JS DEPENDENCY – SAFEST) -->
+  <button onclick="window.location.href='student-scan.html'">
+    📷 Scan QR & Mark Attendance
+  </button>
+
+  <button onclick="showSection('overall')">
+    📊 My Attendance (Overall)
+  </button>
+
+  <button onclick="showSection('subject')">
+    📘 Per Subject Attendance
+  </button>
+
+  <button onclick="showSection('timetable')">
+    🗓 Timetable (View Only)
+  </button>
+
+  <button class="danger" onclick="logout()">
+    Logout
+  </button>
 </div>
 
 <!-- ================= PLACEHOLDERS ================= -->
@@ -92,11 +108,6 @@ function showSection(id) {
     if (c.id) c.classList.add("hidden");
   });
   document.getElementById(id).classList.remove("hidden");
-}
-
-function goToScan() {
-  // ✅ FULL PAGE NAVIGATION (camera-safe)
-  window.location.href = "student-scan.html";
 }
 
 function logout() {
