@@ -4,9 +4,6 @@
   <title>GO GREEN – Student Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- ✅ STEP 1: QR SCANNER LIBRARY -->
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -44,14 +41,8 @@
       cursor: pointer;
     }
     button:hover { background: #084c91; }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 8px;
-    }
+    .danger { background:#c0392b; }
     .hidden { display: none; }
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
   </style>
 </head>
 
@@ -72,34 +63,11 @@ if (
 
 <!-- ================= MENU ================= -->
 <div class="card">
-  <!-- ✅ STEP 4: START QR SCANNER -->
-  <button onclick="openScan()">📷 Scan QR & Mark Attendance</button>
+  <button onclick="goToScan()">📷 Scan QR & Mark Attendance</button>
   <button onclick="showSection('overall')">📊 My Attendance (Overall)</button>
   <button onclick="showSection('subject')">📘 Per Subject Attendance</button>
   <button onclick="showSection('timetable')">🗓 Timetable (View Only)</button>
-  <button style="background:#c0392b" onclick="logout()">Logout</button>
-</div>
-
-<!-- ================= SCAN QR ================= -->
-<div class="card hidden" id="scan">
-  <h3>Scan QR</h3>
-
-  <!-- ✅ STEP 2: QR CAMERA -->
-  <div id="qr-reader" style="width:100%"></div>
- <div id="qr-reader" style="width:100%; margin-bottom:10px;"></div>
-<input id="sessionId" placeholder="Session ID" readonly>
-
-
-  <p><b>Enter Details</b></p>
-  <input id="roll" placeholder="Roll Number">
-  <input id="name" placeholder="Name">
-
-  <!-- ✅ STEP 5: FACE CAPTURE -->
-  <video id="video" width="100%" autoplay></video>
-  <canvas id="canvas" class="hidden"></canvas>
-  <button onclick="captureFace()">📸 Capture Face</button>
-
-  <button onclick="markAttendance()">✅ Mark Attendance</button>
+  <button class="danger" onclick="logout()">Logout</button>
 </div>
 
 <!-- ================= PLACEHOLDERS ================= -->
@@ -119,8 +87,6 @@ if (
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-
 function showSection(id) {
   document.querySelectorAll(".card").forEach(c => {
     if (c.id) c.classList.add("hidden");
@@ -128,102 +94,15 @@ function showSection(id) {
   document.getElementById(id).classList.remove("hidden");
 }
 
-/* ================= STEP 3: QR LOGIC ================= */
-let qrScanner;
-
-function startQRScanner() {
-  document.getElementById("sessionId").value = "";
-
-  if (qrScanner) {
-    qrScanner.stop().catch(() => {});
-  }
-
-  qrScanner = new Html5Qrcode("qr-reader");
-  qrScanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    decodedText => {
-      document.getElementById("sessionId").value = decodedText;
-      qrScanner.stop();
-      alert("QR scanned successfully");
-    },
-    () => {}
-  );
-}
-
-/* ================= STEP 6: FACE CAPTURE ================= */
-let faceCaptured = false;
-
-navigator.mediaDevices.getUserMedia({ video: true })
-  .then(stream => {
-    document.getElementById("video").srcObject = stream;
-  })
-  .catch(() => alert("Camera access required"));
-
-function captureFace() {
-  const video = document.getElementById("video");
-  const canvas = document.getElementById("canvas");
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext("2d").drawImage(video, 0, 0);
-  faceCaptured = true;
-  alert("Face captured");
-}
-
-/* ================= STEP 7: ENFORCE FACE + GPS ================= */
-function markAttendance() {
-  const sessionId = document.getElementById("sessionId").value;
-  const roll = document.getElementById("roll").value;
-  const name = document.getElementById("name").value;
-
-  if (!sessionId || !roll || !name) {
-    alert("Fill all fields");
-    return;
-  }
-
-  if (!faceCaptured) {
-    alert("Please capture face first");
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(pos => {
-    const lat = pos.coords.latitude;
-    const lng = pos.coords.longitude;
-
-    fetch(`${API_URL}?action=markStudentAttendance&sessionId=${sessionId}&roll=${roll}&name=${name}&lat=${lat}&lng=${lng}`)
-      .then(res => res.text())
-      .then(msg => alert(msg))
-      .catch(() => alert("Attendance error"));
-  }, () => alert("Please allow GPS access"));
+function goToScan() {
+  // ✅ FULL PAGE NAVIGATION (camera-safe)
+  window.location.href = "student-scan.html";
 }
 
 function logout() {
   localStorage.clear();
   window.location.href = "index.html";
 }
-  let qrScanner = null;
-
-function openScan() {
-  showSection('scan');
-
-  if (qrScanner) {
-    qrScanner.stop().catch(() => {});
-  }
-
-  qrScanner = new Html5Qrcode("qr-reader");
-
-  qrScanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    decodedText => {
-      document.getElementById("sessionId").value = decodedText;
-      qrScanner.stop();
-      alert("QR scanned successfully");
-    },
-    error => {}
-  );
-}
-
 </script>
 
 </body>
