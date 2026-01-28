@@ -4,12 +4,11 @@
   <title>Scan QR & Mark Attendance</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- QR Library -->
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: Arial;
       background: #f4f6f8;
       padding: 20px;
       text-align: center;
@@ -18,7 +17,8 @@
 
     #reader {
       width: 320px;
-      margin: 20px auto;
+      margin: 15px auto;
+      display: none;
     }
 
     input, button {
@@ -36,9 +36,7 @@
       cursor: pointer;
     }
 
-    .back {
-      background: #c0392b;
-    }
+    .danger { background: #c0392b; }
   </style>
 </head>
 
@@ -46,65 +44,53 @@
 
 <h2>📷 Scan QR & Mark Attendance</h2>
 
+<button onclick="startScan()">▶ Start QR Scan</button>
+
 <div id="reader"></div>
 
-<input id="sessionId" placeholder="Session ID (auto from QR)">
+<input id="sessionId" placeholder="Session ID (auto)">
 <input id="roll" placeholder="Roll Number">
 <input id="name" placeholder="Name">
 
 <button onclick="markAttendance()">Mark Attendance</button>
-<br><br>
-<button class="back" onclick="goBack()">Back</button>
+<button class="danger" onclick="goBack()">Back</button>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+let qr;
 
-/* 🔐 SESSION CHECK */
-if (
-  localStorage.getItem("loggedIn") !== "true" ||
-  localStorage.getItem("role") !== "STUDENT"
-) {
-  window.location.href = "index.html";
+function startScan() {
+  document.getElementById("reader").style.display = "block";
+
+  qr = new Html5Qrcode("reader");
+
+  qr.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    text => {
+      document.getElementById("sessionId").value = text;
+      qr.stop();
+      alert("✅ QR scanned");
+    },
+    err => {}
+  ).catch(e => alert("Camera error: " + e));
 }
 
-/* ▶️ START CAMERA + QR */
-const html5QrCode = new Html5Qrcode("reader");
-
-Html5Qrcode.getCameras().then(devices => {
-  if (devices && devices.length) {
-    html5QrCode.start(
-      devices[0].id,
-      { fps: 10, qrbox: 250 },
-      qrText => {
-        document.getElementById("sessionId").value = qrText;
-        html5QrCode.stop();
-        alert("✅ QR Scanned");
-      }
-    );
-  }
-}).catch(err => {
-  alert("Camera error: " + err);
-});
-
-/* 📝 MARK ATTENDANCE */
 function markAttendance() {
-  const sessionId = document.getElementById("sessionId").value;
-  const roll = document.getElementById("roll").value;
-  const name = document.getElementById("name").value;
+  const s = sessionId.value;
+  const r = roll.value;
+  const n = name.value;
 
-  if (!sessionId || !roll || !name) {
+  if (!s || !r || !n) {
     alert("Fill all fields");
     return;
   }
 
   navigator.geolocation.getCurrentPosition(pos => {
-    const lat = pos.coords.latitude;
-    const lng = pos.coords.longitude;
-
-    fetch(`${API_URL}?action=markStudentAttendance&sessionId=${sessionId}&roll=${roll}&name=${name}&lat=${lat}&lng=${lng}`)
+    fetch(`${API_URL}?action=markStudentAttendance&sessionId=${s}&roll=${r}&name=${n}&lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`)
       .then(r => r.text())
-      .then(msg => alert(msg));
-  }, () => alert("GPS permission required"));
+      .then(alert);
+  }, () => alert("Allow GPS"));
 }
 
 function goBack() {
