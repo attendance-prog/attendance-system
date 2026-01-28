@@ -3,7 +3,8 @@
 <head>
   <title>Scan QR & Mark Attendance</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Permissions-Policy" content="camera=*, microphone=*">
+  <meta http-equiv="Permissions-Policy" content="camera=*">
+
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
@@ -58,8 +59,6 @@
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 let qr;
-<script>
-let qr;
 
 function startScan() {
   document.getElementById("reader").style.display = "block";
@@ -71,26 +70,34 @@ function startScan() {
         return;
       }
 
-      // Force back camera (important)
-      const cameraId = cameras[cameras.length - 1].id;
+      const cameraId = cameras[cameras.length - 1].id; // back camera
 
       qr = new Html5Qrcode("reader");
 
       qr.start(
         cameraId,
         { fps: 10, qrbox: 250 },
-        qrText => {
+        (qrText) => {
           document.getElementById("sessionId").value = qrText;
           qr.stop();
           alert("✅ QR scanned successfully");
         },
-        error => {}
+        (error) => {}
       );
     })
     .catch(err => {
       alert("❌ Camera blocked: " + err);
     });
 }
+
+function markAttendance() {
+  alert("Attendance logic will go here");
+}
+
+function goBack() {
+  history.back();
+}
 </script>
+
 </body>
 </html>
