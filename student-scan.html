@@ -164,6 +164,32 @@ function markAttendance() {
 function goBack() {
   window.location.href = "dashboard.html";
 }
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+let qr;
+
+window.onload = () => {
+  qr = new Html5Qrcode("reader");
+
+  qr.start(
+    { facingMode: "environment" }, // back camera
+    { fps: 10, qrbox: 250 },
+    qrText => {
+      // QR successfully scanned
+      document.getElementById("sessionId").value = qrText;
+      qr.stop();
+      alert("QR Scanned Successfully");
+    },
+    err => {
+      // ignore scan errors
+    }
+  ).catch(err => {
+    alert("Camera error: " + err);
+  });
+};
+</script>
+
 </script>
 
 </body>
