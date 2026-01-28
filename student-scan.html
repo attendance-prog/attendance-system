@@ -1,72 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>GO GREEN – Scan QR & Attendance</title>
+  <title>GO GREEN – Scan QR</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- QR Scanner -->
+  <!-- QR Scanner Library -->
   <script src="https://unpkg.com/html5-qrcode"></script>
-
-  <!-- Face Recognition -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f4f6f8;
-      padding: 20px;
       text-align: center;
+      padding: 20px;
     }
-    h2 { color: #1e8449; }
-    #qr-reader {
-      width: 100%;
-      max-width: 320px;
-      margin: auto;
+    h1 {
+      color: #1e8449;
     }
-    input, button {
-      width: 100%;
-      max-width: 320px;
+    #reader {
+      width: 300px;
+      margin: 20px auto;
+    }
+    input {
+      width: 90%;
       padding: 10px;
-      margin-top: 10px;
-      font-size: 15px;
+      margin: 8px auto;
+      display: block;
     }
     button {
+      width: 90%;
+      padding: 12px;
+      margin-top: 10px;
       background: #0a5fb4;
-      color: #fff;
+      color: white;
       border: none;
       border-radius: 5px;
+      font-size: 15px;
       cursor: pointer;
     }
-    button:hover {
-      background: #084c91;
-    }
-    video {
-      display: none;
+    .back {
+      background: #c0392b;
     }
   </style>
 </head>
 
 <body>
 
-<h2>🌱 Scan QR & Mark Attendance</h2>
+<h1>🌱 Scan QR & Mark Attendance</h1>
 
-<div id="qr-reader"></div>
+<div id="reader"></div>
 
-<input id="sessionId" placeholder="Session ID" readonly>
+<input id="sessionId" placeholder="Session ID (auto-filled)" readonly>
 <input id="roll" placeholder="Roll Number">
 <input id="name" placeholder="Name">
 
 <button onclick="markAttendance()">Mark Attendance</button>
-<button style="background:#c0392b" onclick="goBack()">Back</button>
-
-<video id="video" autoplay muted></video>
+<button class="back" onclick="goBack()">Back</button>
 
 <script>
-/* ================= CONFIG ================= */
-const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-
-/* ================= SECURITY CHECK ================= */
+/* 🔐 SESSION CHECK */
 if (
   localStorage.getItem("loggedIn") !== "true" ||
   localStorage.getItem("role") !== "STUDENT"
@@ -74,122 +66,58 @@ if (
   window.location.href = "index.html";
 }
 
-/* ================= LOAD FACE MODEL ================= */
-async function loadFaceModel() {
-  await faceapi.nets.tinyFaceDetector.loadFromUri(
-    "https://justadudewhohacks.github.io/face-api.js/models"
-  );
-}
-loadFaceModel();
+const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 
-/* ================= START QR SCAN ================= */
-let qrScanner = new Html5Qrcode("qr-reader");
+let qr;
 
-qrScanner.start(
-  { facingMode: "environment" },
-  { fps: 10, qrbox: 250 },
-  qrText => {
-    document.getElementById("sessionId").value = qrText;
-    qrScanner.stop();
-    startCamera();
-    alert("✅ QR scanned successfully");
-  },
-  () => {}
-);
+/* 🎥 START CAMERA + QR */
+window.onload = () => {
+  qr = new Html5Qrcode("reader");
 
-/* ================= CAMERA ================= */
-let video = document.getElementById("video");
+  qr.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    qrText => {
+      document.getElementById("sessionId").value = qrText;
+      qr.stop();
+      alert("✅ QR Scanned Successfully");
+    },
+    err => {}
+  ).catch(err => {
+    alert("Camera error: " + err);
+  });
+};
 
-async function startCamera() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    video.srcObject = stream;
-  } catch {
-    alert("❌ Camera permission required");
-  }
-}
-
-/* ================= FACE CHECK ================= */
-async function isFacePresent() {
-  const face = await faceapi.detectSingleFace(
-    video,
-    new faceapi.TinyFaceDetectorOptions()
-  );
-  return !!face;
-}
-
-/* ================= MARK ATTENDANCE ================= */
+/* 📍 MARK ATTENDANCE */
 function markAttendance() {
   const sessionId = document.getElementById("sessionId").value;
   const roll = document.getElementById("roll").value;
   const name = document.getElementById("name").value;
 
   if (!sessionId || !roll || !name) {
-    alert("❌ Fill all fields");
+    alert("Fill all fields");
     return;
   }
 
   if (!navigator.geolocation) {
-    alert("❌ GPS not supported");
+    alert("GPS not supported");
     return;
   }
 
-  navigator.geolocation.getCurrentPosition(async pos => {
+  navigator.geolocation.getCurrentPosition(pos => {
     const lat = pos.coords.latitude;
     const lng = pos.coords.longitude;
 
-    const faceOk = await isFacePresent();
-    if (!faceOk) {
-      alert("❌ Face not detected. Attendance blocked.");
-      return;
-    }
-
     fetch(`${API_URL}?action=markStudentAttendance&sessionId=${sessionId}&roll=${roll}&name=${name}&lat=${lat}&lng=${lng}`)
       .then(res => res.text())
-      .then(msg => {
-        if (msg === "QR_EXPIRED") {
-          alert("⏰ QR expired. Lecture ended.");
-        } else if (msg === "ATTENDANCE_MARKED") {
-          alert("✅ Attendance marked successfully");
-          goBack();
-        } else {
-          alert(msg);
-        }
-      });
-
-  }, () => alert("❌ GPS permission required"));
+      .then(msg => alert(msg))
+      .catch(() => alert("Error marking attendance"));
+  }, () => alert("GPS permission required"));
 }
 
-/* ================= BACK ================= */
 function goBack() {
   window.location.href = "dashboard.html";
 }
-  <script src="https://unpkg.com/html5-qrcode"></script>
-
-<script>
-let qr;
-
-window.onload = () => {
-  qr = new Html5Qrcode("reader");
-
-  qr.start(
-    { facingMode: "environment" }, // back camera
-    { fps: 10, qrbox: 250 },
-    qrText => {
-      // QR successfully scanned
-      document.getElementById("sessionId").value = qrText;
-      qr.stop();
-      alert("QR Scanned Successfully");
-    },
-    err => {
-      // ignore scan errors
-    }
-  ).catch(err => {
-    alert("Camera error: " + err);
-  });
-};
-</script>
-
 </script>
 
 </body>
