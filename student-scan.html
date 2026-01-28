@@ -1,22 +1,169 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Scan QR</title>
+  <title>GO GREEN – Scan QR & Attendance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- QR Scanner -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <!-- Face Recognition -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 20px;
+      text-align: center;
+    }
+    h2 { color: #1e8449; }
+    #qr-reader {
+      width: 100%;
+      max-width: 320px;
+      margin: auto;
+    }
+    input, button {
+      width: 100%;
+      max-width: 320px;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 15px;
+    }
+    button {
+      background: #0a5fb4;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #084c91;
+    }
+    video {
+      display: none;
+    }
+  </style>
 </head>
+
 <body>
 
-<h3>📷 Scan QR & Mark Attendance</h3>
-<video id="video" width="300" autoplay></video>
-<p id="result"></p>
+<h2>🌱 Scan QR & Mark Attendance</h2>
+
+<div id="qr-reader"></div>
+
+<input id="sessionId" placeholder="Session ID" readonly>
+<input id="roll" placeholder="Roll Number">
+<input id="name" placeholder="Name">
+
+<button onclick="markAttendance()">Mark Attendance</button>
+<button style="background:#c0392b" onclick="goBack()">Back</button>
+
+<video id="video" autoplay muted></video>
 
 <script>
-navigator.mediaDevices.getUserMedia({ video: true })
-  .then(stream => {
-    document.getElementById("video").srcObject = stream;
-  })
-  .catch(() => alert("Camera permission required"));
+/* ================= CONFIG ================= */
+const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 
-// QR decoding can be added later (Phase-2 enhancement)
+/* ================= SECURITY CHECK ================= */
+if (
+  localStorage.getItem("loggedIn") !== "true" ||
+  localStorage.getItem("role") !== "STUDENT"
+) {
+  window.location.href = "index.html";
+}
+
+/* ================= LOAD FACE MODEL ================= */
+async function loadFaceModel() {
+  await faceapi.nets.tinyFaceDetector.loadFromUri(
+    "https://justadudewhohacks.github.io/face-api.js/models"
+  );
+}
+loadFaceModel();
+
+/* ================= START QR SCAN ================= */
+let qrScanner = new Html5Qrcode("qr-reader");
+
+qrScanner.start(
+  { facingMode: "environment" },
+  { fps: 10, qrbox: 250 },
+  qrText => {
+    document.getElementById("sessionId").value = qrText;
+    qrScanner.stop();
+    startCamera();
+    alert("✅ QR scanned successfully");
+  },
+  () => {}
+);
+
+/* ================= CAMERA ================= */
+let video = document.getElementById("video");
+
+async function startCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+  } catch {
+    alert("❌ Camera permission required");
+  }
+}
+
+/* ================= FACE CHECK ================= */
+async function isFacePresent() {
+  const face = await faceapi.detectSingleFace(
+    video,
+    new faceapi.TinyFaceDetectorOptions()
+  );
+  return !!face;
+}
+
+/* ================= MARK ATTENDANCE ================= */
+function markAttendance() {
+  const sessionId = document.getElementById("sessionId").value;
+  const roll = document.getElementById("roll").value;
+  const name = document.getElementById("name").value;
+
+  if (!sessionId || !roll || !name) {
+    alert("❌ Fill all fields");
+    return;
+  }
+
+  if (!navigator.geolocation) {
+    alert("❌ GPS not supported");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+
+    const faceOk = await isFacePresent();
+    if (!faceOk) {
+      alert("❌ Face not detected. Attendance blocked.");
+      return;
+    }
+
+    fetch(`${API_URL}?action=markStudentAttendance&sessionId=${sessionId}&roll=${roll}&name=${name}&lat=${lat}&lng=${lng}`)
+      .then(res => res.text())
+      .then(msg => {
+        if (msg === "QR_EXPIRED") {
+          alert("⏰ QR expired. Lecture ended.");
+        } else if (msg === "ATTENDANCE_MARKED") {
+          alert("✅ Attendance marked successfully");
+          goBack();
+        } else {
+          alert(msg);
+        }
+      });
+
+  }, () => alert("❌ GPS permission required"));
+}
+
+/* ================= BACK ================= */
+function goBack() {
+  window.location.href = "dashboard.html";
+}
 </script>
 
 </body>
