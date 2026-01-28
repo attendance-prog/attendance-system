@@ -3,7 +3,7 @@
 <head>
   <title>Scan QR & Mark Attendance</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
+<meta http-equiv="Permissions-Policy" content="camera=*, microphone=*">
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
@@ -58,45 +58,39 @@
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 let qr;
+<script>
+let qr;
 
 function startScan() {
   document.getElementById("reader").style.display = "block";
 
-  qr = new Html5Qrcode("reader");
+  Html5Qrcode.getCameras()
+    .then(cameras => {
+      if (!cameras || cameras.length === 0) {
+        alert("❌ No camera found");
+        return;
+      }
 
-  qr.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    text => {
-      document.getElementById("sessionId").value = text;
-      qr.stop();
-      alert("✅ QR scanned");
-    },
-    err => {}
-  ).catch(e => alert("Camera error: " + e));
-}
+      // Force back camera (important)
+      const cameraId = cameras[cameras.length - 1].id;
 
-function markAttendance() {
-  const s = sessionId.value;
-  const r = roll.value;
-  const n = name.value;
+      qr = new Html5Qrcode("reader");
 
-  if (!s || !r || !n) {
-    alert("Fill all fields");
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(pos => {
-    fetch(`${API_URL}?action=markStudentAttendance&sessionId=${s}&roll=${r}&name=${n}&lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`)
-      .then(r => r.text())
-      .then(alert);
-  }, () => alert("Allow GPS"));
-}
-
-function goBack() {
-  window.location.href = "dashboard.html";
+      qr.start(
+        cameraId,
+        { fps: 10, qrbox: 250 },
+        qrText => {
+          document.getElementById("sessionId").value = qrText;
+          qr.stop();
+          alert("✅ QR scanned successfully");
+        },
+        error => {}
+      );
+    })
+    .catch(err => {
+      alert("❌ Camera blocked: " + err);
+    });
 }
 </script>
-
 </body>
 </html>
