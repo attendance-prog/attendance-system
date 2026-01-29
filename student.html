@@ -1,92 +1,35 @@
-<h1 style="color:red">STUDENT FILE LOADED – VERSION A</h1>
 <!DOCTYPE html>
 <html>
 <head>
-  <title>GO GREEN – Student Dashboard</title>
+  <title>Student Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      margin: 0;
-      padding: 20px;
-      text-align: center;
-    }
-    h1 { color: #1e8449; }
-    .card {
-      background: #fff;
-      padding: 15px;
-      margin: 15px auto;
-      max-width: 500px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      font-size: 15px;
-      background: #0a5fb4;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover { background: #084c91; }
-    .logout { background:#c0392b; }
+    body { font-family: Arial; background:#f4f6f8; padding:20px }
+    .card { background:#fff; padding:15px; max-width:500px; margin:auto; border-radius:8px }
+    button { width:100%; padding:12px; margin-top:10px; background:#0a5fb4; color:#fff; border:none }
   </style>
 </head>
 
 <body>
 
-<script>
-/* 🔐 SESSION CHECK */
-if (
-  localStorage.getItem("loggedIn") !== "true" ||
-  localStorage.getItem("role") !== "STUDENT"
-) {
-  window.location.href = "index.html";
-}
-</script>
-
-<h1>🌱 GO GREEN</h1>
-<h3>Student Dashboard</h3>
-
 <div class="card">
-  <p><b>Email:</b> <span id="emailText"></span></p>
-  <p><b>Role:</b> STUDENT</p>
-</div>
+  <h3>🎓 Student Panel</h3>
 
-<div class="card">
-  <button onclick="alert('BUTTON CLICKED OK')">
-  📷 Scan QR & Mark Attendance
-</button>
-  <button onclick="goOverall()">📊 My Attendance (Overall)</button>
-  <button onclick="goSubject()">📘 Per Subject Attendance</button>
-  <button onclick="goTimetable()">🗓 Timetable (View Only)</button>
-  <button class="logout" onclick="logout()">Logout</button>
+  <button onclick="goScan()">📷 Scan QR & Mark Attendance</button>
+  <button onclick="alert('Phase 2')">📊 My Attendance</button>
+  <button onclick="alert('Phase 2')">📘 Per Subject</button>
+  <button onclick="alert('Phase 2')">🗓 Timetable</button>
+
+  <button style="background:#c0392b" onclick="logout()">Logout</button>
 </div>
 
 <script>
-document.getElementById("emailText").innerText =
-  localStorage.getItem("email");
-
 function goScan() {
-  window.location.href = "student-scan.html";
-}
-function goOverall() {
-  window.location.href = "student-overall.html";
-}
-function goSubject() {
-  window.location.href = "student-subject.html";
-}
-function goTimetable() {
-  window.location.href = "student-timetable.html";
+  window.location.href = "?page=student-scan";
 }
 function logout() {
   localStorage.clear();
-  window.location.href = "index.html";
+  window.location.href = "?page=index";
 }
 </script>
 
