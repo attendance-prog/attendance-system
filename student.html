@@ -2,34 +2,25 @@
 <html>
 <head>
   <title>Student Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { font-family: Arial; background:#f4f6f8; padding:20px }
-    .card { background:#fff; padding:15px; max-width:500px; margin:auto; border-radius:8px }
-    button { width:100%; padding:12px; margin-top:10px; background:#0a5fb4; color:#fff; border:none }
-  </style>
 </head>
 
-<body>
+<body style="font-family:Arial;text-align:center">
 
-<div class="card">
-  <h3>🎓 Student Panel</h3>
+<h2>🌱 GO GREEN – Student</h2>
 
-  <button onclick="goScan()">📷 Scan QR & Mark Attendance</button>
-  <button onclick="alert('Phase 2')">📊 My Attendance</button>
-  <button onclick="alert('Phase 2')">📘 Per Subject</button>
-  <button onclick="alert('Phase 2')">🗓 Timetable</button>
-
-  <button style="background:#c0392b" onclick="logout()">Logout</button>
-</div>
+<button onclick="openScan()">📷 Scan QR & Mark Attendance</button><br><br>
+<button onclick="alert('Coming soon')">📊 My Attendance</button><br><br>
+<button onclick="logout()">Logout</button>
 
 <script>
-function goScan() {
-  window.location.href = "?page=student-scan";
+function openScan(){
+  window.location.href =
+    "https://script.google.com/macros/s/YOUR_DEPLOY_ID/exec?page=scan";
 }
-function logout() {
+
+function logout(){
   localStorage.clear();
-  window.location.href = "?page=index";
+  window.location.href="index.html";
 }
 </script>
 
