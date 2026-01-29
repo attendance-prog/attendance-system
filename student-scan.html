@@ -1,142 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Scan QR & Mark Attendance</title>
+  <title>Scan QR</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Permissions-Policy" content="camera=*">
-
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
-    body {
-      font-family: Arial;
-      background: #f4f6f8;
-      padding: 20px;
-      text-align: center;
-    }
-    h2 { color: #1e8449; }
-
-    #reader {
-      width: 320px;
-      margin: 15px auto;
-    }
-
-    input, button {
-      width: 90%;
-      padding: 12px;
-      margin-top: 10px;
-      font-size: 15px;
-    }
-
-    button {
-      background: #0a5fb4;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .danger { background: #c0392b; }
+    body { font-family: Arial; background:#f4f6f8; padding:20px; text-align:center }
+    #reader { width:300px; margin:auto }
+    input,button { width:100%; padding:12px; margin-top:10px }
+    button { background:#0a5fb4; color:#fff; border:none }
   </style>
 </head>
 
 <body>
 
-<script>
-/* 🔐 SESSION CHECK */
-if (
-  localStorage.getItem("loggedIn") !== "true" ||
-  localStorage.getItem("role") !== "STUDENT"
-) {
-  window.location.href = "index.html";
-}
-</script>
-
-<h2>📷 Scan QR & Mark Attendance</h2>
-
-<button onclick="startScan()">▶ Start QR Scan</button>
+<h3>📷 Scan QR & Mark Attendance</h3>
 
 <div id="reader"></div>
 
-<input id="sessionId" placeholder="Session ID (auto)" readonly>
+<input id="sessionId" placeholder="Session ID" readonly>
 <input id="roll" placeholder="Roll Number">
 <input id="name" placeholder="Name">
 
 <button onclick="verifyFace()">📸 Verify Face</button>
 <button onclick="markAttendance()">✅ Mark Attendance</button>
-<button class="danger" onclick="goBack()">⬅ Back</button>
+<button onclick="goBack()" style="background:#c0392b">⬅ Back</button>
 
 <script>
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+let scanned = false, faceOk = false;
+const API = google.script.host.origin + "/exec";
 
-let scannedSessionId = null;
-let faceVerified = false;
-let qr;
+new Html5Qrcode("reader").start(
+  { facingMode:"environment" },
+  { fps:10, qrbox:250 },
+  txt => {
+    document.getElementById("sessionId").value = txt;
+    scanned = true;
+    alert("QR Scanned");
+  }
+);
 
-function startScan() {
-  Html5Qrcode.getCameras().then(cameras => {
-    if (!cameras.length) {
-      alert("No camera found");
-      return;
-    }
-    qr = new Html5Qrcode("reader");
-    qr.start(
-      cameras[cameras.length - 1].id,
-      { fps: 10, qrbox: 250 },
-      qrText => {
-        scannedSessionId = qrText;
-        document.getElementById("sessionId").value = qrText;
-        qr.stop();
-        alert("✅ QR scanned");
-      }
-    );
+async function verifyFace(){
+  try{
+    const s = await navigator.mediaDevices.getUserMedia({video:true});
+    setTimeout(()=>{ s.getTracks().forEach(t=>t.stop()); faceOk=true; alert("Face Verified"); },2000);
+  }catch{ alert("Camera blocked"); }
+}
+
+function markAttendance(){
+  if(!scanned || !faceOk) return alert("Scan QR & verify face");
+
+  navigator.geolocation.getCurrentPosition(pos=>{
+    fetch(`${API}?action=markStudentAttendance&sessionId=${sessionId.value}&roll=${roll.value}&name=${name.value}&lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`)
+      .then(r=>r.text()).then(alert);
   });
 }
 
-async function verifyFace() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    setTimeout(() => {
-      stream.getTracks().forEach(t => t.stop());
-      faceVerified = true;
-      alert("✅ Face verified");
-    }, 3000);
-  } catch {
-    alert("Camera permission required");
-  }
-}
-
-function markAttendance() {
-  if (!scannedSessionId) {
-    alert("Scan QR first");
-    return;
-  }
-  if (!faceVerified) {
-    alert("Face verification required");
-    return;
-  }
-
-  const roll = document.getElementById("roll").value;
-  const name = document.getElementById("name").value;
-
-  if (!roll || !name) {
-    alert("Fill all fields");
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      fetch(`${API_URL}?action=markStudentAttendance&sessionId=${scannedSessionId}&roll=${roll}&name=${name}&lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`)
-        .then(r => r.text())
-        .then(msg => alert(msg));
-    },
-    () => alert("GPS permission required")
-  );
-}
-
-function goBack() {
-  window.location.href = "student.html";
+function goBack(){
+  window.location.href = "?page=student";
 }
 </script>
 
