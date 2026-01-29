@@ -110,8 +110,46 @@ function startScan() {
     });
 }
 
+<script>
 function markAttendance() {
-  alert("Attendance logic will go here");
+
+  if (!scannedSessionId) {
+    alert("❌ Please scan QR first");
+    return;
+  }
+
+  if (!faceVerified) {
+    alert("❌ Face verification required");
+    return;
+  }
+
+  const roll = document.getElementById("roll").value;
+  const name = document.getElementById("name").value;
+
+  if (!roll || !name) {
+    alert("Fill roll number and name");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      fetch(`${API_URL}?action=markStudentAttendance&sessionId=${scannedSessionId}&roll=${roll}&name=${name}&lat=${lat}&lng=${lng}`)
+        .then(res => res.text())
+        .then(msg => {
+          if (msg === "QR_EXPIRED") {
+            alert("❌ QR expired. Ask faculty to generate again.");
+          } else if (msg === "ATTENDANCE_MARKED") {
+            alert("✅ Attendance marked successfully");
+          } else {
+            alert(msg);
+          }
+        });
+    },
+    () => alert("GPS permission required")
+  );
 }
 
 function goBack() {
