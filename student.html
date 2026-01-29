@@ -5,26 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
-   < body>
-    <h1 style="color:red">TEST VERSION 999</h1>
-    <h1 style="color:red">LIVE FILE CONFIRMED</h1>
-
-{
+    body {
       font-family: Arial, sans-serif;
       background: #f4f6f8;
       margin: 0;
       padding: 20px;
-    }
-    h1 {
       text-align: center;
-      color: #1e8449;
-      margin-bottom: 5px;
     }
-    h3 {
-      text-align: center;
-      color: #555;
-      margin-top: 0;
-    }
+    h1 { color: #1e8449; }
     .card {
       background: #fff;
       padding: 15px;
@@ -45,8 +33,7 @@
       cursor: pointer;
     }
     button:hover { background: #084c91; }
-    .danger { background:#c0392b; }
-    .hidden { display: none; }
+    .logout { background:#c0392b; }
   </style>
 </head>
 
@@ -65,55 +52,35 @@ if (
 <h1>🌱 GO GREEN</h1>
 <h3>Student Dashboard</h3>
 
-<!-- ================= MENU ================= -->
 <div class="card">
-
-  <!-- ✅ DIRECT NAVIGATION (NO JS DEPENDENCY – SAFEST) -->
- <button onclick="alert('CLICK WORKS')">
-  📷 Scan QR & Mark Attendance
-</button>
-  
-  <button onclick="showSection('overall')">
-    📊 My Attendance (Overall)
-  </button>
-
-  <button onclick="showSection('subject')">
-    📘 Per Subject Attendance
-  </button>
-
-  <button onclick="showSection('timetable')">
-    🗓 Timetable (View Only)
-  </button>
-
-  <button class="danger" onclick="logout()">
-    Logout
-  </button>
+  <p><b>Email:</b> <span id="emailText"></span></p>
+  <p><b>Role:</b> STUDENT</p>
 </div>
 
-<!-- ================= PLACEHOLDERS ================= -->
-<div class="card hidden" id="overall">
-  <h3>Overall Attendance</h3>
-  <p>Read-only view (Phase-2).</p>
-</div>
-
-<div class="card hidden" id="subject">
-  <h3>Per Subject Attendance</h3>
-  <p>Read-only view (Phase-2).</p>
-</div>
-
-<div class="card hidden" id="timetable">
-  <h3>Timetable</h3>
-  <p>View-only timetable set by HOD.</p>
+<div class="card">
+  <button onclick="goScan()">📷 Scan QR & Mark Attendance</button>
+  <button onclick="goOverall()">📊 My Attendance (Overall)</button>
+  <button onclick="goSubject()">📘 Per Subject Attendance</button>
+  <button onclick="goTimetable()">🗓 Timetable (View Only)</button>
+  <button class="logout" onclick="logout()">Logout</button>
 </div>
 
 <script>
-function showSection(id) {
-  document.querySelectorAll(".card").forEach(c => {
-    if (c.id) c.classList.add("hidden");
-  });
-  document.getElementById(id).classList.remove("hidden");
-}
+document.getElementById("emailText").innerText =
+  localStorage.getItem("email");
 
+function goScan() {
+  window.location.href = "student-scan.html";
+}
+function goOverall() {
+  window.location.href = "student-overall.html";
+}
+function goSubject() {
+  window.location.href = "student-subject.html";
+}
+function goTimetable() {
+  window.location.href = "student-timetable.html";
+}
 function logout() {
   localStorage.clear();
   window.location.href = "index.html";
