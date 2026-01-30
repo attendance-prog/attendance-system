@@ -1,129 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>GO GREEN Login</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #eaf6ea;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  .card {
-    background: #fff;
-    padding: 25px;
-    border-radius: 10px;
-    width: 320px;
-    box-shadow: 0 4px 12px rgba(0,0,0,.2);
-    text-align: center;
-  }
-  h2 { color: #2e7d32; }
-  input, select, button {
-    width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-  }
-  button {
-    background: #2e7d32;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-  }
-</style>
+  <title>GO GREEN Login</title>
+  <style>
+    body{font-family:Arial;background:#eaf5ea}
+    .box{max-width:350px;margin:80px auto;padding:20px;background:#fff}
+    button{width:100%;padding:10px;background:green;color:#fff}
+  </style>
 </head>
-
 <body>
 
-<div class="card">
+<div class="box">
   <h2>🌱 GO GREEN</h2>
 
-  <input type="email" id="email" placeholder="Enter Email ID">
-
+  <input id="email" placeholder="Email"><br><br>
   <select id="role">
-    <option value="">Select Role</option>
     <option value="admin">Admin</option>
-    <option value="hod">HOD</option>
     <option value="faculty">Faculty</option>
-    <option value="coordinator">Coordinator</option>
-    <option value="student">Student</option>
-  </select>
+  </select><br><br>
 
-  <button onclick="sendOtp()">Send OTP</button>
+  <button onclick="sendOtp()">Send OTP</button><br><br>
 
-  <input type="number" id="otp" placeholder="Enter OTP">
-
+  <input id="otp" placeholder="Enter OTP"><br><br>
   <button onclick="verifyOtp()">Verify OTP</button>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const API_URL = "PASTE_NEW_EXEC_URL";
 
-/* ---- CLEAR OLD SESSION ON LOGIN PAGE ---- */
-localStorage.clear();
-
-/* ---- SEND OTP ---- */
-function sendOtp() {
-  const email = document.getElementById("email").value.trim();
-  const role  = document.getElementById("role").value;
-
-  if (!email || !role) {
-    alert("Enter email and select role");
-    return;
-  }
-
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({
-      action: "sendOtp",
-      email: email,
-      role: role
+function sendOtp(){
+  fetch(API_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      action:"sendOtp",
+      email:email.value.trim(),
+      role:role.value
     })
-  })
-  .then(r => r.json())
-  .then(res => alert(res.message))
-  .catch(() => alert("Network error"));
+  }).then(r=>r.json()).then(d=>alert(d.message));
 }
 
-/* ---- VERIFY OTP ---- */
-function verifyOtp() {
-  const email = document.getElementById("email").value.trim();
-  const role  = document.getElementById("role").value;
-  const otp   = document.getElementById("otp").value.trim();
-
-  if (!otp) {
-    alert("Enter OTP");
-    return;
-  }
-
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({
-      action: "verifyOtp",
-      email: email,
-      otp: otp
+function verifyOtp(){
+  fetch(API_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      action:"verifyOtp",
+      email:email.value.trim(),
+      otp:otp.value.trim()
     })
-  })
-  .then(r => r.json())
-  .then(res => {
-    if (!res.success) {
-      alert(res.message);
-      return;
-    }
-
-    // SAVE SESSION
-    localStorage.setItem("email", email);
-    localStorage.setItem("role", role);
-
-    // REDIRECT BY ROLE
-    window.location.href = role + ".html";
-  })
-  .catch(() => alert("Verification error"));
+  }).then(r=>r.json()).then(d=>{
+    if(d.success){
+      localStorage.setItem("email",email.value);
+      localStorage.setItem("role",role.value);
+      window.location="admin.html";
+    }else alert(d.message);
+  });
 }
 </script>
-
 </body>
 </html>
