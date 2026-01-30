@@ -47,9 +47,20 @@
 <button onclick="logout()">Logout</button>
 
 <section>
-  <h3>My Attendance</h3>
-  <button onclick="markAttendance()">Mark My Attendance</button>
+  <button onclick="markMyAttendance()" class="btn">
+  Mark My Attendance
+</button>
   <button onclick="viewAttendance()">View My Attendance</button>
+  <!-- Camera Section (HIDDEN INITIALLY) -->
+<div id="cameraSection" style="display:none; margin-top:20px;">
+  <video id="video" width="260" autoplay></video><br><br>
+  <button onclick="captureAndMark()" class="btn">
+    Capture Attendance
+  </button>
+</div>
+
+<canvas id="canvas" width="260" height="200" style="display:none;"></canvas>
+
   <pre id="attendance"></pre>
 </section>
 
@@ -92,17 +103,52 @@ function post(data, cb) {
 }
 
 /* ---- ATTENDANCE ---- */
-function markAttendance() {
+let stream = null;
+
+function markMyAttendance() {
+  document.getElementById("cameraSection").style.display = "block";
+
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(s => {
+      stream = s;
+      document.getElementById("video").srcObject = s;
+    })
+    .catch(() => alert("Camera permission denied"));
+}
+
+function captureAndMark() {
+  const canvas = document.getElementById("canvas");
+  const video = document.getElementById("video");
+  const ctx = canvas.getContext("2d");
+
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
   navigator.geolocation.getCurrentPosition(pos => {
-    post({
-      action: "markStaffAttendance",
-      email: email,
-      role: "ADMIN",
-      latitude: pos.coords.latitude,
-      longitude: pos.coords.longitude,
-      room: "ADMIN"
-    }, () => alert("Attendance marked"));
+    fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "markStaffAttendance",
+        email: localStorage.getItem("email"),
+        role: "ADMIN",
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude
+      })
+    })
+    .then(r => r.json())
+    .then(res => {
+      alert("✅ Attendance marked successfully");
+      stopCamera();
+    })
+    .catch(() => alert("Network error"));
   });
+}
+
+function stopCamera() {
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+    stream = null;
+  }
+  document.getElementById("cameraSection").style.display = "none";
 }
 
 function viewAttendance() {
