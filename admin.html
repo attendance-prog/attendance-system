@@ -49,6 +49,14 @@
 <section>
   <h3>My Attendance</h3>
   <button onclick="markAttendance()">Mark My Attendance</button>
+  <section>
+  <video id="video" width="240" autoplay></video><br>
+  <button onclick="startCamera()">Open Camera</button>
+  <button onclick="capturePhoto()">Capture & Mark Attendance</button>
+
+  <canvas id="canvas" width="240" height="180" style="display:none;"></canvas>
+</section>
+
   <button onclick="viewAttendance()">View My Attendance</button>
   <pre id="attendance"></pre>
 </section>
