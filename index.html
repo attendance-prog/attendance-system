@@ -6,20 +6,24 @@
 </head>
 <body>
 
-  <div class="card">
-    <h2>🌱 Go Green Login</h2>
-    <input id="email" type="email" placeholder="Enter Sharda Email">
-    <button id="sendOtpBtn">Send OTP</button>
-  </div>
+<div class="card">
+  <h2>🌱 Go Green Login</h2>
 
-  <script src="script.js"></script>
+  <input id="email" placeholder="Enter Email">
 
-  <script>
-    console.log("Binding click event");
-    document.getElementById("sendOtpBtn").addEventListener("click", function () {
-      console.log("Button clicked");
-      sendOTP();
-    });
+  <select id="role">
+    <option value="student" selected>Student</option>
+    <option value="faculty">Faculty</option>
+    <option value="coordinator">Coordinator</option>
+    <option value="hod">HOD</option>
+    <option value="admin">Admin</option>
+  </select>
+
+  <button onclick="sendOTP()">Send OTP</button>
+</div>
+
+<script src="script.js"></script>
+
   </script>
 
 </body>
