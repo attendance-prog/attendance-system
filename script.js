@@ -1,41 +1,55 @@
-alert("script.js loaded");
 const API = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-
+/* SEND OTP */
 function sendOTP() {
-  console.log("sendOTP function called");
+  const email = emailInput("email");
+  const role = emailInput("role");
 
-  const emailEl = document.getElementById("email");
-  if (!emailEl) {
-    alert("Email input not found");
-    return;
-  }
-
-  const email = emailEl.value;
-  console.log("Email:", email);
-
-  if (!email) {
-    alert("Please enter email");
-    return;
-  }
+  localStorage.setItem("email", email);
+  localStorage.setItem("role", role);
 
   fetch(API, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       action: "sendOTP",
-      email: email
+      email: email,
+      role: role
     })
   })
-  .then(res => {
-    console.log("Fetch response received");
-    return res.json();
+  .then(r => r.json())
+  .then(d => {
+    if (d.status === "sent") location.href = "verify.html";
+    else alert(JSON.stringify(d));
   })
-  .then(data => {
-    console.log("API data:", data);
-    alert(JSON.stringify(data));
+  .catch(() => alert("Fetch failed"));
+}
+
+/* VERIFY OTP */
+function verifyOTP() {
+  fetch(API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "verifyOTP",
+      email: localStorage.getItem("email"),
+      role: localStorage.getItem("role"),
+      otp: otp.value
+    })
   })
-  .catch(err => {
-    console.error("Fetch failed:", err);
-    alert("Fetch failed");
+  .then(r => r.json())
+  .then(d => {
+    if (d.status === "success") {
+      localStorage.setItem("user", JSON.stringify(d));
+      location.href = d.role + ".html";
+    } else {
+      alert("Login denied: " + d.status);
+    }
   });
+}
+
+/* HELPER */
+function emailInput(id) {
+  const v = document.getElementById(id).value;
+  if (!v) throw "Missing field";
+  return v;
 }
