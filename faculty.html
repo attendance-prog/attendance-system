@@ -1,23 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Faculty Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-</head>
+<html>
 <body>
+<h2>🌱 GO GREEN – Faculty Dashboard</h2>
 
-  <h2>Faculty Dashboard</h2>
+<button onclick="markAttendance()">Mark My Attendance</button>
 
-  <p>Welcome, Faculty</p>
+<h3>Create Session</h3>
+<input id="sub" placeholder="Subject ID">
+<input id="loc" placeholder="Location ID">
+<input id="st" placeholder="Start Time">
+<input id="et" placeholder="End Time">
+<button onclick="createSession()">Create Session</button>
 
-  <button onclick="startLecture()">Start Lecture</button>
+<pre id="out"></pre>
 
-  <button onclick="logout()">Logout</button>
+<script>
+const API = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const email = localStorage.getItem("email");
 
-  <script src="js/config.js"></script>
-  <script src="js/attendance.js"></script>
-  <script src="js/auth.js"></script>
+function post(d){
+ fetch(API,{method:"POST",body:JSON.stringify(d)})
+ .then(r=>r.json()).then(x=>out.innerText=JSON.stringify(x,null,2));
+}
+
+function markAttendance(){
+ navigator.geolocation.getCurrentPosition(p=>{
+   post({
+     action:"markStaffAttendance",
+     email,
+     role:"FACULTY",
+     latitude:p.coords.latitude,
+     longitude:p.coords.longitude,
+     room:"CLASS"
+   });
+ });
+}
+
+function createSession(){
+ post({
+   action:"createSession",
+   subjectId:sub.value,
+   facultyEmail:email,
+   startTime:st.value,
+   endTime:et.value,
+   locationId:loc.value
+ });
+}
+</script>
 </body>
 </html>
