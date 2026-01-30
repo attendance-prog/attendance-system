@@ -1,7 +1,27 @@
-<div class="card">
-  <h3>Verify OTP</h3>
-  <input id="otp" placeholder="Enter OTP">
-  <button onclick="verifyOTP()">Verify</button>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Verify OTP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-<script src="script.js"></script>
+  <div class="card">
+    <h3>Verify OTP</h3>
+
+    <input
+      type="text"
+      id="otp"
+      placeholder="Enter OTP"
+      required
+    >
+
+    <button onclick="verifyOTP()">Verify</button>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
