@@ -1,10 +1,143 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Admin Dashboard</title>
+<meta charset="UTF-8">
+<title>GO GREEN – Admin Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body { font-family: Arial; background:#f4fff4; padding:20px; }
+  h2 { color:#2e7d32; }
+  section { margin-bottom: 20px; }
+  input, button {
+    padding:8px;
+    margin:4px;
+  }
+  button {
+    background:#2e7d32;
+    color:#fff;
+    border:none;
+    cursor:pointer;
+  }
+  pre {
+    background:#eee;
+    padding:10px;
+    max-height:200px;
+    overflow:auto;
+  }
+</style>
 </head>
+
 <body>
-  <h1>Welcome Admin</h1>
-  <p>GO GREEN Attendance System</p>
+
+<!-- 🔒 LOGIN GUARD -->
+<script>
+(function () {
+  const email = localStorage.getItem("email");
+  const role  = localStorage.getItem("role");
+
+  if (!email || role !== "admin") {
+    alert("Unauthorized access. Please login.");
+    window.location.href = "index.html";
+  }
+})();
+</script>
+
+<h2>🌱 GO GREEN – Admin Dashboard</h2>
+
+<button onclick="logout()">Logout</button>
+
+<section>
+  <h3>My Attendance</h3>
+  <button onclick="markAttendance()">Mark My Attendance</button>
+  <button onclick="viewAttendance()">View My Attendance</button>
+  <pre id="attendance"></pre>
+</section>
+
+<section>
+  <h3>Add Location</h3>
+  <input id="room" placeholder="Room No">
+  <input id="lat" placeholder="Latitude">
+  <input id="lng" placeholder="Longitude">
+  <input id="rad" placeholder="Radius">
+  <button onclick="addLocation()">Add</button>
+</section>
+
+<section>
+  <h3>Add Subject</h3>
+  <input id="sid" placeholder="Subject ID">
+  <input id="sname" placeholder="Subject Name">
+  <input id="dept" placeholder="Department">
+  <input id="sem" placeholder="Semester">
+  <button onclick="addSubject()">Add</button>
+</section>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const email = localStorage.getItem("email");
+
+/* ---- LOGOUT ---- */
+function logout() {
+  localStorage.clear();
+  window.location.href = "index.html";
+}
+
+/* ---- POST HELPER ---- */
+function post(data, cb) {
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify(data)
+  })
+  .then(r => r.json())
+  .then(cb);
+}
+
+/* ---- ATTENDANCE ---- */
+function markAttendance() {
+  navigator.geolocation.getCurrentPosition(pos => {
+    post({
+      action: "markStaffAttendance",
+      email: email,
+      role: "ADMIN",
+      latitude: pos.coords.latitude,
+      longitude: pos.coords.longitude,
+      room: "ADMIN"
+    }, () => alert("Attendance marked"));
+  });
+}
+
+function viewAttendance() {
+  post({
+    action: "getMyAttendance",
+    email: email
+  }, res => {
+    document.getElementById("attendance").innerText =
+      JSON.stringify(res.data, null, 2);
+  });
+}
+
+/* ---- LOCATION ---- */
+function addLocation() {
+  post({
+    action: "addLocation",
+    room: room.value,
+    lat: lat.value,
+    lng: lng.value,
+    radius: rad.value
+  }, () => alert("Location added"));
+}
+
+/* ---- SUBJECT ---- */
+function addSubject() {
+  post({
+    action: "addSubject",
+    subjectId: sid.value,
+    subjectName: sname.value,
+    department: dept.value,
+    semester: sem.value
+  }, () => alert("Subject added"));
+}
+</script>
+
 </body>
 </html>
+
