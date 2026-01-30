@@ -1,30 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Go Green Login</title>
+  <meta charset="UTF-8">
+  <title>SSBS Attendance Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="card">
-  <h2>🌱 Go Green Login</h2>
+  <div class="card">
+    <h2>🌱 SSBS Attendance Login</h2>
 
-  <input id="email" placeholder="Enter Email">
+    <input
+      type="email"
+      id="email"
+      placeholder="Enter College Email"
+      required
+    >
 
-  <select id="role">
-    <option value="student" selected>Student</option>
-    <option value="faculty">Faculty</option>
-    <option value="coordinator">Coordinator</option>
-    <option value="hod">HOD</option>
-    <option value="admin">Admin</option>
-  </select>
+    <select id="role">
+      <option value="student" selected>Student</option>
+      <option value="faculty">Faculty</option>
+      <option value="coordinator">Coordinator</option>
+      <option value="hod">HOD</option>
+      <option value="admin">Admin</option>
+    </select>
 
-  <button onclick="sendOTP()">Send OTP</button>
-</div>
+    <button onclick="sendOTP()">Send OTP</button>
+  </div>
 
-<script src="script.js"></script>
-
-  </script>
-
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
 </body>
 </html>
