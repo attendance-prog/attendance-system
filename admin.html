@@ -82,6 +82,62 @@
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email = localStorage.getItem("email");
+const role  = "ADMIN";
+
+let videoStream = null;
+
+function startCamera() {
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      videoStream = stream;
+      document.getElementById("video").srcObject = stream;
+    })
+    .catch(() => alert("Camera access denied"));
+}
+
+function capturePhoto() {
+  if (!videoStream) {
+    alert("Open camera first");
+    return;
+  }
+
+  const canvas = document.getElementById("canvas");
+  const video = document.getElementById("video");
+  const ctx = canvas.getContext("2d");
+
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  const base64Image = canvas
+    .toDataURL("image/png")
+    .replace("data:image/png;base64,", "");
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "markStaffAttendance",
+        email: email,
+        role: role,
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+        room: "ADMIN",
+        faceImage: base64Image
+      })
+    })
+    .then(r => r.json())
+    .then(res => {
+      alert(res.message || "Attendance marked successfully");
+      stopCamera();
+    });
+  });
+}
+
+function stopCamera() {
+  if (videoStream) {
+    videoStream.getTracks().forEach(t => t.stop());
+    videoStream = null;
+  }
+}
 
 /* ---- LOGOUT ---- */
 function logout() {
