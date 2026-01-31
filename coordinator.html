@@ -127,10 +127,10 @@ function loadTimetable(){
         <td>${x[2]}</td>
         <td>${x[4]}</td>
         <td>
-          <button onclick="assist('${x[1]}','${x[2]}')">
-            Take Lecture
-          </button>
-        </td>
+         <button onclick="takeLecture('${x[1]}','${x[2]}')">
+  Take Lecture
+</button>
+</td>
       </tr>`;
     });
   });
@@ -141,14 +141,16 @@ function takeLecture(subject, faculty) {
 
   navigator.geolocation.getCurrentPosition(pos => {
     post({
-      action: "coordinatorTakeLecture",
-      subject: subject,
-      faculty: faculty,
-      coordinator: localStorage.getItem("email"),
-      assist: true,
-      latitude: pos.coords.latitude,
-      longitude: pos.coords.longitude
-    })
+  action: "coordinatorTakeLecture",
+  subject: subject,
+  faculty: faculty,
+  coordinator: localStorage.getItem("email"),
+  assist: true,
+  room: "CLASSROOM",        // 🔑 ADD THIS
+  latitude: pos.coords.latitude,
+  longitude: pos.coords.longitude
+})
+
     .then(res => {
       if (!res.success) {
         alert("❌ " + res.message);
