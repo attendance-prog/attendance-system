@@ -29,11 +29,11 @@ if(localStorage.getItem("role")!=="faculty"){
 
 <h3>1️⃣ Mark My Attendance</h3>
 <button onclick="startCamera()">Mark Attendance</button>
-
-<div id="cam" style="display:none">
-  <video id="video" autoplay width="260"></video><br>
+<div id="cam" style="display:none;margin-top:10px">
+  <video id="video" width="260" autoplay playsinline></video><br><br>
   <button onclick="captureAttendance()">Capture</button>
 </div>
+
 <canvas id="canvas" width="260" height="200" style="display:none"></canvas>
 
 <hr>
@@ -63,36 +63,66 @@ function post(data){
 
 /* -------- ATTENDANCE -------- */
 function startCamera(){
-  cam.style.display="block";
-  navigator.mediaDevices.getUserMedia({video:true})
-    .then(s=>{stream=s;video.srcObject=s});
+  document.getElementById("cam").style.display="block";
+
+  navigator.mediaDevices.getUserMedia({ video:true })
+    .then(s=>{
+      stream=s;
+      const v=document.getElementById("video");
+      v.srcObject=s;
+      v.play();               // 🔑 REQUIRED
+    })
+    .catch(()=>{
+      alert("Camera permission denied");
+    });
 }
 
+
 function captureAttendance(){
-  canvas.getContext("2d").drawImage(video,0,0,260,200);
+  const v=document.getElementById("video");
+  const c=document.getElementById("canvas");
+
+  if(!v.srcObject){
+    alert("Camera not started");
+    return;
+  }
+
+  c.getContext("2d").drawImage(v,0,0,260,200);
 
   navigator.geolocation.getCurrentPosition(pos=>{
     post({
       action:"markStaffAttendance",
-      email,
-      role:"FACULTY",
-      latitude:pos.coords.latitude,
-      longitude:pos.coords.longitude
-    }).then(r=>{
-      alert(r.message);
+      email: email,
+      role: "FACULTY",
+      latitude: pos.coords.latitude,
+      longitude: pos.coords.longitude,
+      room: "CLASSROOM"
+    })
+    .then(r=>{
+      alert(r.success ? "✅ Attendance marked" : "❌ "+r.message);
       if(r.success){
         qrBtn.disabled=false;
         loadSubjects();
       }
       stopCamera();
+    })
+    .catch(()=>{
+      alert("Network error");
+      stopCamera();
     });
+  },()=>{
+    alert("GPS permission denied");
   });
 }
 
 function stopCamera(){
-  if(stream) stream.getTracks().forEach(t=>t.stop());
-  cam.style.display="none";
+  if(stream){
+    stream.getTracks().forEach(t=>t.stop());
+    stream=null;
+  }
+  document.getElementById("cam").style.display="none";
 }
+
 
 /* -------- QR -------- */
 function loadSubjects(){
