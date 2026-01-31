@@ -8,103 +8,109 @@
 body{font-family:Arial;background:#f4fff4;padding:20px}
 h2{color:#2e7d32}
 button{background:#2e7d32;color:#fff;border:none;padding:10px;margin:6px}
-video{border:1px solid #ccc}
 table{border-collapse:collapse;width:100%}
-th,td{border:1px solid #ccc;padding:6px}
+th,td{border:1px solid #ccc;padding:6px;text-align:center}
+#scanner{display:none;margin-top:10px}
 </style>
 </head>
 
 <body>
 
 <script>
-// 📱 MOBILE ONLY
+// 📱 MOBILE ONLY ENFORCEMENT
 if(!/Android|iPhone/i.test(navigator.userAgent)){
   alert("Attendance allowed only from mobile");
   location.href="index.html";
 }
 </script>
 
-<h2>🌱 GO GREEN – Student</h2>
+<h2>🌱 GO GREEN – Student Dashboard</h2>
 
-<button onclick="startScan()">Scan QR & Mark Attendance</button>
+<button onclick="startQrScan()">📷 Scan QR & Mark Attendance</button>
 
-<div id="cam" style="display:none">
-  <video id="video" autoplay width="260"></video><br>
-  <button onclick="capture()">Capture & Submit</button>
+<div id="scanner">
+  <div id="qr-reader" style="width:280px"></div>
 </div>
-
-<canvas id="canvas" width="260" height="200" style="display:none"></canvas>
 
 <hr>
 
 <h3>My Attendance</h3>
-<button onclick="viewAttendance()">View Attendance</button>
+<button onclick="viewAttendance()">View My Attendance</button>
 
 <table id="attTable" style="display:none">
 <thead>
-<tr><th>Date</th><th>Subject</th><th>Status</th><th>Time</th></tr>
+<tr>
+  <th>Date</th>
+  <th>Role</th>
+  <th>Status</th>
+  <th>Time</th>
+</tr>
 </thead>
 <tbody id="attBody"></tbody>
 </table>
 
+<!-- QR SCANNER LIBRARY -->
+<script src="https://unpkg.com/html5-qrcode"></script>
+
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-const email=localStorage.getItem("email");
-let stream=null;
-let sessionId="", subjectId="";
+const email = localStorage.getItem("email");
+let qrScanner = null;
 
-function post(d){
+/* ---------------- API POST ---------------- */
+function post(data){
   return fetch(API,{
     method:"POST",
-    headers:{"Content-Type":"text/plain;charset=utf-8"},
-    body:JSON.stringify(d)
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
   }).then(r=>r.json());
 }
 
-function startScan(){
-  sessionId=prompt("Paste Session ID from QR");
-  subjectId=prompt("Enter Subject ID");
-  if(!sessionId||!subjectId) return;
+/* ---------------- QR SCAN ---------------- */
+function startQrScan(){
+  document.getElementById("scanner").style.display="block";
 
-  cam.style.display="block";
-  navigator.mediaDevices.getUserMedia({video:true})
-    .then(s=>{stream=s;video.srcObject=s});
+  qrScanner = new Html5Qrcode("qr-reader");
+
+  qrScanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    qrText => {
+      qrScanner.stop();
+      document.getElementById("scanner").style.display="none";
+      markAttendance(qrText);
+    },
+    err => {}
+  );
 }
 
-function capture(){
-  canvas.getContext("2d").drawImage(video,0,0,260,200);
-
+/* ---------------- MARK ATTENDANCE ---------------- */
+function markAttendance(sessionId){
   navigator.geolocation.getCurrentPosition(pos=>{
     post({
       action:"markStudentAttendance",
-      email,
-      sessionId,
-      subjectId,
-      latitude:pos.coords.latitude,
-      longitude:pos.coords.longitude
+      email: email,
+      sessionId: sessionId,
+      latitude: pos.coords.latitude,
+      longitude: pos.coords.longitude
     }).then(r=>{
       alert(r.message);
-      stopCam();
     });
-  });
+  }, ()=>alert("GPS permission required"));
 }
 
-function stopCam(){
-  if(stream) stream.getTracks().forEach(t=>t.stop());
-  cam.style.display="none";
-}
-
+/* ---------------- VIEW ATTENDANCE ---------------- */
 function viewAttendance(){
-  post({action:"getMyAttendance",email}).then(r=>{
+  post({ action:"getMyAttendance", email }).then(r=>{
     attBody.innerHTML="";
     r.data.forEach(x=>{
       attBody.innerHTML+=`
-      <tr>
-        <td>${new Date(x[0]).toLocaleDateString()}</td>
-        <td>${x[2]}</td>
-        <td>${x[4]}</td>
-        <td>${new Date(x[5]).toLocaleTimeString()}</td>
-      </tr>`;
+        <tr>
+          <td>${new Date(x[0]).toLocaleDateString()}</td>
+          <td>${x[2]}</td>
+          <td>${x[6]}</td>
+          <td>${new Date(x[8]).toLocaleTimeString()}</td>
+        </tr>`;
     });
     attTable.style.display="table";
   });
