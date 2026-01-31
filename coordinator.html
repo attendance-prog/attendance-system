@@ -129,18 +129,28 @@ function loadTimetable(){
   });
 }
 
-function assist(subject,faculty){
-  if(!confirm("Faculty absent? Take lecture as coordinator?"))return;
+function assist(subject, faculty) {
+  if (!confirm("Faculty absent? Take lecture as coordinator?")) return;
 
-  navigator.geolocation.getCurrentPosition(pos=>{
+  navigator.geolocation.getCurrentPosition(pos => {
     post({
-      action:"coordinatorTakeLecture",
-      coordinator:email,
-      faculty,
-      subject,
-      latitude:pos.coords.latitude,
-      longitude:pos.coords.longitude
-    }).then(r=>alert(r.message));
+      action: "coordinatorTakeLecture",
+      subject: subject,
+      faculty: faculty,
+      coordinator: email,
+      role: "COORDINATOR",
+      assist: true,              // 🔑 REQUIRED
+      latitude: pos.coords.latitude,
+      longitude: pos.coords.longitude
+    })
+    .then(res => {
+      if (!res.success) {
+        alert("❌ " + res.message);
+      } else {
+        alert("✅ " + res.message);
+      }
+    })
+    .catch(() => alert("Network error"));
   });
 }
 
