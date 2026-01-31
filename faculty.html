@@ -29,13 +29,24 @@ if(localStorage.getItem("role")!=="faculty"){
 
 <h3>1️⃣ Mark My Attendance</h3>
 <button onclick="startCamera()">Mark Attendance</button>
+  <button onclick="viewMyAttendance()">View My Attendance</button>
+
 <div id="cam" style="display:none;margin-top:10px">
   <video id="video" width="260" autoplay playsinline></video><br><br>
   <button onclick="captureAttendance()">Capture</button>
 </div>
 
 <canvas id="canvas" width="260" height="200" style="display:none"></canvas>
-
+  <table id="attTable" style="display:none;margin-top:15px" border="1" cellpadding="6">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Status</th>
+      <th>Time</th>
+    </tr>
+  </thead>
+  <tbody id="attBody"></tbody>
+</table>
 <hr>
 
 <h3>2️⃣ Generate QR (After Attendance)</h3>
@@ -150,6 +161,31 @@ function generateQR(){
     `;
   });
 }
+  function viewMyAttendance(){
+  post({
+    action:"getMyAttendance",
+    email: email
+  }).then(r=>{
+    if(!r.success || r.data.length===0){
+      alert("No attendance found");
+      return;
+    }
+
+    attBody.innerHTML="";
+    r.data.forEach(x=>{
+      attBody.innerHTML+=`
+        <tr>
+          <td>${new Date(x[0]).toLocaleDateString()}</td>
+          <td>${x[6]}</td>
+          <td>${new Date(x[8]).toLocaleTimeString()}</td>
+        </tr>`;
+    });
+
+    attTable.style.display="table";
+  })
+  .catch(()=>alert("Network error"));
+}
+
 </script>
 
 </body>
