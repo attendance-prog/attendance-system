@@ -145,6 +145,14 @@ function assist(subject,faculty){
 }
 
 loadTimetable();
+  function stopCamera(){
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+    stream = null;
+  }
+  cam.style.display = "none";
+}
+
 </script>
 
 </body>
