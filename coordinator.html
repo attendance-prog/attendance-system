@@ -67,8 +67,15 @@ const email=localStorage.getItem("email");
 let stream=null;
 
 function logout(){localStorage.clear();location.href="index.html"}
-function post(d){return fetch(API,{method:"POST",body:JSON.stringify(d)}).then(r=>r.json())}
-
+function post(data) {
+  return fetch(API, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
+    body: JSON.stringify(data)
+  }).then(r => r.json());
+}
 /* OWN ATTENDANCE */
 function startCamera(){
   cam.style.display="block";
@@ -129,7 +136,7 @@ function loadTimetable(){
   });
 }
 
-function assist(subject, faculty) {
+function takeLecture(subject, faculty) {
   if (!confirm("Faculty absent? Take lecture as coordinator?")) return;
 
   navigator.geolocation.getCurrentPosition(pos => {
@@ -137,9 +144,8 @@ function assist(subject, faculty) {
       action: "coordinatorTakeLecture",
       subject: subject,
       faculty: faculty,
-      coordinator: email,
-      role: "COORDINATOR",
-      assist: true,              // 🔑 REQUIRED
+      coordinator: localStorage.getItem("email"),
+      assist: true,
       latitude: pos.coords.latitude,
       longitude: pos.coords.longitude
     })
@@ -150,9 +156,13 @@ function assist(subject, faculty) {
         alert("✅ " + res.message);
       }
     })
-    .catch(() => alert("Network error"));
-  });
+    .catch(err => {
+      alert("Network error");
+      console.error(err);
+    });
+  }, () => alert("GPS permission denied"));
 }
+
 
 loadTimetable();
   function stopCamera(){
