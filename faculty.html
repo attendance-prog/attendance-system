@@ -1,51 +1,126 @@
 <!DOCTYPE html>
 <html>
+<head>
+<meta charset="UTF-8">
+<title>GO GREEN – Faculty</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{font-family:Arial;background:#f4fff4;padding:20px}
+h2{color:#2e7d32}
+button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px;cursor:pointer}
+button:disabled{background:#999}
+video{border:1px solid #ccc}
+</style>
+</head>
+
 <body>
-<h2>🌱 GO GREEN – Faculty Dashboard</h2>
-
-<button onclick="markAttendance()">Mark My Attendance</button>
-
-<h3>Create Session</h3>
-<input id="sub" placeholder="Subject ID">
-<input id="loc" placeholder="Location ID">
-<input id="st" placeholder="Start Time">
-<input id="et" placeholder="End Time">
-<button onclick="createSession()">Create Session</button>
-
-<pre id="out"></pre>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-const email = localStorage.getItem("email");
-
-function post(d){
- fetch(API,{method:"POST",body:JSON.stringify(d)})
- .then(r=>r.json()).then(x=>out.innerText=JSON.stringify(x,null,2));
-}
-
-function markAttendance(){
- navigator.geolocation.getCurrentPosition(p=>{
-   post({
-     action:"markStaffAttendance",
-     email,
-     role:"FACULTY",
-     latitude:p.coords.latitude,
-     longitude:p.coords.longitude,
-     room:"CLASS"
-   });
- });
-}
-
-function createSession(){
- post({
-   action:"createSession",
-   subjectId:sub.value,
-   facultyEmail:email,
-   startTime:st.value,
-   endTime:et.value,
-   locationId:loc.value
- });
+if(localStorage.getItem("role")!=="faculty"){
+  alert("Unauthorized");
+  location.href="index.html";
 }
 </script>
+
+<h2>🌱 GO GREEN – Faculty Dashboard</h2>
+<button onclick="logout()">Logout</button>
+
+<hr>
+
+<h3>1️⃣ Mark My Attendance</h3>
+<button onclick="startCamera()">Mark Attendance</button>
+
+<div id="cam" style="display:none">
+  <video id="video" autoplay width="260"></video><br>
+  <button onclick="captureAttendance()">Capture</button>
+</div>
+<canvas id="canvas" width="260" height="200" style="display:none"></canvas>
+
+<hr>
+
+<h3>2️⃣ Generate QR (After Attendance)</h3>
+<select id="subject">
+  <option value="">Select Subject</option>
+</select>
+<button id="qrBtn" onclick="generateQR()" disabled>Generate QR</button>
+
+<div id="qrBox"></div>
+
+<script>
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const email=localStorage.getItem("email");
+let stream=null;
+
+function logout(){localStorage.clear();location.href="index.html";}
+
+function post(data){
+  return fetch(API,{
+    method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+/* -------- ATTENDANCE -------- */
+function startCamera(){
+  cam.style.display="block";
+  navigator.mediaDevices.getUserMedia({video:true})
+    .then(s=>{stream=s;video.srcObject=s});
+}
+
+function captureAttendance(){
+  canvas.getContext("2d").drawImage(video,0,0,260,200);
+
+  navigator.geolocation.getCurrentPosition(pos=>{
+    post({
+      action:"markStaffAttendance",
+      email,
+      role:"FACULTY",
+      latitude:pos.coords.latitude,
+      longitude:pos.coords.longitude
+    }).then(r=>{
+      alert(r.message);
+      if(r.success){
+        qrBtn.disabled=false;
+        loadSubjects();
+      }
+      stopCamera();
+    });
+  });
+}
+
+function stopCamera(){
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  cam.style.display="none";
+}
+
+/* -------- QR -------- */
+function loadSubjects(){
+  post({action:"getSubjects"}).then(r=>{
+    r.data.slice(1).forEach(s=>{
+      subject.innerHTML+=`<option value="${s[0]}">${s[1]}</option>`;
+    });
+  });
+}
+
+function generateQR(){
+  const sub=subject.value;
+  if(!sub) return alert("Select subject");
+
+  post({
+    action:"createFacultySession",
+    subjectId:sub,
+    facultyEmail:email
+  }).then(r=>{
+    if(!r.success) return alert(r.message);
+
+    qrBox.innerHTML=`
+      <h4>QR valid for 5 minutes</h4>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">
+    `;
+  });
+}
+</script>
+
 </body>
 </html>
