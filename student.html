@@ -118,7 +118,7 @@ function startQrScan(){
 /* ---------- FACE CAMERA ---------- */
 function openFaceCamera(){
   faceCam.style.display="block";
-
+alert("🔴 Liveness Check: Blink twice and smile before capture");
   navigator.mediaDevices.getUserMedia({video:true})
     .then(s=>{
       stream = s;
@@ -195,6 +195,10 @@ document.addEventListener("visibilitychange",()=>{
     screen.height +
     Intl.DateTimeFormat().resolvedOptions().timeZone
   );
+}
+body{
+  user-select:none;
+  -webkit-user-select:none;
 }
 
 </script>
