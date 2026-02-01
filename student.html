@@ -154,22 +154,27 @@ function stopCam(){
 
 /* ---------- VIEW ATTENDANCE ---------- */
 function viewAttendance(){
-  post({action:"getMyAttendance",email})
-  .then(r=>{
+  post({
+    action:"getMyStudentAttendance",
+    email
+  }).then(r=>{
+
     attBody.innerHTML="";
+
     r.data.forEach(x=>{
-      attBody.innerHTML+=`
+      attBody.innerHTML += `
       <tr>
         <td>${new Date(x[0]).toLocaleDateString()}</td>
         <td>${x[2]}</td>
-        <td>${x[6]}</td>
-        <td>${new Date(x[8]).toLocaleTimeString()}</td>
+        <td>${x[4]}</td>
+        <td>${new Date(x[5]).toLocaleTimeString()}</td>
       </tr>`;
     });
+
     attTable.style.display="table";
   });
 }
-
+  
 /* ---------- SCREENSHOT DETER ---------- */
 document.addEventListener("visibilitychange",()=>{
   if(document.hidden){
