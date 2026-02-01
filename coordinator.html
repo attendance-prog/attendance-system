@@ -4,26 +4,54 @@
 <meta charset="UTF-8">
 <title>GO GREEN – Coordinator Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 <style>
-body{font-family:Arial;background:#f4fff4;padding:20px}
+body{
+ font-family:Arial;
+ padding:20px;
+ background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+}
 h2{color:#2e7d32}
-button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px;cursor:pointer}
-input,select{padding:6px;margin:4px}
+button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px}
 table{border-collapse:collapse;width:100%}
 th,td{border:1px solid #ccc;padding:6px}
+
+#welcomeBar{
+ background:#1b5e20;
+ color:white;
+ padding:12px;
+ border-radius:8px;
+ margin-bottom:15px;
+}
+
+#toast{
+ position:fixed;
+ bottom:20px;
+ right:20px;
+ background:#1b5e20;
+ color:white;
+ padding:10px 16px;
+ border-radius:6px;
+ display:none;
+}
 </style>
 </head>
 
 <body>
 
 <script>
-(() => {
-  if(localStorage.getItem("role")!=="coordinator"){
-    alert("Unauthorized");
-    location.href="index.html";
-  }
-})();
+if(localStorage.getItem("role")!=="coordinator"){
+ alert("Unauthorized");
+ location.href="index.html";
+}
 </script>
+
+<div id="welcomeBar"></div>
 
 <h2>🌱 GO GREEN – Coordinator Dashboard</h2>
 <button onclick="logout()">Logout</button>
@@ -35,9 +63,10 @@ th,td{border:1px solid #ccc;padding:6px}
 <button onclick="viewMyAttendance()">View My Attendance</button>
 
 <div id="cam" style="display:none">
-  <video id="video" autoplay width="260"></video><br>
-  <button onclick="capture()">Capture</button>
+<video id="video" autoplay width="260"></video><br>
+<button onclick="capture()">Capture</button>
 </div>
+
 <canvas id="canvas" width="260" height="200" style="display:none"></canvas>
 
 <table id="attTable" style="display:none">
@@ -48,133 +77,169 @@ th,td{border:1px solid #ccc;padding:6px}
 <hr>
 
 <h3>Faculty Timetable (View Only)</h3>
+<button onclick="loadTimetable()">🔄 Refresh</button>
+
 <table>
 <thead>
 <tr>
-  <th>Day</th>
-  <th>Subject ID</th>
-  <th>Faculty Email</th>
-  <th>Room</th>
-  <th>Action</th>
+<th>Day</th>
+<th>Subject</th>
+<th>Faculty</th>
+<th>Room</th>
+<th>Action</th>
 </tr>
 </thead>
 <tbody id="ttBody"></tbody>
 </table>
+
+<hr>
+
+<h3>📊 Lecture Assist Analytics</h3>
+<canvas id="assistChart"></canvas>
+
+<hr>
+
+<h3>🗺 Attendance Map</h3>
+<div id="map" style="height:300px"></div>
+
+<div id="toast"></div>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email=localStorage.getItem("email");
 let stream=null;
 
-function logout(){localStorage.clear();location.href="index.html"}
-function post(data) {
-  return fetch(API, {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8"
-    },
-    body: JSON.stringify(data)
-  }).then(r => r.json());
+/* ===== utils ===== */
+function post(d){
+ return fetch(API,{
+  method:"POST",
+  headers:{"Content-Type":"text/plain"},
+  body:JSON.stringify(d)
+ }).then(r=>r.json());
 }
-/* OWN ATTENDANCE */
+
+function toast(m){
+ toastBox.innerText=m;
+ toastBox.style.display="block";
+ setTimeout(()=>toastBox.style.display="none",2500);
+}
+const toastBox=document.getElementById("toast");
+
+function logout(){localStorage.clear();location.href="index.html"}
+
+/* ===== greeting ===== */
+const name=localStorage.getItem("name")||email.split("@")[0];
+const hr=new Date().getHours();
+const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
+welcomeBar.innerHTML=`${g}, ${name} 👋 | Role: Coordinator`;
+
+/* ===== camera ===== */
 function startCamera(){
-  cam.style.display="block";
-  navigator.mediaDevices.getUserMedia({video:true}).then(s=>{
-    stream=s;video.srcObject=s;
-  });
+ cam.style.display="block";
+ navigator.mediaDevices.getUserMedia({video:true})
+ .then(s=>{stream=s;video.srcObject=s});
 }
 
 function capture(){
-  canvas.getContext("2d").drawImage(video,0,0,260,200);
-  navigator.geolocation.getCurrentPosition(pos=>{
-    post({
-      action:"markCoordinatorAttendance",
-      email,
-      latitude:pos.coords.latitude,
-      longitude:pos.coords.longitude
-    }).then(r=>{
-      alert(r.message);
-      stream.getTracks().forEach(t=>t.stop());
-      cam.style.display="none";
-    });
-  });
+ canvas.getContext("2d").drawImage(video,0,0,260,200);
+ navigator.geolocation.getCurrentPosition(pos=>{
+   post({
+     action:"markCoordinatorAttendance",
+     email,
+     latitude:pos.coords.latitude,
+     longitude:pos.coords.longitude
+   }).then(r=>{
+     toast(r.message);
+     stopCamera();
+   });
+ });
 }
 
+function stopCamera(){
+ if(stream){stream.getTracks().forEach(t=>t.stop())}
+ cam.style.display="none";
+}
+
+/* ===== attendance view ===== */
 function viewMyAttendance(){
-  post({action:"getMyAttendance",email}).then(r=>{
-    attBody.innerHTML="";
-    r.data.forEach(x=>{
-      attBody.innerHTML+=`
-      <tr>
-        <td>${new Date(x[0]).toLocaleDateString()}</td>
-        <td>${x[6]}</td>
-        <td>${new Date(x[8]).toLocaleTimeString()}</td>
-      </tr>`;
-    });
-    attTable.style.display="table";
-  });
+ post({action:"getMyAttendance",email}).then(r=>{
+   attBody.innerHTML="";
+   r.data.forEach(x=>{
+     attBody.innerHTML+=`
+     <tr>
+       <td>${new Date(x[0]).toLocaleDateString()}</td>
+       <td>${x[6]}</td>
+       <td>${new Date(x[8]).toLocaleTimeString()}</td>
+     </tr>`;
+   });
+   attTable.style.display="table";
+ });
 }
 
-/* FACULTY TIMETABLE */
+/* ===== timetable ===== */
 function loadTimetable(){
-  post({action:"getFacultyTimetable"}).then(r=>{
-    ttBody.innerHTML="";
-    r.data.forEach(x=>{
-      ttBody.innerHTML+=`
-      <tr>
-        <td>${x[0]}</td>
-        <td>${x[1]}</td>
-        <td>${x[2]}</td>
-        <td>${x[4]}</td>
-        <td>
-         <button onclick="takeLecture('${x[1]}','${x[2]}')">
-  Take Lecture
-</button>
-</td>
-      </tr>`;
-    });
-  });
+ post({action:"getFacultyTimetable"}).then(r=>{
+   ttBody.innerHTML="";
+   r.data.forEach(x=>{
+     ttBody.innerHTML+=`
+     <tr>
+       <td>${x[0]}</td>
+       <td>${x[1]}</td>
+       <td>${x[2]}</td>
+       <td>${x[4]}</td>
+       <td>
+       <button onclick="takeLecture('${x[1]}','${x[2]}')">
+       Take Lecture
+       </button>
+       </td>
+     </tr>`;
+   });
+ });
 }
-
-function takeLecture(subject, faculty) {
-  if (!confirm("Faculty absent? Take lecture as coordinator?")) return;
-
-  navigator.geolocation.getCurrentPosition(pos => {
-    post({
-  action: "coordinatorTakeLecture",
-  subject: subject,
-  faculty: faculty,
-  coordinator: localStorage.getItem("email"),
-  assist: true,
-  room: "CLASSROOM",        // 🔑 ADD THIS
-  latitude: pos.coords.latitude,
-  longitude: pos.coords.longitude
-})
-
-    .then(res => {
-      if (!res.success) {
-        alert("❌ " + res.message);
-      } else {
-        alert("✅ " + res.message);
-      }
-    })
-    .catch(err => {
-      alert("Network error");
-      console.error(err);
-    });
-  }, () => alert("GPS permission denied"));
-}
-
-
 loadTimetable();
-  function stopCamera(){
-  if (stream) {
-    stream.getTracks().forEach(t => t.stop());
-    stream = null;
-  }
-  cam.style.display = "none";
+
+/* ===== take lecture ===== */
+function takeLecture(subject,faculty){
+ if(!confirm("Take lecture as coordinator?")) return;
+
+ navigator.geolocation.getCurrentPosition(pos=>{
+   post({
+     action:"coordinatorTakeLecture",
+     subject,
+     faculty,
+     coordinator:email,
+     assist:true,
+     room:"CLASSROOM",
+     latitude:pos.coords.latitude,
+     longitude:pos.coords.longitude
+   }).then(r=>{
+     toast(r.message);
+   });
+ });
 }
 
+/* ===== analytics ===== */
+post({action:"getAssistAnalytics"}).then(r=>{
+ new Chart(assistChart,{
+   type:"bar",
+   data:{
+     labels:Object.keys(r.data||{}),
+     datasets:[{data:Object.values(r.data||{})}]
+   }
+ });
+});
+
+/* ===== map ===== */
+const map=L.map("map").setView([28.47,77.48],16);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+.addTo(map);
+
+post({action:"getGpsPoints"}).then(r=>{
+ (r.points||[]).forEach(p=>{
+   L.marker([p.lat,p.lng]).addTo(map)
+   .bindPopup(p.email);
+ });
+});
 </script>
 
 </body>
