@@ -101,11 +101,12 @@ function startQrScan(){
 
   qrScanner = new Html5Qrcode("qr-reader");
 
-  qrScanner.start(
-    { facingMode: { exact:"environment" } },
-    { fps:10, qrbox:250 },
-    text=>{
-      sessionId = text;
+text=>{
+   const parts = text.split("|");   // QR payload
+   sessionId = parts[0];
+   signature = parts[1] || "";
+   subjectId = parts[2] || "";
+
       qrScanner.stop();
       document.getElementById("scanner").style.display="none";
       openFaceCamera();
@@ -195,10 +196,6 @@ document.addEventListener("visibilitychange",()=>{
     screen.height +
     Intl.DateTimeFormat().resolvedOptions().timeZone
   );
-}
-body{
-  user-select:none;
-  -webkit-user-select:none;
 }
 
 </script>
