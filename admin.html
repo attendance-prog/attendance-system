@@ -5,13 +5,19 @@
 <title>GO GREEN – Admin Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body { font-family: Arial; background:#f4fff4; padding:20px; }
+  body{
+  font-family:Arial;
+  padding:20px;
+  background:
+    linear-gradient(135deg,#e8f5e9,#c8e6c9);
+}
   h2 { color:#2e7d32; }
   section { margin-bottom: 30px; }
   input, button { padding:8px; margin:4px; }
   button { background:#2e7d32; color:#fff; border:none; cursor:pointer; }
   table { border-collapse: collapse; width: 100%; }
   th, td { border:1px solid #ccc; padding:6px; text-align:left; }
+<h3 id="welcomeBar"></h3>
 </style>
 </head>
 
@@ -227,6 +233,16 @@ function loadStudents() {
 /* Load panels on page load */
 loadFaculty();
 loadStudents();
+  const name = localStorage.getItem("name") || "User";
+const role = localStorage.getItem("role") || "";
+
+const hr = new Date().getHours();
+let greet = hr<12?"Good Morning":
+            hr<18?"Good Afternoon":"Good Evening";
+
+document.getElementById("welcomeBar").innerHTML =
+  `${greet}, ${name} 👋 <br><small>Role: ${role.toUpperCase()}</small>`;
+
 </script>
 
 </body>
