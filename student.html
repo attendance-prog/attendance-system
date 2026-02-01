@@ -133,19 +133,26 @@ function openFaceCamera(){
 function captureFace(){
   canvas.getContext("2d").drawImage(video,0,0,260,200);
 
+  const faceImage = canvas.toDataURL("image/png");
+
   navigator.geolocation.getCurrentPosition(pos=>{
     post({
       action:"markStudentAttendance",
-      email,
-      sessionId,
-      latitude:pos.coords.latitude,
-      longitude:pos.coords.longitude
+      email: email,
+      sessionId: sessionId,
+      subjectId: subjectId,
+      signature: signature,   // from QR payload
+      deviceId: getDeviceId(),
+      faceImage: faceImage,
+      latitude: pos.coords.latitude,
+      longitude: pos.coords.longitude
     }).then(r=>{
       alert(r.message);
       stopCam();
     });
   });
 }
+
 
 function stopCam(){
   if(stream) stream.getTracks().forEach(t=>t.stop());
@@ -181,6 +188,15 @@ document.addEventListener("visibilitychange",()=>{
     document.body.innerHTML="<h2>⚠️ Screenshot not allowed</h2>";
   }
 });
+  function getDeviceId(){
+  return btoa(
+    navigator.userAgent +
+    screen.width +
+    screen.height +
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
+}
+
 </script>
 
 </body>
