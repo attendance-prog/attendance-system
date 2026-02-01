@@ -4,245 +4,212 @@
 <meta charset="UTF-8">
 <title>GO GREEN – Admin Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 <style>
-  body{
+body{
   font-family:Arial;
   padding:20px;
-  background:
-    linear-gradient(135deg,#e8f5e9,#c8e6c9);
+  background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
 }
-  h2 { color:#2e7d32; }
-  section { margin-bottom: 30px; }
-  input, button { padding:8px; margin:4px; }
-  button { background:#2e7d32; color:#fff; border:none; cursor:pointer; }
-  table { border-collapse: collapse; width: 100%; }
-  th, td { border:1px solid #ccc; padding:6px; text-align:left; }
-<h3 id="welcomeBar"></h3>
+
+h2{color:#2e7d32}
+section{margin-bottom:30px}
+input,select,button{padding:8px;margin:4px}
+button{background:#2e7d32;color:#fff;border:none;cursor:pointer}
+
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid #ccc;padding:6px}
+
+#welcomeBar{
+  background:#1b5e20;
+  color:white;
+  padding:12px;
+  border-radius:8px;
+  margin-bottom:15px;
+}
+
+/* toast */
+#toast{
+ position:fixed;
+ bottom:20px;
+ right:20px;
+ background:#1b5e20;
+ color:#fff;
+ padding:10px 16px;
+ border-radius:6px;
+ display:none;
+}
 </style>
 </head>
 
 <body>
 
-<!-- 🔒 LOGIN GUARD -->
-<script>
-(function () {
-  const email = localStorage.getItem("email");
-  const role  = localStorage.getItem("role");
-  if (!email || role !== "admin") {
-    alert("Unauthorized access. Please login.");
-    window.location.href = "index.html";
-  }
-})();
-</script>
+<div id="welcomeBar"></div>
 
 <h2>🌱 GO GREEN – Admin Dashboard</h2>
 <button onclick="logout()">Logout</button>
 
-<!-- ================= ATTENDANCE ================= -->
+<!-- ================= ANALYTICS ================= -->
 <section>
-  <h3>My Attendance</h3>
-  <button onclick="markMyAttendance()">Mark My Attendance</button>
-  <button onclick="viewMyAttendance()">View My Attendance</button>
-
-  <!-- Camera -->
-  <div id="cameraSection" style="display:none; margin-top:15px;">
-    <video id="video" width="260" autoplay></video><br><br>
-    <button onclick="captureAndMark()">Capture Attendance</button>
-  </div>
-
-  <canvas id="canvas" width="260" height="200" style="display:none;"></canvas>
-
-  <!-- Attendance Table -->
-  <div id="myAttendanceSection" style="display:none; margin-top:20px;">
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Status</th>
-          <th>Time</th>
-        </tr>
-      </thead>
-      <tbody id="myAttendanceBody"></tbody>
-    </table>
-  </div>
+<h3>📊 Attendance Analytics</h3>
+<canvas id="subjectChart"></canvas>
 </section>
 
-<!-- ================= FACULTY PANEL ================= -->
+<!-- ================= MAP ================= -->
 <section>
-  <h3>Faculty Panel (View Only)</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody id="facultyBody"></tbody>
-  </table>
+<h3>🗺 Attendance GPS Map</h3>
+<div id="map" style="height:350px"></div>
 </section>
 
-<!-- ================= STUDENT PANEL ================= -->
+<!-- ================= ROLE CONTROL ================= -->
 <section>
-  <h3>Student Panel (View Only)</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Roll No</th>
-        <th>Name</th>
-        <th>Email</th>
-      </tr>
-    </thead>
-    <tbody id="studentBody"></tbody>
-  </table>
+<h3>👑 Role Control Panel</h3>
+<input id="roleEmail" placeholder="User Email">
+<select id="roleSel">
+<option>student</option>
+<option>faculty</option>
+<option>hod</option>
+<option>admin</option>
+<option>coordinator</option>
+</select>
+<button onclick="updateRole()">Update Role</button>
 </section>
 
-<!-- ================= LOCATION ================= -->
+<!-- ================= EXPORT ================= -->
 <section>
-  <h3>Add Location</h3>
-  <input id="room" placeholder="Room No">
-  <input id="lat" placeholder="Latitude">
-  <input id="lng" placeholder="Longitude">
-  <input id="rad" placeholder="Radius">
-  <button onclick="addLocation()">Add</button>
+<h3>📁 Export</h3>
+<button onclick="exportCSV()">Export Student Attendance CSV</button>
 </section>
 
-<!-- ================= SUBJECT ================= -->
+<!-- ================= RISK ================= -->
 <section>
-  <h3>Add Subject</h3>
-  <input id="sid" placeholder="Subject ID">
-  <input id="sname" placeholder="Subject Name">
-  <input id="dept" placeholder="Department">
-  <input id="sem" placeholder="Semester">
-  <button onclick="addSubject()">Add</button>
+<h3>⚠ Risk Students (&lt;75%)</h3>
+<button onclick="loadRisk()">Check Risk List</button>
+<ul id="riskList"></ul>
 </section>
+
+<div id="toast"></div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-const email = localStorage.getItem("email");
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const email=localStorage.getItem("email");
 
-/* -------- LOGOUT -------- */
-function logout() {
-  localStorage.clear();
-  location.href = "index.html";
+/* ========= UTIL ========= */
+function post(data){
+ return fetch(API,{
+  method:"POST",
+  headers:{"Content-Type":"text/plain"},
+  body:JSON.stringify(data)
+ }).then(r=>r.json());
 }
 
-/* -------- CAMERA ATTENDANCE -------- */
-let stream = null;
-
-function markMyAttendance() {
-  document.getElementById("cameraSection").style.display = "block";
-  navigator.mediaDevices.getUserMedia({ video:true })
-    .then(s => {
-      stream = s;
-      video.srcObject = s;
-    })
-    .catch(() => alert("Camera permission denied"));
+function toast(msg){
+ const t=document.getElementById("toast");
+ t.innerText=msg;
+ t.style.display="block";
+ setTimeout(()=>t.style.display="none",3000);
 }
 
-function captureAndMark() {
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-  navigator.geolocation.getCurrentPosition(pos => {
-    fetch(API_URL, {
-      method:"POST",
-      body:JSON.stringify({
-        action:"markStaffAttendance",
-        email: email,
-        role:"ADMIN",
-        latitude: pos.coords.latitude,
-        longitude: pos.coords.longitude
-      })
-    })
-    .then(r=>r.json())
-    .then(() => {
-      alert("✅ Attendance marked successfully");
-      stopCamera();
-    });
-  });
+function logout(){
+ localStorage.clear();
+ location.href="index.html";
 }
 
-function stopCamera() {
-  if (stream) stream.getTracks().forEach(t=>t.stop());
-  stream = null;
-  cameraSection.style.display="none";
-}
-
-/* -------- VIEW MY ATTENDANCE -------- */
-function viewMyAttendance() {
-  fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify({ action:"getMyAttendance", email })
-  })
-  .then(r=>r.json())
-  .then(res=>{
-    myAttendanceBody.innerHTML="";
-    res.data.forEach(r=>{
-      myAttendanceBody.innerHTML += `
-        <tr>
-          <td>${new Date(r[0]).toLocaleDateString()}</td>
-          <td>${r[6]}</td>
-          <td>${new Date(r[8]).toLocaleTimeString()}</td>
-        </tr>`;
-    });
-    myAttendanceSection.style.display="block";
-  });
-}
-
-/* -------- FACULTY -------- */
-function loadFaculty() {
-  fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify({ action:"getFaculty" })
-  })
-  .then(r=>r.json())
-  .then(res=>{
-    facultyBody.innerHTML="";
-    res.data.forEach(r=>{
-      facultyBody.innerHTML += `
-        <tr>
-          <td>${r[2]}</td>
-          <td>${r[1]}</td>
-          <td>${r[3]}</td>
-        </tr>`;
-    });
-  });
-}
-
-/* -------- STUDENTS -------- */
-function loadStudents() {
-  fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify({ action:"getStudents" })
-  })
-  .then(r=>r.json())
-  .then(res=>{
-    studentBody.innerHTML="";
-    res.data.forEach(r=>{
-      studentBody.innerHTML += `
-        <tr>
-          <td>${r[0]}</td>
-          <td>${r[1]}</td>
-          <td>${r[2]}</td>
-        </tr>`;
-    });
-  });
-}
-
-/* Load panels on page load */
-loadFaculty();
-loadStudents();
-  const name = localStorage.getItem("name") || "User";
-const role = localStorage.getItem("role") || "";
-
+/* ========= GREETING ========= */
+const name = localStorage.getItem("name") || email.split("@")[0];
+const role = localStorage.getItem("role");
 const hr = new Date().getHours();
-let greet = hr<12?"Good Morning":
-            hr<18?"Good Afternoon":"Good Evening";
+const greet = hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
 
-document.getElementById("welcomeBar").innerHTML =
-  `${greet}, ${name} 👋 <br><small>Role: ${role.toUpperCase()}</small>`;
+welcomeBar.innerHTML =
+ `${greet}, ${name} 👋 | Role: ${role.toUpperCase()}`;
 
+/* ========= ANALYTICS CHART ========= */
+function loadAnalytics(){
+ post({action:"getAnalytics"}).then(r=>{
+   const labels=Object.keys(r.subject);
+   const values=Object.values(r.subject);
+
+   new Chart(subjectChart,{
+     type:"bar",
+     data:{
+       labels,
+       datasets:[{
+         label:"Attendance Count",
+         data:values
+       }]
+     }
+   });
+ });
+}
+loadAnalytics();
+
+/* ========= MAP ========= */
+function loadMap(){
+ const map=L.map("map").setView([28.47,77.48],16);
+
+ L.tileLayer(
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+ ).addTo(map);
+
+ post({action:"getGpsPoints"}).then(r=>{
+   r.points.forEach(p=>{
+     L.marker([p.lat,p.lng])
+      .addTo(map)
+      .bindPopup(p.email);
+   });
+ });
+}
+loadMap();
+
+/* ========= ROLE UPDATE ========= */
+function updateRole(){
+ post({
+  action:"adminUpdateRole",
+  email:roleEmail.value,
+  role:roleSel.value
+ }).then(()=>toast("Role updated"));
+}
+
+/* ========= EXPORT CSV ========= */
+function exportCSV(){
+ post({action:"getStudents"}).then(r=>{
+   let csv="Roll,Email\n";
+   r.data.forEach(x=>{
+     csv+=x.join(",")+"\n";
+   });
+
+   const blob=new Blob([csv]);
+   const a=document.createElement("a");
+   a.href=URL.createObjectURL(blob);
+   a.download="students.csv";
+   a.click();
+ });
+}
+
+/* ========= RISK LIST ========= */
+function loadRisk(){
+ post({action:"getStudents"}).then(r=>{
+   riskList.innerHTML="";
+   r.data.forEach(st=>{
+     post({
+       action:"getStudentPercent",
+       email:st[1]
+     }).then(p=>{
+       if(p.percent<75){
+         riskList.innerHTML+=
+           `<li>${st[1]} — ${p.percent}%</li>`;
+       }
+     });
+   });
+ });
+}
 </script>
 
 </body>
