@@ -4,12 +4,38 @@
 <meta charset="UTF-8">
 <title>GO GREEN – Faculty</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-body{font-family:Arial;background:#f4fff4;padding:20px}
+body{
+ font-family:Arial;
+ padding:20px;
+ background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+}
 h2{color:#2e7d32}
-button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px;cursor:pointer}
+button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px}
 button:disabled{background:#999}
 video{border:1px solid #ccc}
+
+#welcomeBar{
+ background:#1b5e20;
+ color:white;
+ padding:12px;
+ border-radius:8px;
+ margin-bottom:15px;
+}
+
+#toast{
+ position:fixed;
+ bottom:20px;
+ right:20px;
+ background:#1b5e20;
+ color:white;
+ padding:10px 16px;
+ border-radius:6px;
+ display:none;
+}
 </style>
 </head>
 
@@ -17,10 +43,12 @@ video{border:1px solid #ccc}
 
 <script>
 if(localStorage.getItem("role")!=="faculty"){
-  alert("Unauthorized");
-  location.href="index.html";
+ alert("Unauthorized");
+ location.href="index.html";
 }
 </script>
+
+<div id="welcomeBar"></div>
 
 <h2>🌱 GO GREEN – Faculty Dashboard</h2>
 <button onclick="logout()">Logout</button>
@@ -29,7 +57,7 @@ if(localStorage.getItem("role")!=="faculty"){
 
 <h3>1️⃣ Mark My Attendance</h3>
 <button onclick="startCamera()">Mark Attendance</button>
-  <button onclick="viewMyAttendance()">View My Attendance</button>
+<button onclick="viewMyAttendance()">View My Attendance</button>
 
 <div id="cam" style="display:none;margin-top:10px">
   <video id="video" width="260" autoplay playsinline></video><br><br>
@@ -37,191 +65,204 @@ if(localStorage.getItem("role")!=="faculty"){
 </div>
 
 <canvas id="canvas" width="260" height="200" style="display:none"></canvas>
-  <table id="attTable" style="display:none;margin-top:15px" border="1" cellpadding="6">
-  <thead>
-    <tr>
-      <th>Date</th>
-      <th>Status</th>
-      <th>Time</th>
-    </tr>
-  </thead>
-  <tbody id="attBody"></tbody>
+
+<table id="attTable" style="display:none;margin-top:15px" border="1">
+<thead>
+<tr><th>Date</th><th>Status</th><th>Time</th></tr>
+</thead>
+<tbody id="attBody"></tbody>
 </table>
+
 <hr>
 
-<h3>2️⃣ Generate QR (After Attendance)</h3>
+<h3>2️⃣ Generate QR Session</h3>
+
+<button onclick="loadSubjects()">🔄 Refresh Subjects</button>
+
 <select id="subject">
-  <option value="">Select Subject</option>
+<option value="">Select Subject</option>
 </select>
-<button id="qrBtn" onclick="generateQR()" disabled>Generate QR</button>
+
+<br><br>
+
+<label>Topic Covered:</label><br>
+<input id="topic" placeholder="Topic taught today"><br>
+
+<label>Notes Link:</label><br>
+<input id="notes" placeholder="Drive link (optional)"><br>
+
+<button id="qrBtn" onclick="generateQR()" disabled>
+Generate QR
+</button>
 
 <div id="qrBox"></div>
+<div id="qrTimer"></div>
+
+<hr>
+
+<h3>📊 My Attendance Trend</h3>
+<canvas id="attChart"></canvas>
+
+<div id="toast"></div>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email=localStorage.getItem("email");
 let stream=null;
+let qrCountdown=null;
 
-function logout(){localStorage.clear();location.href="index.html";}
-
-function post(data){
-  return fetch(API,{
-    method:"POST",
-    headers:{"Content-Type":"text/plain;charset=utf-8"},
-    body:JSON.stringify(data)
-  }).then(r=>r.json());
+/* ===== utils ===== */
+function post(d){
+ return fetch(API,{
+  method:"POST",
+  headers:{"Content-Type":"text/plain"},
+  body:JSON.stringify(d)
+ }).then(r=>r.json());
 }
 
-/* -------- ATTENDANCE -------- */
+function toast(m){
+ toastBox.innerText=m;
+ toastBox.style.display="block";
+ setTimeout(()=>toastBox.style.display="none",2500);
+}
+const toastBox=document.getElementById("toast");
+
+function logout(){
+ localStorage.clear();
+ location.href="index.html";
+}
+
+/* ===== greeting ===== */
+const name=localStorage.getItem("name")||email.split("@")[0];
+const hr=new Date().getHours();
+const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
+welcomeBar.innerHTML=`${g}, ${name} 👋 | Faculty Portal`;
+
+/* ===== camera ===== */
 function startCamera(){
-  document.getElementById("cam").style.display="block";
-alert("🔴 Liveness Check: Move head slightly then capture");
-  navigator.mediaDevices.getUserMedia({ video:true })
-    .then(s=>{
-      stream=s;
-      const v=document.getElementById("video");
-      v.srcObject=s;
-      v.play();               // 🔑 REQUIRED
-    })
-    .catch(()=>{
-      alert("Camera permission denied");
-    });
+ cam.style.display="block";
+ navigator.mediaDevices.getUserMedia({video:true})
+ .then(s=>{
+   stream=s;
+   video.srcObject=s;
+   video.play();
+ });
 }
-
 
 function captureAttendance(){
-  const v=document.getElementById("video");
-  const c=document.getElementById("canvas");
+ if(!video.srcObject){
+  toast("Camera not started");
+  return;
+ }
 
-  if(!v.srcObject){
-    alert("Camera not started");
-    return;
-  }
+ canvas.getContext("2d").drawImage(video,0,0,260,200);
 
-  c.getContext("2d").drawImage(v,0,0,260,200);
-
-  navigator.geolocation.getCurrentPosition(pos=>{
-    post({
-      action:"markStaffAttendance",
-      email: email,
-      role: "FACULTY",
-      latitude: pos.coords.latitude,
-      longitude: pos.coords.longitude,
-      room: "CLASSROOM"
-    })
-    .then(r=>{
-      alert(r.success ? "✅ Attendance marked" : "❌ "+r.message);
-      if(r.success){
-        qrBtn.disabled=false;
-        loadSubjects();
-      }
-      stopCamera();
-    })
-    .catch(()=>{
-      alert("Network error");
-      stopCamera();
-    });
-  },()=>{
-  alert("GPS permission denied");
-  stopCamera();
-});
-
+ navigator.geolocation.getCurrentPosition(pos=>{
+   post({
+     action:"markStaffAttendance",
+     email,
+     role:"FACULTY",
+     latitude:pos.coords.latitude,
+     longitude:pos.coords.longitude,
+     room:"CLASSROOM"
+   }).then(r=>{
+     toast(r.success?"Attendance marked":"❌ "+r.message);
+     if(r.success){
+       qrBtn.disabled=false;
+       loadSubjects();
+     }
+     stopCamera();
+   });
+ });
 }
 
 function stopCamera(){
-  if(stream){
-    stream.getTracks().forEach(t=>t.stop());
-    stream=null;
-  }
-  document.getElementById("cam").style.display="none";
+ if(stream){stream.getTracks().forEach(t=>t.stop())}
+ cam.style.display="none";
 }
 
+/* ===== attendance table ===== */
+function viewMyAttendance(){
+ post({action:"getMyAttendance",email})
+ .then(r=>{
+   attBody.innerHTML="";
+   r.data.forEach(x=>{
+     attBody.innerHTML+=`
+     <tr>
+       <td>${new Date(x[0]).toLocaleDateString()}</td>
+       <td>${x[6]}</td>
+       <td>${new Date(x[8]).toLocaleTimeString()}</td>
+     </tr>`;
+   });
+   attTable.style.display="table";
+   drawChart(r.data);
+ });
+}
 
-/* -------- QR -------- */
+/* ===== subjects ===== */
 function loadSubjects(){
-
-  post({action:"getSubjects"})
-  .then(r=>{
-
-    if(!r.success){
-      alert("Subjects load failed");
-      return;
-    }
-
-    const sel = document.getElementById("subject");
-
-    // reset dropdown
-    sel.innerHTML = `<option value="">Select Subject</option>`;
-
-    r.data.forEach(s=>{
-      sel.innerHTML += `<option value="${s[0]}">${s[1]}</option>`;
-    });
-
-  })
-  .catch(()=>{
-    alert("Subject fetch network error");
-  });
+ post({action:"getSubjects"}).then(r=>{
+   subject.innerHTML=`<option value="">Select Subject</option>`;
+   r.data.forEach(s=>{
+     subject.innerHTML+=`<option value="${s[0]}">${s[1]}</option>`;
+   });
+ });
 }
 
+/* ===== QR ===== */
 function generateQR(){
-  const sub = subject.value;
-  if(!sub) return alert("Select subject");
+ const sub=subject.value;
+ if(!sub) return toast("Select subject");
 
-  navigator.geolocation.getCurrentPosition(pos => {
+ navigator.geolocation.getCurrentPosition(pos=>{
+   post({
+     action:"createFacultySession",
+     subjectId:sub,
+     facultyEmail:email,
+     latitude:pos.coords.latitude,
+     longitude:pos.coords.longitude,
+     room:"CLASSROOM",
+     topic:topic.value,
+     notes:notes.value
+   }).then(r=>{
+     if(!r.success) return toast(r.message);
 
-    post({
-      action:"createFacultySession",
-      subjectId: sub,
-      facultyEmail: email,
-      latitude: pos.coords.latitude,
-      longitude: pos.coords.longitude,
-      room: "CLASSROOM"
-    })
-    .then(r=>{
-      if(!r.success) return alert(r.message);
+     qrBox.innerHTML=`
+       <h4>QR valid 5 minutes</h4>
+       <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">
+     `;
 
-      qrBox.innerHTML = `
-        <h4>QR valid for 5 minutes</h4>
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">
-      `;
-    });
-
-  }, ()=> alert("GPS permission denied"));
+     startQrTimer(300);
+   });
+ });
 }
 
-  function viewMyAttendance(){
-  post({
-    action:"getMyAttendance",
-    email: email
-  }).then(r=>{
-    if(!r.success || r.data.length===0){
-      alert("No attendance found");
-      return;
-    }
-
-    attBody.innerHTML="";
-    r.data.forEach(x=>{
-      attBody.innerHTML+=`
-        <tr>
-          <td>${new Date(x[0]).toLocaleDateString()}</td>
-          <td>${x[6]}</td>
-          <td>${new Date(x[8]).toLocaleTimeString()}</td>
-        </tr>`;
-    });
-
-    attTable.style.display="table";
-  })
-  .catch(()=>alert("Network error"));
-}
-function getDeviceId(){
-  return btoa(
-    navigator.userAgent +
-    screen.width +
-    screen.height +
-    Intl.DateTimeFormat().resolvedOptions().timeZone
-  );
+/* ===== QR TIMER ===== */
+function startQrTimer(sec){
+ clearInterval(qrCountdown);
+ qrCountdown=setInterval(()=>{
+   sec--;
+   qrTimer.innerText="Expires in "+sec+" sec";
+   if(sec<=0){
+     clearInterval(qrCountdown);
+     qrTimer.innerText="QR expired";
+   }
+ },1000);
 }
 
+/* ===== analytics chart ===== */
+function drawChart(rows){
+ const days=rows.map(r=>new Date(r[0]).toLocaleDateString());
+ const status=rows.map(r=>r[6]==="PRESENT"?1:0);
+
+ new Chart(attChart,{
+   type:"line",
+   data:{
+     labels:days,
+     datasets:[{label:"Attendance",data:status}]
+   }
+ });
+}
 </script>
 
 </body>
