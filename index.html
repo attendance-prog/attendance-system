@@ -101,6 +101,9 @@ function verifyOtp() {
 
   fetch(API_URL, {
     method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
     body: JSON.stringify({
       action: "verifyOtp",
       email: email,
@@ -109,21 +112,26 @@ function verifyOtp() {
   })
   .then(r => r.json())
   .then(res => {
+
     if (!res.success) {
       alert(res.message);
       return;
     }
 
-    // SAVE SESSION
+    // ✅ SAVE SESSION
     localStorage.setItem("email", email);
     localStorage.setItem("role", role);
-localStorage.setItem("name", r.name);
+    localStorage.setItem("name", email.split("@")[0]);
 
-    // REDIRECT BY ROLE
+    // ✅ REDIRECT
     window.location.href = role + ".html";
   })
-  .catch(() => alert("Verification error"));
+  .catch(err => {
+    console.error(err);
+    alert("Verification error");
+  });
 }
+
 </script>
 
 </body>
