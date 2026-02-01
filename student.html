@@ -51,13 +51,22 @@ if(!/Android|iPhone/i.test(navigator.userAgent)){
 
 <!-- QR SCANNER LIBRARY -->
 <script src="https://unpkg.com/html5-qrcode"></script>
+  <div id="faceCam" style="display:none">
+  <video id="video" autoplay width="260"></video><br>
+  <button onclick="captureFace()">Capture Face & Submit</button>
+</div>
+
+<canvas id="canvas" width="260" height="200" style="display:none"></canvas>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email = localStorage.getItem("email");
-let qrScanner = null;
 
-/* ---------------- API POST ---------------- */
+let qrScanner = null;
+let stream = null;
+let sessionId = "";
+
+/* -------- POST -------- */
 function post(data){
   return fetch(API,{
     method:"POST",
@@ -66,7 +75,7 @@ function post(data){
   }).then(r=>r.json());
 }
 
-/* ---------------- QR SCAN ---------------- */
+/* -------- STEP 1 — SCAN QR -------- */
 function startQrScan(){
   document.getElementById("scanner").style.display="block";
 
@@ -76,16 +85,32 @@ function startQrScan(){
     { facingMode: "environment" },
     { fps: 10, qrbox: 250 },
     qrText => {
+      sessionId = qrText;
       qrScanner.stop();
       document.getElementById("scanner").style.display="none";
-      markAttendance(qrText);
+
+      openFaceCamera(); // ✅ next step
     },
     err => {}
   );
 }
 
-/* ---------------- MARK ATTENDANCE ---------------- */
-function markAttendance(sessionId){
+/* -------- STEP 2 — FACE CAMERA -------- */
+function openFaceCamera(){
+  document.getElementById("faceCam").style.display="block";
+
+  navigator.mediaDevices.getUserMedia({video:true})
+    .then(s=>{
+      stream=s;
+      video.srcObject=s;
+    })
+    .catch(()=>alert("Camera permission needed"));
+}
+
+/* -------- STEP 3 — CAPTURE FACE + MARK -------- */
+function captureFace(){
+  canvas.getContext("2d").drawImage(video,0,0,260,200);
+
   navigator.geolocation.getCurrentPosition(pos=>{
     post({
       action:"markStudentAttendance",
@@ -95,11 +120,17 @@ function markAttendance(sessionId){
       longitude: pos.coords.longitude
     }).then(r=>{
       alert(r.message);
+      stopCam();
     });
-  }, ()=>alert("GPS permission required"));
+  });
 }
 
-/* ---------------- VIEW ATTENDANCE ---------------- */
+function stopCam(){
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  faceCam.style.display="none";
+}
+
+/* -------- VIEW ATTENDANCE -------- */
 function viewAttendance(){
   post({ action:"getMyAttendance", email }).then(r=>{
     attBody.innerHTML="";
@@ -115,7 +146,19 @@ function viewAttendance(){
     attTable.style.display="table";
   });
 }
+  // Screenshot deterrent
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden){
+    document.body.innerHTML="<h2>⚠️ Screenshot not allowed</h2>";
+  }
+});
+body {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 </script>
+
 
 </body>
 </html>
