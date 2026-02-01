@@ -96,10 +96,20 @@ function post(data){
 }
 
 /* ---------- QR SCAN ---------- */
-function startQrScan(){
-  document.getElementById("scanner").style.display="block";
+function scanQR(){
 
-  qrScanner = new Html5Qrcode("qr-reader");
+  const scanner = new Html5Qrcode("reader");
+
+  scanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    qr => {
+      scanner.stop();
+      markStudentAttendance(qr);
+    }
+  );
+}
+
 
 text=>{
    const parts = text.split("|");   // QR payload
@@ -161,28 +171,37 @@ function stopCam(){
 }
 
 /* ---------- VIEW ATTENDANCE ---------- */
-function viewAttendance(){
+function viewMyAttendance(){
   post({
     action:"getMyStudentAttendance",
-    email
-  }).then(r=>{
+    email: localStorage.getItem("email")
+  })
+  .then(r=>{
+    if(!r.success){
+      alert(r.message);
+      return;
+    }
 
-    attBody.innerHTML="";
+    const body = document.getElementById("attBody");
+    body.innerHTML="";
 
     r.data.forEach(x=>{
-      attBody.innerHTML += `
-      <tr>
-        <td>${new Date(x[0]).toLocaleDateString()}</td>
-        <td>${x[2]}</td>
-        <td>${x[4]}</td>
-        <td>${new Date(x[5]).toLocaleTimeString()}</td>
-      </tr>`;
+      body.innerHTML += `
+        <tr>
+          <td>${x[1]}</td>
+          <td>${x[2]}</td>
+          <td>${x[4]}</td>
+          <td>${new Date(x[0]).toLocaleString()}</td>
+        </tr>`;
     });
 
-    attTable.style.display="table";
-  });
+    document.getElementById("attTable").style.display="table";
+  })
+  .catch(()=> alert("Network error"));
 }
-  
+
+  <div id="reader" style="width:300px"></div>
+
 /* ---------- SCREENSHOT DETER ---------- */
 document.addEventListener("visibilitychange",()=>{
   if(document.hidden){
@@ -197,6 +216,17 @@ document.addEventListener("visibilitychange",()=>{
     Intl.DateTimeFormat().resolvedOptions().timeZone
   );
 }
+<table id="attTable" style="display:none" border="1">
+<thead>
+<tr>
+<th>Email</th>
+<th>Subject</th>
+<th>Status</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody id="attBody"></tbody>
+</table>
 
 </script>
 
