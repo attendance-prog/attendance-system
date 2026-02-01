@@ -10,10 +10,8 @@ body{
   font-family:Arial;
   background:#f4fff4;
   padding:20px;
-  -webkit-user-select:none;
   user-select:none;
 }
-
 h2{color:#2e7d32}
 button{
   background:#2e7d32;
@@ -22,18 +20,16 @@ button{
   padding:10px;
   margin:6px;
 }
-
 table{border-collapse:collapse;width:100%}
 th,td{border:1px solid #ccc;padding:6px;text-align:center}
-
-#scanner{display:none;margin-top:10px}
-#faceCam{display:none;margin-top:10px}
+#scanner,#faceCam{display:none;margin-top:12px}
 </style>
 </head>
 
 <body>
 
 <script>
+/* MOBILE ONLY */
 if(!/Android|iPhone/i.test(navigator.userAgent)){
   alert("Attendance allowed only from mobile");
   location.href="index.html";
@@ -45,11 +41,11 @@ if(!/Android|iPhone/i.test(navigator.userAgent)){
 <button onclick="startQrScan()">📷 Scan QR & Mark Attendance</button>
 
 <div id="scanner">
-  <div id="qr-reader" style="width:280px"></div>
+  <div id="qr-reader" style="width:300px"></div>
 </div>
 
 <div id="faceCam">
-  <video id="video" autoplay width="260"></video><br>
+  <video id="video" autoplay playsinline width="260"></video><br>
   <button onclick="captureFace()">Capture Face & Submit</button>
 </div>
 
@@ -58,7 +54,7 @@ if(!/Android|iPhone/i.test(navigator.userAgent)){
 <hr>
 
 <h3>My Attendance</h3>
-<button onclick="viewAttendance()">View My Attendance</button>
+<button onclick="viewMyAttendance()">View My Attendance</button>
 
 <table id="attTable" style="display:none">
 <thead>
@@ -78,13 +74,14 @@ if(!/Android|iPhone/i.test(navigator.userAgent)){
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email = localStorage.getItem("email");
 
+let qrScanner=null;
+let stream=null;
+let sessionId="";
+let subjectId="";
+let signature="";
+
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
-const faceCam = document.getElementById("faceCam");
-
-let qrScanner = null;
-let stream = null;
-let sessionId = "";
 
 /* ---------- POST ---------- */
 function post(data){
@@ -96,44 +93,39 @@ function post(data){
 }
 
 /* ---------- QR SCAN ---------- */
-function scanQR(){
+function startQrScan(){
+  document.getElementById("scanner").style.display="block";
 
-  const scanner = new Html5Qrcode("reader");
+  qrScanner = new Html5Qrcode("qr-reader");
 
-  scanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    qr => {
-      scanner.stop();
-      markStudentAttendance(qr);
-    }
-  );
-}
-
-
-text=>{
-   const parts = text.split("|");   // QR payload
-   sessionId = parts[0];
-   signature = parts[1] || "";
-   subjectId = parts[2] || "";
+  qrScanner.start(
+    { facingMode:"environment" },
+    { fps:10, qrbox:250 },
+    text=>{
+      const parts = text.split("|");
+      sessionId = parts[0];
+      signature = parts[1] || "";
+      subjectId = parts[2] || "";
 
       qrScanner.stop();
       document.getElementById("scanner").style.display="none";
       openFaceCamera();
     }
   ).catch(()=>{
-    alert("Camera error — allow permission");
+    alert("Camera permission error");
   });
 }
 
 /* ---------- FACE CAMERA ---------- */
 function openFaceCamera(){
-  faceCam.style.display="block";
-alert("🔴 Liveness Check: Blink twice and smile before capture");
+  document.getElementById("faceCam").style.display="block";
+  alert("🔴 Liveness Check: Blink & smile before capture");
+
   navigator.mediaDevices.getUserMedia({video:true})
     .then(s=>{
-      stream = s;
-      video.srcObject = s;
+      stream=s;
+      video.srcObject=s;
+      video.play();
     })
     .catch(()=>{
       alert("Camera permission needed");
@@ -143,7 +135,6 @@ alert("🔴 Liveness Check: Blink twice and smile before capture");
 /* ---------- CAPTURE ---------- */
 function captureFace(){
   canvas.getContext("2d").drawImage(video,0,0,260,200);
-
   const faceImage = canvas.toDataURL("image/png");
 
   navigator.geolocation.getCurrentPosition(pos=>{
@@ -152,63 +143,64 @@ function captureFace(){
       email: email,
       sessionId: sessionId,
       subjectId: subjectId,
-      signature: signature,   // from QR payload
+      signature: signature,
       deviceId: getDeviceId(),
       faceImage: faceImage,
       latitude: pos.coords.latitude,
       longitude: pos.coords.longitude
-    }).then(r=>{
+    })
+    .then(r=>{
       alert(r.message);
       stopCam();
+    })
+    .catch(()=>{
+      alert("Network error");
+      stopCam();
     });
+
+  },()=>{
+    alert("GPS permission denied");
+    stopCam();
   });
 }
 
-
 function stopCam(){
   if(stream) stream.getTracks().forEach(t=>t.stop());
-  faceCam.style.display="none";
+  document.getElementById("faceCam").style.display="none";
 }
 
 /* ---------- VIEW ATTENDANCE ---------- */
 function viewMyAttendance(){
   post({
     action:"getMyStudentAttendance",
-    email: localStorage.getItem("email")
+    email: email
   })
   .then(r=>{
-    if(!r.success){
-      alert(r.message);
+    if(!r.success || r.data.length===0){
+      alert("No attendance found");
       return;
     }
 
-    const body = document.getElementById("attBody");
+    const body=document.getElementById("attBody");
     body.innerHTML="";
 
     r.data.forEach(x=>{
-      body.innerHTML += `
+      body.innerHTML+=`
         <tr>
-          <td>${x[1]}</td>
-          <td>${x[2]}</td>
+          <td>${new Date(x[0]).toLocaleDateString()}</td>
+          <td>STUDENT</td>
           <td>${x[4]}</td>
-          <td>${new Date(x[0]).toLocaleString()}</td>
+          <td>${new Date(x[5]).toLocaleTimeString()}</td>
         </tr>`;
     });
 
     document.getElementById("attTable").style.display="table";
   })
-  .catch(()=> alert("Network error"));
+  .catch(()=>alert("Network error"));
 }
 
-  <div id="reader" style="width:300px"></div>
-
-/* ---------- SCREENSHOT DETER ---------- */
-document.addEventListener("visibilitychange",()=>{
-  if(document.hidden){
-    document.body.innerHTML="<h2>⚠️ Screenshot not allowed</h2>";
-  }
-});
-  function getDeviceId(){
+/* ---------- DEVICE ID ---------- */
+function getDeviceId(){
   return btoa(
     navigator.userAgent +
     screen.width +
@@ -216,18 +208,13 @@ document.addEventListener("visibilitychange",()=>{
     Intl.DateTimeFormat().resolvedOptions().timeZone
   );
 }
-<table id="attTable" style="display:none" border="1">
-<thead>
-<tr>
-<th>Email</th>
-<th>Subject</th>
-<th>Status</th>
-<th>Time</th>
-</tr>
-</thead>
-<tbody id="attBody"></tbody>
-</table>
 
+/* ---------- SCREENSHOT DETECTOR ---------- */
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden){
+    document.body.innerHTML="<h2>⚠️ Screenshot not allowed</h2>";
+  }
+});
 </script>
 
 </body>
