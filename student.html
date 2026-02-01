@@ -4,20 +4,36 @@
 <meta charset="UTF-8">
 <title>GO GREEN – Student</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
+
 <style>
-body{font-family:Arial;background:#f4fff4;padding:20px}
+body{
+  font-family:Arial;
+  background:#f4fff4;
+  padding:20px;
+  -webkit-user-select:none;
+  user-select:none;
+}
+
 h2{color:#2e7d32}
-button{background:#2e7d32;color:#fff;border:none;padding:10px;margin:6px}
+button{
+  background:#2e7d32;
+  color:#fff;
+  border:none;
+  padding:10px;
+  margin:6px;
+}
+
 table{border-collapse:collapse;width:100%}
 th,td{border:1px solid #ccc;padding:6px;text-align:center}
+
 #scanner{display:none;margin-top:10px}
+#faceCam{display:none;margin-top:10px}
 </style>
 </head>
 
 <body>
 
 <script>
-// 📱 MOBILE ONLY ENFORCEMENT
 if(!/Android|iPhone/i.test(navigator.userAgent)){
   alert("Attendance allowed only from mobile");
   location.href="index.html";
@@ -32,6 +48,13 @@ if(!/Android|iPhone/i.test(navigator.userAgent)){
   <div id="qr-reader" style="width:280px"></div>
 </div>
 
+<div id="faceCam">
+  <video id="video" autoplay width="260"></video><br>
+  <button onclick="captureFace()">Capture Face & Submit</button>
+</div>
+
+<canvas id="canvas" width="260" height="200" style="display:none"></canvas>
+
 <hr>
 
 <h3>My Attendance</h3>
@@ -40,84 +63,83 @@ if(!/Android|iPhone/i.test(navigator.userAgent)){
 <table id="attTable" style="display:none">
 <thead>
 <tr>
-  <th>Date</th>
-  <th>Role</th>
-  <th>Status</th>
-  <th>Time</th>
+<th>Date</th>
+<th>Role</th>
+<th>Status</th>
+<th>Time</th>
 </tr>
 </thead>
 <tbody id="attBody"></tbody>
 </table>
 
-<!-- QR SCANNER LIBRARY -->
 <script src="https://unpkg.com/html5-qrcode"></script>
-  <div id="faceCam" style="display:none">
-  <video id="video" autoplay width="260"></video><br>
-  <button onclick="captureFace()">Capture Face & Submit</button>
-</div>
-
-<canvas id="canvas" width="260" height="200" style="display:none"></canvas>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email = localStorage.getItem("email");
 
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const faceCam = document.getElementById("faceCam");
+
 let qrScanner = null;
 let stream = null;
 let sessionId = "";
 
-/* -------- POST -------- */
+/* ---------- POST ---------- */
 function post(data){
   return fetch(API,{
     method:"POST",
-    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
     body:JSON.stringify(data)
   }).then(r=>r.json());
 }
 
-/* -------- STEP 1 — SCAN QR -------- */
+/* ---------- QR SCAN ---------- */
 function startQrScan(){
   document.getElementById("scanner").style.display="block";
 
   qrScanner = new Html5Qrcode("qr-reader");
 
   qrScanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    qrText => {
-      sessionId = qrText;
+    { facingMode: { exact:"environment" } },
+    { fps:10, qrbox:250 },
+    text=>{
+      sessionId = text;
       qrScanner.stop();
       document.getElementById("scanner").style.display="none";
-
-      openFaceCamera(); // ✅ next step
-    },
-    err => {}
-  );
+      openFaceCamera();
+    }
+  ).catch(()=>{
+    alert("Camera error — allow permission");
+  });
 }
 
-/* -------- STEP 2 — FACE CAMERA -------- */
+/* ---------- FACE CAMERA ---------- */
 function openFaceCamera(){
-  document.getElementById("faceCam").style.display="block";
+  faceCam.style.display="block";
 
   navigator.mediaDevices.getUserMedia({video:true})
     .then(s=>{
-      stream=s;
-      video.srcObject=s;
+      stream = s;
+      video.srcObject = s;
     })
-    .catch(()=>alert("Camera permission needed"));
+    .catch(()=>{
+      alert("Camera permission needed");
+    });
 }
 
-/* -------- STEP 3 — CAPTURE FACE + MARK -------- */
+/* ---------- CAPTURE ---------- */
 function captureFace(){
   canvas.getContext("2d").drawImage(video,0,0,260,200);
 
   navigator.geolocation.getCurrentPosition(pos=>{
     post({
       action:"markStudentAttendance",
-      email: email,
-      sessionId: sessionId,
-      latitude: pos.coords.latitude,
-      longitude: pos.coords.longitude
+      email,
+      sessionId,
+      latitude:pos.coords.latitude,
+      longitude:pos.coords.longitude
     }).then(r=>{
       alert(r.message);
       stopCam();
@@ -130,35 +152,31 @@ function stopCam(){
   faceCam.style.display="none";
 }
 
-/* -------- VIEW ATTENDANCE -------- */
+/* ---------- VIEW ATTENDANCE ---------- */
 function viewAttendance(){
-  post({ action:"getMyAttendance", email }).then(r=>{
+  post({action:"getMyAttendance",email})
+  .then(r=>{
     attBody.innerHTML="";
     r.data.forEach(x=>{
       attBody.innerHTML+=`
-        <tr>
-          <td>${new Date(x[0]).toLocaleDateString()}</td>
-          <td>${x[2]}</td>
-          <td>${x[6]}</td>
-          <td>${new Date(x[8]).toLocaleTimeString()}</td>
-        </tr>`;
+      <tr>
+        <td>${new Date(x[0]).toLocaleDateString()}</td>
+        <td>${x[2]}</td>
+        <td>${x[6]}</td>
+        <td>${new Date(x[8]).toLocaleTimeString()}</td>
+      </tr>`;
     });
     attTable.style.display="table";
   });
 }
-  // Screenshot deterrent
+
+/* ---------- SCREENSHOT DETER ---------- */
 document.addEventListener("visibilitychange",()=>{
   if(document.hidden){
     document.body.innerHTML="<h2>⚠️ Screenshot not allowed</h2>";
   }
 });
-body {
-  -webkit-user-select: none;
-  user-select: none;
-}
-
 </script>
-
 
 </body>
 </html>
