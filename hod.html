@@ -4,39 +4,69 @@
 <meta charset="UTF-8">
 <title>GO GREEN – HOD Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 <style>
-body{font-family:Arial;background:#f4fff4;padding:20px}
+body{
+ font-family:Arial;
+ padding:20px;
+ background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+}
 h2{color:#2e7d32}
-button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px;cursor:pointer}
+button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px}
 input,select{padding:6px;margin:4px}
 table{border-collapse:collapse;width:100%}
 th,td{border:1px solid #ccc;padding:6px}
+
+#welcomeBar{
+ background:#1b5e20;
+ color:white;
+ padding:12px;
+ border-radius:8px;
+ margin-bottom:15px;
+}
+
+#toast{
+ position:fixed;
+ bottom:20px;
+ right:20px;
+ background:#1b5e20;
+ color:white;
+ padding:10px 16px;
+ border-radius:6px;
+ display:none;
+}
 </style>
 </head>
 
 <body>
 
 <script>
-(() => {
-  if(localStorage.getItem("role")!=="hod"){
-    alert("Unauthorized");
-    location.href="index.html";
-  }
-})();
+if(localStorage.getItem("role")!=="hod"){
+ alert("Unauthorized");
+ location.href="index.html";
+}
 </script>
+
+<div id="welcomeBar"></div>
 
 <h2>🌱 GO GREEN – HOD Dashboard</h2>
 <button onclick="logout()">Logout</button>
 
-<!-- MARK ATTENDANCE -->
+<!-- ================= MY ATTENDANCE ================= -->
 <h3>My Attendance</h3>
 <button onclick="startCamera()">Mark My Attendance</button>
 <button onclick="viewMyAttendance()">View My Attendance</button>
 
 <div id="cam" style="display:none">
-  <video id="video" autoplay width="260"></video><br>
-  <button onclick="capture()">Capture</button>
+<video id="video" autoplay width="260"></video><br>
+<button onclick="capture()">Capture</button>
 </div>
+
 <canvas id="canvas" width="260" height="200" style="display:none"></canvas>
 
 <table id="attTable" style="display:none">
@@ -44,18 +74,27 @@ th,td{border:1px solid #ccc;padding:6px}
 <tbody id="attBody"></tbody>
 </table>
 
-<!-- SUBJECT -->
+<!-- ================= ANALYTICS ================= -->
+<h3>📊 Subject Attendance Chart</h3>
+<canvas id="subChart"></canvas>
+
+<!-- ================= MAP ================= -->
+<h3>🗺 Attendance Map</h3>
+<div id="map" style="height:300px"></div>
+
+<!-- ================= SUBJECT ================= -->
 <h3>Add Subject</h3>
 <input id="sid" placeholder="Subject ID">
 <input id="sname" placeholder="Subject Name">
 <input id="sem" placeholder="Semester">
 <button onclick="addSubject()">Add</button>
 
-<!-- TIMETABLE -->
+<!-- ================= TIMETABLE ================= -->
 <h3>Add Timetable</h3>
 <select id="day">
-<option>Monday</option><option>Tuesday</option><option>Wednesday</option>
-<option>Thursday</option><option>Friday</option>
+<option>Monday</option><option>Tuesday</option>
+<option>Wednesday</option><option>Thursday</option>
+<option>Friday</option>
 </select>
 <input id="tsub" placeholder="Subject ID">
 <input id="start" placeholder="Start (HH.MM)">
@@ -63,73 +102,142 @@ th,td{border:1px solid #ccc;padding:6px}
 <input id="room" placeholder="Room">
 <button onclick="addTimetable()">Add</button>
 
-<!-- GPS -->
+<!-- ================= GPS ================= -->
 <h3>Add GPS Location</h3>
 <input id="groom" placeholder="Room">
 <input id="lat" placeholder="Latitude">
 <input id="lng" placeholder="Longitude">
-<input id="rad" placeholder="Radius (m)">
+<input id="rad" placeholder="Radius">
 <button onclick="addLocation()">Add</button>
+
+<div id="toast"></div>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email=localStorage.getItem("email");
 let stream=null;
 
+/* ===== util ===== */
+function post(d){
+ return fetch(API,{
+  method:"POST",
+  headers:{"Content-Type":"text/plain"},
+  body:JSON.stringify(d)
+ }).then(r=>r.json());
+}
+
+function toast(m){
+ toastBox.innerText=m;
+ toastBox.style.display="block";
+ setTimeout(()=>toastBox.style.display="none",2500);
+}
+const toastBox=document.getElementById("toast");
+
 function logout(){localStorage.clear();location.href="index.html"}
 
-function post(d){return fetch(API,{method:"POST",body:JSON.stringify(d)}).then(r=>r.json())}
+/* ===== greeting ===== */
+const name=localStorage.getItem("name")||email.split("@")[0];
+const hr=new Date().getHours();
+const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
+welcomeBar.innerHTML=`${g}, ${name} 👋 | Role: HOD`;
 
+/* ===== camera ===== */
 function startCamera(){
-  cam.style.display="block";
-  navigator.mediaDevices.getUserMedia({video:true}).then(s=>{
-    stream=s;video.srcObject=s;
-  });
+ cam.style.display="block";
+ navigator.mediaDevices.getUserMedia({video:true})
+ .then(s=>{stream=s;video.srcObject=s});
 }
 
 function capture(){
-  canvas.getContext("2d").drawImage(video,0,0,260,200);
-  navigator.geolocation.getCurrentPosition(pos=>{
-    post({
-      action:"markHodAttendance",
-      email,
-      latitude:pos.coords.latitude,
-      longitude:pos.coords.longitude
-    }).then(r=>{
-      alert(r.message);
-      stream.getTracks().forEach(t=>t.stop());
-      cam.style.display="none";
-    });
-  });
+ canvas.getContext("2d").drawImage(video,0,0,260,200);
+
+ navigator.geolocation.getCurrentPosition(pos=>{
+   post({
+     action:"markHodAttendance",
+     email,
+     latitude:pos.coords.latitude,
+     longitude:pos.coords.longitude
+   }).then(r=>{
+     toast(r.message);
+     stream.getTracks().forEach(t=>t.stop());
+     cam.style.display="none";
+   });
+ });
 }
 
+/* ===== my attendance ===== */
 function viewMyAttendance(){
-  post({action:"getMyAttendance",email}).then(r=>{
-    attBody.innerHTML="";
-    r.data.forEach(x=>{
-      attBody.innerHTML+=`
-      <tr><td>${new Date(x[0]).toLocaleDateString()}</td>
-      <td>${x[6]}</td>
-      <td>${new Date(x[8]).toLocaleTimeString()}</td></tr>`;
-    });
-    attTable.style.display="table";
-  });
+ post({action:"getMyAttendance",email}).then(r=>{
+   attBody.innerHTML="";
+   r.data.forEach(x=>{
+     attBody.innerHTML+=`
+     <tr>
+     <td>${new Date(x[0]).toLocaleDateString()}</td>
+     <td>${x[6]}</td>
+     <td>${new Date(x[8]).toLocaleTimeString()}</td>
+     </tr>`;
+   });
+   attTable.style.display="table";
+ });
 }
 
+/* ===== analytics chart ===== */
+post({action:"getAnalytics"}).then(r=>{
+ new Chart(subChart,{
+   type:"bar",
+   data:{
+     labels:Object.keys(r.subject),
+     datasets:[{data:Object.values(r.subject)}]
+   }
+ });
+});
+
+/* ===== map ===== */
+const map=L.map("map").setView([28.47,77.48],16);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+.addTo(map);
+
+post({action:"getGpsPoints"}).then(r=>{
+ r.points.forEach(p=>{
+   L.marker([p.lat,p.lng]).addTo(map)
+   .bindPopup(p.email);
+ });
+});
+
+/* ===== add subject ===== */
 function addSubject(){
-  post({action:"addSubject",subjectId:sid.value,subjectName:sname.value,department:"HOD",semester:sem.value})
-  .then(()=>alert("Subject Added"));
+ post({
+  action:"addSubject",
+  subjectId:sid.value,
+  subjectName:sname.value,
+  department:"HOD",
+  semester:sem.value
+ }).then(()=>toast("Subject Added"));
 }
 
+/* ===== timetable ===== */
 function addTimetable(){
-  post({action:"addTimetable",day:day.value,subjectId:tsub.value,start:start.value,end:end.value,room})
-  .then(()=>alert("Timetable Added"));
+ post({
+  action:"addTimetable",
+  day:day.value,
+  subjectId:tsub.value,
+  start:start.value,
+  end:end.value,
+  room:room.value
+ }).then(()=>toast("Timetable Added"));
 }
 
+/* ===== location ===== */
 function addLocation(){
-  post({action:"addLocation",room:groom.value,lat, lng, radius:rad.value})
-  .then(()=>alert("Location Added"));
+ post({
+  action:"addLocation",
+  room:groom.value,
+  lat:lat.value,
+  lng:lng.value,
+  radius:rad.value
+ }).then(()=>toast("Location Added"));
 }
 </script>
+
 </body>
 </html>
