@@ -5,48 +5,64 @@
 <title>GO GREEN – Student</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
+
 <style>
 body{
-  font-family:Arial;
-  background:#f4fff4;
-  padding:20px;
-  user-select:none;
+ font-family:Arial;
+ padding:20px;
+ background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+ user-select:none;
 }
 h2{color:#2e7d32}
-button{
-  background:#2e7d32;
-  color:#fff;
-  border:none;
-  padding:10px;
-  margin:6px;
+button{background:#2e7d32;color:white;border:none;padding:10px;margin:6px}
+
+#welcomeBar{
+ background:#1b5e20;
+ color:white;
+ padding:12px;
+ border-radius:8px;
+ margin-bottom:15px;
 }
-table{border-collapse:collapse;width:100%}
-th,td{border:1px solid #ccc;padding:6px;text-align:center}
+
 #scanner,#faceCam{display:none;margin-top:12px}
+
+#toast{
+ position:fixed;
+ bottom:20px;
+ right:20px;
+ background:#1b5e20;
+ color:white;
+ padding:10px 16px;
+ border-radius:6px;
+ display:none;
+}
 </style>
 </head>
 
 <body>
 
 <script>
-/* MOBILE ONLY */
 if(!/Android|iPhone/i.test(navigator.userAgent)){
-  alert("Attendance allowed only from mobile");
-  location.href="index.html";
+ alert("Attendance allowed only from mobile");
+ location.href="index.html";
 }
 </script>
+
+<div id="welcomeBar"></div>
 
 <h2>🌱 GO GREEN – Student Dashboard</h2>
 
 <button onclick="startQrScan()">📷 Scan QR & Mark Attendance</button>
 
 <div id="scanner">
-  <div id="qr-reader" style="width:300px"></div>
+ <div id="qr-reader" style="width:300px"></div>
 </div>
 
 <div id="faceCam">
-  <video id="video" autoplay playsinline width="260"></video><br>
-  <button onclick="captureFace()">Capture Face & Submit</button>
+ <video id="video" autoplay playsinline width="260"></video><br>
+ <button onclick="captureFace()">Capture Face & Submit</button>
 </div>
 
 <canvas id="canvas" width="260" height="200" style="display:none"></canvas>
@@ -56,164 +72,178 @@ if(!/Android|iPhone/i.test(navigator.userAgent)){
 <h3>My Attendance</h3>
 <button onclick="viewMyAttendance()">View My Attendance</button>
 
-<table id="attTable" style="display:none">
+<div id="percentBox"></div>
+
+<table id="attTable" style="display:none" border="1">
 <thead>
-<tr>
-<th>Date</th>
-<th>Role</th>
-<th>Status</th>
-<th>Time</th>
-</tr>
+<tr><th>Date</th><th>Status</th><th>Time</th></tr>
 </thead>
 <tbody id="attBody"></tbody>
 </table>
 
-<script src="https://unpkg.com/html5-qrcode"></script>
+<h3>📊 Attendance Trend</h3>
+<canvas id="attChart"></canvas>
+
+<h3>📍 Last Attendance Location</h3>
+<iframe id="mapBox" width="100%" height="200"></iframe>
+
+<div id="toast"></div>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-const email = localStorage.getItem("email");
+const email=localStorage.getItem("email");
 
-let qrScanner=null;
-let stream=null;
-let sessionId="";
-let subjectId="";
-let signature="";
+let qrScanner=null,stream=null;
+let sessionId="",subjectId="",signature="";
+let faceFrames=[];
 
-const video = document.getElementById("video");
-const canvas = document.getElementById("canvas");
+const video=video=document.getElementById("video");
+const canvas=document.getElementById("canvas");
+const toastBox=document.getElementById("toast");
 
-/* ---------- POST ---------- */
-function post(data){
-  return fetch(API,{
-    method:"POST",
-    headers:{"Content-Type":"text/plain;charset=utf-8"},
-    body:JSON.stringify(data)
-  }).then(r=>r.json());
+/* ===== greeting ===== */
+const name=email.split("@")[0];
+const hr=new Date().getHours();
+const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
+welcomeBar.innerHTML=`${g}, ${name} 👋 | Student Portal`;
+
+/* ===== toast ===== */
+function toast(m){
+ toastBox.innerText=m;
+ toastBox.style.display="block";
+ setTimeout(()=>toastBox.style.display="none",2500);
 }
 
-/* ---------- QR SCAN ---------- */
+/* ===== post ===== */
+function post(d){
+ return fetch(API,{
+  method:"POST",
+  headers:{"Content-Type":"text/plain"},
+  body:JSON.stringify(d)
+ }).then(r=>r.json());
+}
+
+/* ===== QR scan ===== */
 function startQrScan(){
-  document.getElementById("scanner").style.display="block";
+ scanner.style.display="block";
+ qrScanner=new Html5Qrcode("qr-reader");
 
-  qrScanner = new Html5Qrcode("qr-reader");
-
-  qrScanner.start(
-    { facingMode:"environment" },
-    { fps:10, qrbox:250 },
-    text=>{
-      const parts = text.split("|");
-      sessionId = parts[0];
-      signature = parts[1] || "";
-      subjectId = parts[2] || "";
-
-      qrScanner.stop();
-      document.getElementById("scanner").style.display="none";
-      openFaceCamera();
-    }
-  ).catch(()=>{
-    alert("Camera permission error");
-  });
+ qrScanner.start(
+  {facingMode:"environment"},
+  {fps:10,qrbox:250},
+  txt=>{
+   const p=txt.split("|");
+   sessionId=p[0];
+   signature=p[1]||"";
+   subjectId=p[2]||"";
+   qrScanner.stop();
+   scanner.style.display="none";
+   toast("QR verified ✅");
+   openFaceCamera();
+  }
+ );
 }
 
-/* ---------- FACE CAMERA ---------- */
+/* ===== face camera ===== */
 function openFaceCamera(){
-  document.getElementById("faceCam").style.display="block";
-  alert("🔴 Liveness Check: Blink & smile before capture");
-
-  navigator.mediaDevices.getUserMedia({video:true})
-    .then(s=>{
-      stream=s;
-      video.srcObject=s;
-      video.play();
-    })
-    .catch(()=>{
-      alert("Camera permission needed");
-    });
+ faceCam.style.display="block";
+ navigator.mediaDevices.getUserMedia({video:true})
+ .then(s=>{
+   stream=s;
+   video.srcObject=s;
+   video.play();
+ });
 }
 
-/* ---------- CAPTURE ---------- */
+/* ===== multi-frame capture ===== */
 function captureFace(){
-  canvas.getContext("2d").drawImage(video,0,0,260,200);
-  const faceImage = canvas.toDataURL("image/png");
 
-  navigator.geolocation.getCurrentPosition(pos=>{
-    post({
-      action:"markStudentAttendance",
-      email: email,
-      sessionId: sessionId,
-      subjectId: subjectId,
-      signature: signature,
-      deviceId: getDeviceId(),
-      faceImage: faceImage,
-      latitude: pos.coords.latitude,
-      longitude: pos.coords.longitude
-    })
-    .then(r=>{
-      alert(r.message);
-      stopCam();
-    })
-    .catch(()=>{
-      alert("Network error");
-      stopCam();
-    });
+ faceFrames=[];
+ for(let i=0;i<3;i++){
+   canvas.getContext("2d").drawImage(video,0,0,260,200);
+   faceFrames.push(canvas.toDataURL());
+ }
 
-  },()=>{
-    alert("GPS permission denied");
-    stopCam();
-  });
+ navigator.geolocation.getCurrentPosition(pos=>{
+   post({
+     action:"markStudentAttendance",
+     email,
+     sessionId,
+     subjectId,
+     signature,
+     deviceId:getDeviceId(),
+     faceImage:faceFrames[0],
+     latitude:pos.coords.latitude,
+     longitude:pos.coords.longitude
+   }).then(r=>{
+     toast(r.message);
+     stopCam();
+   });
+ });
 }
 
 function stopCam(){
-  if(stream) stream.getTracks().forEach(t=>t.stop());
-  document.getElementById("faceCam").style.display="none";
+ if(stream) stream.getTracks().forEach(t=>t.stop());
+ faceCam.style.display="none";
 }
 
-/* ---------- VIEW ATTENDANCE ---------- */
+/* ===== attendance view ===== */
 function viewMyAttendance(){
-  post({
-    action:"getMyStudentAttendance",
-    email: email
-  })
-  .then(r=>{
-    if(!r.success || r.data.length===0){
-      alert("No attendance found");
-      return;
-    }
+ post({action:"getMyStudentAttendance",email})
+ .then(r=>{
+   attBody.innerHTML="";
+   if(!r.data.length){toast("No attendance");return;}
 
-    const body=document.getElementById("attBody");
-    body.innerHTML="";
+   let present=0;
 
-    r.data.forEach(x=>{
-      body.innerHTML+=`
-        <tr>
-          <td>${new Date(x[0]).toLocaleDateString()}</td>
-          <td>STUDENT</td>
-          <td>${x[4]}</td>
-          <td>${new Date(x[5]).toLocaleTimeString()}</td>
-        </tr>`;
-    });
+   r.data.forEach(x=>{
+     if(x[4]==="PRESENT") present++;
+     attBody.innerHTML+=`
+      <tr>
+       <td>${new Date(x[0]).toLocaleDateString()}</td>
+       <td>${x[4]}</td>
+       <td>${new Date(x[5]).toLocaleTimeString()}</td>
+      </tr>`;
+   });
 
-    document.getElementById("attTable").style.display="table";
-  })
-  .catch(()=>alert("Network error"));
+   const pct=Math.round(present/r.data.length*100);
+   percentBox.innerHTML=`Attendance %: <b>${pct}%</b>`;
+
+   drawChart(r.data);
+   showMap(r.data.at(-1));
+
+   attTable.style.display="table";
+ });
 }
 
-/* ---------- DEVICE ID ---------- */
-function getDeviceId(){
-  return btoa(
-    navigator.userAgent +
-    screen.width +
-    screen.height +
-    Intl.DateTimeFormat().resolvedOptions().timeZone
-  );
-}
-
-/* ---------- SCREENSHOT DETECTOR ---------- */
-document.addEventListener("visibilitychange",()=>{
-  if(document.hidden){
-    document.body.innerHTML="<h2>⚠️ Screenshot not allowed</h2>";
+/* ===== chart ===== */
+function drawChart(rows){
+ new Chart(attChart,{
+  type:"bar",
+  data:{
+   labels:rows.map(r=>new Date(r[0]).toLocaleDateString()),
+   datasets:[{label:"Present",data:rows.map(r=>r[4]==="PRESENT"?1:0)}]
   }
+ });
+}
+
+/* ===== map ===== */
+function showMap(last){
+ if(!last) return;
+ const lat=last[6],lng=last[7];
+ if(!lat) return;
+ mapBox.src=`https://maps.google.com/maps?q=${lat},${lng}&z=16&output=embed`;
+}
+
+/* ===== device id ===== */
+function getDeviceId(){
+ return btoa(navigator.userAgent+screen.width+screen.height);
+}
+
+/* ===== anti screenshot ===== */
+document.addEventListener("visibilitychange",()=>{
+ if(document.hidden)
+   document.body.innerHTML="<h2>⚠️ Screenshot blocked</h2>";
 });
 </script>
 
