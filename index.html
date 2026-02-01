@@ -117,6 +117,7 @@ function verifyOtp() {
     // SAVE SESSION
     localStorage.setItem("email", email);
     localStorage.setItem("role", role);
+localStorage.setItem("name", r.name);
 
     // REDIRECT BY ROLE
     window.location.href = role + ".html";
