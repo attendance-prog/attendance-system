@@ -122,11 +122,10 @@ function captureAttendance(){
       stopCamera();
     });
   },()=>{
-    alert("GPS permission denied");
-    const faceImage = canvas.toDataURL("image/png");
-deviceId: getDeviceId(),
-faceImage: faceImage,
-  });
+  alert("GPS permission denied");
+  stopCamera();
+});
+
 }
 
 function stopCamera(){
