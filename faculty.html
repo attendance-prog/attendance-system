@@ -164,22 +164,31 @@ function loadSubjects(){
 }
 
 function generateQR(){
-  const sub=subject.value;
+  const sub = subject.value;
   if(!sub) return alert("Select subject");
 
-  post({
-    action:"createFacultySession",
-    subjectId:sub,
-    facultyEmail:email
-  }).then(r=>{
-    if(!r.success) return alert(r.message);
+  navigator.geolocation.getCurrentPosition(pos => {
 
-    qrBox.innerHTML=`
-      <h4>QR valid for 5 minutes</h4>
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">
-    `;
-  });
+    post({
+      action:"createFacultySession",
+      subjectId: sub,
+      facultyEmail: email,
+      latitude: pos.coords.latitude,
+      longitude: pos.coords.longitude,
+      room: "CLASSROOM"
+    })
+    .then(r=>{
+      if(!r.success) return alert(r.message);
+
+      qrBox.innerHTML = `
+        <h4>QR valid for 5 minutes</h4>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">
+      `;
+    });
+
+  }, ()=> alert("GPS permission denied"));
 }
+
   function viewMyAttendance(){
   post({
     action:"getMyAttendance",
