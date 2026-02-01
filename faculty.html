@@ -57,7 +57,7 @@ if(localStorage.getItem("role")!=="faculty"){
 <button onclick="viewMyAttendance()">View My Attendance</button>
 
 <div id="cam" style="display:none">
-<video id="video" width="260" autoplay></video><br>
+<video id="video" width="260" autoplay playsinline></video><br>
 <button onclick="captureAttendance()">Capture</button>
 </div>
 
@@ -98,10 +98,20 @@ Attendance %: <b id="myPct">--</b>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
 const email=localStorage.getItem("email");
 const welcomeBar=document.getElementById("welcomeBar");
 const toastBox=document.getElementById("toast");
 
+const subjectSel=document.getElementById("subject");
+const qrBtn=document.getElementById("qrBtn");
+const qrBox=document.getElementById("qrBox");
+const qrTimerEl=document.getElementById("qrTimer");
+
+let stream=null;
+let qrCountdown=null;
+
+/* ===== utils ===== */
 function post(d){
  return fetch(API,{
   method:"POST",
@@ -128,12 +138,14 @@ const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
 welcomeBar.innerHTML=`${g}, ${name} 👋 | Faculty Portal`;
 
 /* ===== CAMERA ===== */
-let stream=null;
-
 function startCamera(){
- cam.style.display="block";
+ document.getElementById("cam").style.display="block";
  navigator.mediaDevices.getUserMedia({video:true})
- .then(s=>{stream=s;video.srcObject=s});
+ .then(s=>{
+   stream=s;
+   document.getElementById("video").srcObject=s;
+ })
+ .catch(()=>toast("Camera permission denied"));
 }
 
 function captureAttendance(){
@@ -147,74 +159,106 @@ function captureAttendance(){
      room:"CLASSROOM"
    }).then(r=>{
      toast(r.message);
-     qrBtn.disabled=false;
+     if(r.success){
+       qrBtn.disabled=false;
+       loadSubjects();
+       loadMyAnalytics();
+     }
      stopCamera();
-     loadSubjects();
-     loadMyAnalytics();
    });
  });
 }
 
 function stopCamera(){
  if(stream) stream.getTracks().forEach(t=>t.stop());
- cam.style.display="none";
+ document.getElementById("cam").style.display="none";
 }
 
 /* ===== VIEW ATTENDANCE ===== */
 function viewMyAttendance(){
  post({action:"getMyAttendance",email})
  .then(r=>{
-   attBody.innerHTML="";
+   const body=document.getElementById("attBody");
+   body.innerHTML="";
    r.data.forEach(x=>{
-     attBody.innerHTML+=`
+     body.innerHTML+=`
      <tr>
        <td>${new Date(x[0]).toLocaleDateString()}</td>
        <td>${x[6]}</td>
        <td>${new Date(x[8]).toLocaleTimeString()}</td>
      </tr>`;
    });
-   attTable.style.display="table";
-
+   document.getElementById("attTable").style.display="table";
    drawChart(r.data);
  });
 }
 
-/* ===== CHART ===== */
+/* ===== TREND CHART ===== */
 function drawChart(rows){
- const labels=rows.map(r=>new Date(r[0]).toLocaleDateString());
- const vals=rows.map(r=>r[6]==="PRESENT"?1:0);
-
  new Chart(document.getElementById("attChart"),{
    type:"line",
-   data:{labels,datasets:[{label:"Present",data:vals}]}
+   data:{
+     labels:rows.map(r=>new Date(r[0]).toLocaleDateString()),
+     datasets:[{
+       label:"Present",
+       data:rows.map(r=>r[6]==="PRESENT"?1:0)
+     }]
+   }
  });
 }
 
 /* ===== SUBJECTS ===== */
 function loadSubjects(){
  post({action:"getSubjects"}).then(r=>{
-   subject.innerHTML="";
+   subjectSel.innerHTML="";
    r.data.forEach(s=>{
-     subject.innerHTML+=`<option value="${s[0]}">${s[1]}</option>`;
+     subjectSel.innerHTML+=`<option value="${s[0]}">${s[1]}</option>`;
    });
  });
 }
 
 /* ===== QR ===== */
 function generateQR(){
+ if(!subjectSel.value){
+   toast("Select subject");
+   return;
+ }
+
  navigator.geolocation.getCurrentPosition(pos=>{
    post({
      action:"createFacultySession",
-     subjectId:subject.value,
+     subjectId:subjectSel.value,
      facultyEmail:email,
      latitude:pos.coords.latitude,
      longitude:pos.coords.longitude,
-     topic:topic.value,
-     notesLink:notes.value
+     topic:document.getElementById("topic").value,
+     notesLink:document.getElementById("notes").value
    }).then(r=>{
+     if(!r.success){
+       toast(r.message);
+       return;
+     }
+
      qrBox.innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">`;
+
+     startQrTimer(300);
    });
  });
+}
+
+/* ===== QR TIMER ===== */
+function startQrTimer(sec){
+ clearInterval(qrCountdown);
+ qrCountdown=setInterval(()=>{
+   sec--;
+   qrTimerEl.innerText="QR expires in "+sec+" sec";
+
+   if(sec<=0){
+     clearInterval(qrCountdown);
+     qrTimerEl.innerText="QR expired";
+     qrBox.innerHTML="";
+   }
+ },1000);
 }
 
 /* ===== OWN ANALYTICS ===== */
@@ -222,10 +266,10 @@ google.charts.load('current',{packages:['corechart']});
 google.charts.setOnLoadCallback(loadMyAnalytics);
 
 function loadMyAnalytics(){
- post({
-   action:"getMyAttendanceAnalytics",
-   email:email
- }).then(r=>{
+ post({action:"getMyAttendanceAnalytics",email})
+ .then(r=>{
+   if(!r.success) return;
+
    document.getElementById("myPct").innerText=r.percent+"%";
 
    const data=google.visualization.arrayToDataTable([
@@ -235,14 +279,16 @@ function loadMyAnalytics(){
      ["Absent",r.absent]
    ]);
 
-   new google.visualization.PieChart(myChart)
-     .draw(data);
+   new google.visualization.PieChart(
+     document.getElementById("myChart")
+   ).draw(data);
  });
 }
 
 /* ===== INIT ===== */
 loadSubjects();
 loadMyAnalytics();
+
 </script>
 
 </body>
