@@ -139,10 +139,27 @@ function stopCamera(){
 
 /* -------- QR -------- */
 function loadSubjects(){
-  post({action:"getSubjects"}).then(r=>{
-    r.data.slice(1).forEach(s=>{
-      subject.innerHTML+=`<option value="${s[0]}">${s[1]}</option>`;
+
+  post({action:"getSubjects"})
+  .then(r=>{
+
+    if(!r.success){
+      alert("Subjects load failed");
+      return;
+    }
+
+    const sel = document.getElementById("subject");
+
+    // reset dropdown
+    sel.innerHTML = `<option value="">Select Subject</option>`;
+
+    r.data.forEach(s=>{
+      sel.innerHTML += `<option value="${s[0]}">${s[1]}</option>`;
     });
+
+  })
+  .catch(()=>{
+    alert("Subject fetch network error");
   });
 }
 
