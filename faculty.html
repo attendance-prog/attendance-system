@@ -75,7 +75,7 @@ function post(data){
 /* -------- ATTENDANCE -------- */
 function startCamera(){
   document.getElementById("cam").style.display="block";
-
+alert("🔴 Liveness Check: Move head slightly then capture");
   navigator.mediaDevices.getUserMedia({ video:true })
     .then(s=>{
       stream=s;
@@ -123,6 +123,9 @@ function captureAttendance(){
     });
   },()=>{
     alert("GPS permission denied");
+    const faceImage = canvas.toDataURL("image/png");
+deviceId: getDeviceId(),
+faceImage: faceImage,
   });
 }
 
@@ -184,6 +187,14 @@ function generateQR(){
     attTable.style.display="table";
   })
   .catch(()=>alert("Network error"));
+}
+function getDeviceId(){
+  return btoa(
+    navigator.userAgent +
+    screen.width +
+    screen.height +
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
 }
 
 </script>
