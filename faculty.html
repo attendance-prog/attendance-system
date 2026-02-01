@@ -16,9 +16,6 @@ body{
 }
 h2{color:#2e7d32}
 button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px}
-button:disabled{background:#999}
-video{border:1px solid #ccc}
-
 #welcomeBar{
  background:#1b5e20;
  color:white;
@@ -26,7 +23,6 @@ video{border:1px solid #ccc}
  border-radius:8px;
  margin-bottom:15px;
 }
-
 #toast{
  position:fixed;
  bottom:20px;
@@ -56,18 +52,18 @@ if(localStorage.getItem("role")!=="faculty"){
 
 <hr>
 
-<h3>1️⃣ Mark My Attendance</h3>
+<h3>Mark My Attendance</h3>
 <button onclick="startCamera()">Mark Attendance</button>
 <button onclick="viewMyAttendance()">View My Attendance</button>
 
-<div id="cam" style="display:none;margin-top:10px">
-  <video id="video" width="260" autoplay playsinline></video><br><br>
-  <button onclick="captureAttendance()">Capture</button>
+<div id="cam" style="display:none">
+<video id="video" width="260" autoplay></video><br>
+<button onclick="captureAttendance()">Capture</button>
 </div>
 
 <canvas id="canvas" width="260" height="200" style="display:none"></canvas>
 
-<table id="attTable" style="display:none;margin-top:15px" border="1">
+<table id="attTable" style="display:none" border="1">
 <thead>
 <tr><th>Date</th><th>Status</th><th>Time</th></tr>
 </thead>
@@ -76,25 +72,13 @@ if(localStorage.getItem("role")!=="faculty"){
 
 <hr>
 
-<h3>2️⃣ Generate QR Session</h3>
+<h3>Generate QR Session</h3>
 
-<button onclick="loadSubjects()">🔄 Refresh Subjects</button>
+<select id="subject"></select><br>
+<input id="topic" placeholder="Topic"><br>
+<input id="notes" placeholder="Notes link"><br>
 
-<select id="subject">
-<option value="">Select Subject</option>
-</select>
-
-<br><br>
-
-<label>Topic Covered:</label><br>
-<input id="topic" placeholder="Topic taught today"><br>
-
-<label>Notes Link:</label><br>
-<input id="notes" placeholder="Drive link (optional)"><br>
-
-<button id="qrBtn" onclick="generateQR()" disabled>
-Generate QR
-</button>
+<button id="qrBtn" onclick="generateQR()" disabled>Generate QR</button>
 
 <div id="qrBox"></div>
 <div id="qrTimer"></div>
@@ -104,15 +88,20 @@ Generate QR
 <h3>📊 My Attendance Trend</h3>
 <canvas id="attChart"></canvas>
 
+<hr>
+
+<h3>📊 My Attendance Analytics</h3>
+Attendance %: <b id="myPct">--</b>
+<div id="myChart" style="height:300px"></div>
+
 <div id="toast"></div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const API="YOUR_SCRIPT_URL";
 const email=localStorage.getItem("email");
-let stream=null;
-let qrCountdown=null;
+const welcomeBar=document.getElementById("welcomeBar");
+const toastBox=document.getElementById("toast");
 
-/* ===== utils ===== */
 function post(d){
  return fetch(API,{
   method:"POST",
@@ -126,38 +115,28 @@ function toast(m){
  toastBox.style.display="block";
  setTimeout(()=>toastBox.style.display="none",2500);
 }
-const toastBox=document.getElementById("toast");
 
 function logout(){
  localStorage.clear();
  location.href="index.html";
 }
 
-/* ===== greeting ===== */
-const name=localStorage.getItem("name")||email.split("@")[0];
+/* ===== GREETING ===== */
+const name=email.split("@")[0];
 const hr=new Date().getHours();
 const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
 welcomeBar.innerHTML=`${g}, ${name} 👋 | Faculty Portal`;
 
-/* ===== camera ===== */
+/* ===== CAMERA ===== */
+let stream=null;
+
 function startCamera(){
  cam.style.display="block";
  navigator.mediaDevices.getUserMedia({video:true})
- .then(s=>{
-   stream=s;
-   video.srcObject=s;
-   video.play();
- });
+ .then(s=>{stream=s;video.srcObject=s});
 }
 
 function captureAttendance(){
- if(!video.srcObject){
-  toast("Camera not started");
-  return;
- }
-
- canvas.getContext("2d").drawImage(video,0,0,260,200);
-
  navigator.geolocation.getCurrentPosition(pos=>{
    post({
      action:"markStaffAttendance",
@@ -167,22 +146,21 @@ function captureAttendance(){
      longitude:pos.coords.longitude,
      room:"CLASSROOM"
    }).then(r=>{
-     toast(r.success?"Attendance marked":"❌ "+r.message);
-     if(r.success){
-       qrBtn.disabled=false;
-       loadSubjects();
-     }
+     toast(r.message);
+     qrBtn.disabled=false;
      stopCamera();
+     loadSubjects();
+     loadMyAnalytics();
    });
  });
 }
 
 function stopCamera(){
- if(stream){stream.getTracks().forEach(t=>t.stop())}
+ if(stream) stream.getTracks().forEach(t=>t.stop());
  cam.style.display="none";
 }
 
-/* ===== attendance table ===== */
+/* ===== VIEW ATTENDANCE ===== */
 function viewMyAttendance(){
  post({action:"getMyAttendance",email})
  .then(r=>{
@@ -196,21 +174,26 @@ function viewMyAttendance(){
      </tr>`;
    });
    attTable.style.display="table";
+
    drawChart(r.data);
  });
 }
-<hr>
 
-<h3>📊 My Attendance Analytics</h3>
+/* ===== CHART ===== */
+function drawChart(rows){
+ const labels=rows.map(r=>new Date(r[0]).toLocaleDateString());
+ const vals=rows.map(r=>r[6]==="PRESENT"?1:0);
 
-Attendance %: <b id="myPct">--</b>
+ new Chart(document.getElementById("attChart"),{
+   type:"line",
+   data:{labels,datasets:[{label:"Present",data:vals}]}
+ });
+}
 
-<div id="myChart" style="height:300px"></div>
-
-/* ===== subjects ===== */
+/* ===== SUBJECTS ===== */
 function loadSubjects(){
  post({action:"getSubjects"}).then(r=>{
-   subject.innerHTML=`<option value="">Select Subject</option>`;
+   subject.innerHTML="";
    r.data.forEach(s=>{
      subject.innerHTML+=`<option value="${s[0]}">${s[1]}</option>`;
    });
@@ -219,96 +202,47 @@ function loadSubjects(){
 
 /* ===== QR ===== */
 function generateQR(){
- const sub=subject.value;
- if(!sub) return toast("Select subject");
-
  navigator.geolocation.getCurrentPosition(pos=>{
    post({
      action:"createFacultySession",
-     subjectId:sub,
+     subjectId:subject.value,
      facultyEmail:email,
      latitude:pos.coords.latitude,
      longitude:pos.coords.longitude,
-     room:"CLASSROOM",
      topic:topic.value,
-     notes:notes.value
+     notesLink:notes.value
    }).then(r=>{
-     if(!r.success) return toast(r.message);
-
-     qrBox.innerHTML=`
-       <h4>QR valid 5 minutes</h4>
-       <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">
-     `;
-
-     startQrTimer(300);
+     qrBox.innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">`;
    });
  });
 }
 
-/* ===== QR TIMER ===== */
-function startQrTimer(sec){
- clearInterval(qrCountdown);
- qrCountdown=setInterval(()=>{
-   sec--;
-   qrTimer.innerText="Expires in "+sec+" sec";
-   if(sec<=0){
-     clearInterval(qrCountdown);
-     qrTimer.innerText="QR expired";
-   }
- },1000);
-}
-
-/* ===== analytics chart ===== */
-function drawChart(rows){
- const days=rows.map(r=>new Date(r[0]).toLocaleDateString());
- const status=rows.map(r=>r[6]==="PRESENT"?1:0);
-
- new Chart(attChart,{
-   type:"line",
-   data:{
-     labels:days,
-     datasets:[{label:"Attendance",data:status}]
-   }
- });
-}
- /* ===== FACULTY OWN ANALYTICS ===== */
-
+/* ===== OWN ANALYTICS ===== */
 google.charts.load('current',{packages:['corechart']});
 google.charts.setOnLoadCallback(loadMyAnalytics);
 
 function loadMyAnalytics(){
+ post({
+   action:"getMyAttendanceAnalytics",
+   email:email
+ }).then(r=>{
+   document.getElementById("myPct").innerText=r.percent+"%";
 
-  post({
-    action:"getMyAttendanceAnalytics",
-    email: email
-  })
-  .then(r=>{
+   const data=google.visualization.arrayToDataTable([
+     ["Status","Count"],
+     ["Present",r.present],
+     ["Late",r.late],
+     ["Absent",r.absent]
+   ]);
 
-    if(!r.success){
-      document.getElementById("myChart").innerHTML="No data";
-      return;
-    }
-
-    document.getElementById("myPct").innerText = r.percent + "%";
-
-    const data = google.visualization.arrayToDataTable([
-      ["Status","Count"],
-      ["Present", r.present],
-      ["Late", r.late],
-      ["Absent", r.absent]
-    ]);
-
-    const chart = new google.visualization.PieChart(
-      document.getElementById("myChart")
-    );
-
-    chart.draw(data,{
-      title:"My Attendance Breakdown"
-    });
-
-  });
+   new google.visualization.PieChart(myChart)
+     .draw(data);
+ });
 }
 
+/* ===== INIT ===== */
+loadSubjects();
+loadMyAnalytics();
 </script>
 
 </body>
