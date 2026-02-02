@@ -324,10 +324,10 @@ function loadMyAnalytics(){
 
 function loadMyTimetable(){
 
- post({
-   action:"getFacultyOwnTimetable",
-   facultyName:name
- })
+post({
+  action:"getFacultyOwnTimetable",
+  email: email
+})
  .then(r=>{
 
    const slots=[9,9.5,10.4,11.35,13.15,14.1,15,15.5];
