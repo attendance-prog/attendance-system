@@ -95,7 +95,25 @@ Attendance %: <b id="myPct">--</b>
 <div id="myChart" style="height:300px"></div>
 
 <div id="toast"></div>
+<hr>
 
+<h3>📅 My Timetable</h3>
+<table id="myTT" border="1">
+<thead>
+<tr>
+<th>Day</th>
+<th>09:00–09:50</th>
+<th>09:50–10:40</th>
+<th>10:40–11:30</th>
+<th>11:35–12:25</th>
+<th>13:15–14:05</th>
+<th>14:10–15:00</th>
+<th>15:00–15:50</th>
+<th>15:50–16:40</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 
@@ -245,25 +263,7 @@ function generateQR(){
    });
  });
 }
-<hr>
 
-<h3>📅 My Timetable</h3>
-<table id="myTT" border="1">
-<thead>
-<tr>
-<th>Day</th>
-<th>09:00–09:50</th>
-<th>09:50–10:40</th>
-<th>10:40–11:30</th>
-<th>11:35–12:25</th>
-<th>13:15–14:05</th>
-<th>14:10–15:00</th>
-<th>15:00–15:50</th>
-<th>15:50–16:40</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
 
 /* ===== QR TIMER ===== */
 function startQrTimer(sec){
@@ -309,8 +309,7 @@ loadSubjects();
 loadMyAnalytics();
 function loadMyTimetable(){
 
- const fname = localStorage.getItem("name");
-
+const fname = localStorage.getItem("name") || email.split("@")[0];
  post({
    action:"getFacultyOwnTimetable",
    facultyName: fname
