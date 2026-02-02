@@ -245,6 +245,25 @@ function generateQR(){
    });
  });
 }
+<hr>
+
+<h3>📅 My Timetable</h3>
+<table id="myTT" border="1">
+<thead>
+<tr>
+<th>Day</th>
+<th>09:00–09:50</th>
+<th>09:50–10:40</th>
+<th>10:40–11:30</th>
+<th>11:35–12:25</th>
+<th>13:15–14:05</th>
+<th>14:10–15:00</th>
+<th>15:00–15:50</th>
+<th>15:50–16:40</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
 
 /* ===== QR TIMER ===== */
 function startQrTimer(sec){
@@ -288,6 +307,48 @@ function loadMyAnalytics(){
 /* ===== INIT ===== */
 loadSubjects();
 loadMyAnalytics();
+function loadMyTimetable(){
+
+ const fname = localStorage.getItem("name");
+
+ post({
+   action:"getFacultyOwnTimetable",
+   facultyName: fname
+ })
+ .then(r=>{
+
+   const slots = [
+     "9","9.5","10.4","11.35","13.15","14.1","15","15.5"
+   ];
+
+   const days = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
+
+   const body = document.querySelector("#myTT tbody");
+   body.innerHTML="";
+
+   days.forEach(d=>{
+
+     let row = `<tr><td>${d}</td>`;
+
+     slots.forEach(s=>{
+       const lec = r.data.find(x =>
+         x.day===d && Number(x.start)==Number(s)
+       );
+
+       if(lec){
+         row += `<td>${lec.subject}<br>Room ${lec.room}</td>`;
+       } else {
+         row += `<td></td>`;
+       }
+     });
+
+     row += "</tr>";
+     body.innerHTML += row;
+   });
+
+ });
+}
+loadMyTimetable();
 
 </script>
 
