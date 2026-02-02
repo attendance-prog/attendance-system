@@ -33,6 +33,8 @@ button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px}
  border-radius:6px;
  display:none;
 }
+table{border-collapse:collapse}
+td,th{padding:6px}
 </style>
 </head>
 
@@ -94,7 +96,6 @@ if(localStorage.getItem("role")!=="faculty"){
 Attendance %: <b id="myPct">--</b>
 <div id="myChart" style="height:300px"></div>
 
-<div id="toast"></div>
 <hr>
 
 <h3>📅 My Timetable</h3>
@@ -114,22 +115,26 @@ Attendance %: <b id="myPct">--</b>
 </thead>
 <tbody></tbody>
 </table>
+
+<div id="toast"></div>
+
 <script>
-const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec"; // ← keep your deployed URL
 
 const email=localStorage.getItem("email");
-const welcomeBar=document.getElementById("welcomeBar");
-const toastBox=document.getElementById("toast");
+const name=localStorage.getItem("name") || email.split("@")[0];
 
 const subjectSel=document.getElementById("subject");
 const qrBtn=document.getElementById("qrBtn");
 const qrBox=document.getElementById("qrBox");
 const qrTimerEl=document.getElementById("qrTimer");
+const toastBox=document.getElementById("toast");
 
 let stream=null;
 let qrCountdown=null;
 
-/* ===== utils ===== */
+/* ========= UTIL ========= */
+
 function post(d){
  return fetch(API,{
   method:"POST",
@@ -149,13 +154,15 @@ function logout(){
  location.href="index.html";
 }
 
-/* ===== GREETING ===== */
-const name=email.split("@")[0];
+/* ========= GREETING ========= */
+
 const hr=new Date().getHours();
 const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
-welcomeBar.innerHTML=`${g}, ${name} 👋 | Faculty Portal`;
+document.getElementById("welcomeBar").innerHTML =
+ `${g}, ${name} 👋 | Faculty Portal`;
 
-/* ===== CAMERA ===== */
+/* ========= CAMERA ========= */
+
 function startCamera(){
  document.getElementById("cam").style.display="block";
  navigator.mediaDevices.getUserMedia({video:true})
@@ -192,7 +199,8 @@ function stopCamera(){
  document.getElementById("cam").style.display="none";
 }
 
-/* ===== VIEW ATTENDANCE ===== */
+/* ========= ATTENDANCE VIEW ========= */
+
 function viewMyAttendance(){
  post({action:"getMyAttendance",email})
  .then(r=>{
@@ -211,7 +219,8 @@ function viewMyAttendance(){
  });
 }
 
-/* ===== TREND CHART ===== */
+/* ========= TREND CHART ========= */
+
 function drawChart(rows){
  new Chart(document.getElementById("attChart"),{
    type:"line",
@@ -225,17 +234,23 @@ function drawChart(rows){
  });
 }
 
-/* ===== SUBJECTS ===== */
+/* ========= SUBJECTS (OWN ONLY) ========= */
+
 function loadSubjects(){
- post({action:"getSubjects"}).then(r=>{
+ post({
+   action:"getFacultySubjects",
+   email:email
+ }).then(r=>{
    subjectSel.innerHTML="";
    r.data.forEach(s=>{
-     subjectSel.innerHTML+=`<option value="${s[0]}">${s[1]}</option>`;
+     subjectSel.innerHTML+=
+       `<option value="${s[0]}">${s[1]}</option>`;
    });
  });
 }
 
-/* ===== QR ===== */
+/* ========= QR ========= */
+
 function generateQR(){
  if(!subjectSel.value){
    toast("Select subject");
@@ -257,21 +272,21 @@ function generateQR(){
        return;
      }
 
-     qrBox.innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">`;
+     qrBox.innerHTML =
+      `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">`;
 
      startQrTimer(300);
    });
  });
 }
 
+/* ========= QR TIMER ========= */
 
-/* ===== QR TIMER ===== */
 function startQrTimer(sec){
  clearInterval(qrCountdown);
  qrCountdown=setInterval(()=>{
    sec--;
    qrTimerEl.innerText="QR expires in "+sec+" sec";
-
    if(sec<=0){
      clearInterval(qrCountdown);
      qrTimerEl.innerText="QR expired";
@@ -280,7 +295,8 @@ function startQrTimer(sec){
  },1000);
 }
 
-/* ===== OWN ANALYTICS ===== */
+/* ========= OWN ANALYTICS ========= */
+
 google.charts.load('current',{packages:['corechart']});
 google.charts.setOnLoadCallback(loadMyAnalytics);
 
@@ -304,49 +320,45 @@ function loadMyAnalytics(){
  });
 }
 
-/* ===== INIT ===== */
-loadSubjects();
-loadMyAnalytics();
+/* ========= OWN TIMETABLE ========= */
+
 function loadMyTimetable(){
 
-const fname = localStorage.getItem("name") || email.split("@")[0];
  post({
    action:"getFacultyOwnTimetable",
-   facultyName: fname
+   facultyName:name
  })
  .then(r=>{
 
-   const slots = [
-     "9","9.5","10.4","11.35","13.15","14.1","15","15.5"
-   ];
+   const slots=[9,9.5,10.4,11.35,13.15,14.1,15,15.5];
+   const days=["Monday","Tuesday","Wednesday","Thursday","Friday"];
 
-   const days = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
-
-   const body = document.querySelector("#myTT tbody");
+   const body=document.querySelector("#myTT tbody");
    body.innerHTML="";
 
    days.forEach(d=>{
-
-     let row = `<tr><td>${d}</td>`;
+     let row=`<tr><td>${d}</td>`;
 
      slots.forEach(s=>{
-       const lec = r.data.find(x =>
+       const lec=r.data.find(x =>
          x.day===d && Number(x.start)==Number(s)
        );
-
-       if(lec){
-         row += `<td>${lec.subject}<br>Room ${lec.room}</td>`;
-       } else {
-         row += `<td></td>`;
-       }
+       row += lec
+        ? `<td>${lec.subject}<br>Room ${lec.room}</td>`
+        : `<td></td>`;
      });
 
-     row += "</tr>";
-     body.innerHTML += row;
+     row+="</tr>";
+     body.innerHTML+=row;
    });
 
  });
 }
+
+/* ========= INIT ========= */
+
+loadSubjects();
+loadMyAnalytics();
 loadMyTimetable();
 
 </script>
