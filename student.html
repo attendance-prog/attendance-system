@@ -24,6 +24,16 @@ button{background:#2e7d32;color:white;border:none;padding:10px;margin:6px}
  padding:12px;
  border-radius:8px;
  margin-bottom:15px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+}
+
+.badge{
+ padding:4px 10px;
+ border-radius:20px;
+ color:white;
+ font-size:12px;
 }
 
 #scanner,#faceCam{display:none;margin-top:12px}
@@ -50,11 +60,15 @@ if(!/Android|iPhone/i.test(navigator.userAgent)){
 }
 </script>
 
-<div id="welcomeBar"></div>
+<div id="welcomeBar">
+  <div id="welcomeText"></div>
+  <button onclick="logout()">Logout</button>
+</div>
 
 <h2>🌱 GO GREEN – Student Dashboard</h2>
 
 <button onclick="startQrScan()">📷 Scan QR & Mark Attendance</button>
+<span id="scanStatus" class="badge" style="background:#888">Idle</span>
 
 <div id="scanner">
  <div id="qr-reader" style="width:300px"></div>
@@ -71,8 +85,10 @@ if(!/Android|iPhone/i.test(navigator.userAgent)){
 
 <h3>My Attendance</h3>
 <button onclick="viewMyAttendance()">View My Attendance</button>
+<button onclick="viewMyAttendance()">🔄 Refresh</button>
 
 <div id="percentBox"></div>
+<div id="lastScan"></div>
 
 <table id="attTable" style="display:none" border="1">
 <thead>
@@ -95,9 +111,9 @@ const email=localStorage.getItem("email");
 
 let qrScanner=null,stream=null;
 let sessionId="",subjectId="",signature="";
-let faceFrames=[];
+let lastScanTime=0;
 
-const video=video=document.getElementById("video");
+const video=document.getElementById("video");
 const canvas=document.getElementById("canvas");
 const toastBox=document.getElementById("toast");
 
@@ -105,7 +121,14 @@ const toastBox=document.getElementById("toast");
 const name=email.split("@")[0];
 const hr=new Date().getHours();
 const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
-welcomeBar.innerHTML=`${g}, ${name} 👋 | Student Portal`;
+document.getElementById("welcomeText").innerHTML=
+`${g}, ${name} 👋 | Student Portal`;
+
+/* ===== logout ===== */
+function logout(){
+ localStorage.clear();
+ location.href="index.html";
+}
 
 /* ===== toast ===== */
 function toast(m){
@@ -120,11 +143,22 @@ function post(d){
   method:"POST",
   headers:{"Content-Type":"text/plain"},
   body:JSON.stringify(d)
- }).then(r=>r.json());
+ })
+ .then(r=>r.json())
+ .catch(()=>toast("Network error"));
 }
 
 /* ===== QR scan ===== */
 function startQrScan(){
+
+ if(Date.now()-lastScanTime < 15000){
+   toast("Wait before scanning again");
+   return;
+ }
+
+ scanStatus.innerText="Scanning...";
+ scanStatus.style.background="#ff9800";
+
  scanner.style.display="block";
  qrScanner=new Html5Qrcode("qr-reader");
 
@@ -136,9 +170,13 @@ function startQrScan(){
    sessionId=p[0];
    signature=p[1]||"";
    subjectId=p[2]||"";
+
    qrScanner.stop();
    scanner.style.display="none";
-   toast("QR verified ✅");
+
+   scanStatus.innerText="QR OK";
+   scanStatus.style.background="#2e7d32";
+
    openFaceCamera();
   }
  );
@@ -151,18 +189,14 @@ function openFaceCamera(){
  .then(s=>{
    stream=s;
    video.srcObject=s;
-   video.play();
  });
 }
 
-/* ===== multi-frame capture ===== */
+/* ===== capture ===== */
 function captureFace(){
 
- faceFrames=[];
- for(let i=0;i<3;i++){
-   canvas.getContext("2d").drawImage(video,0,0,260,200);
-   faceFrames.push(canvas.toDataURL());
- }
+ canvas.getContext("2d").drawImage(video,0,0,260,200);
+ const faceImage=canvas.toDataURL();
 
  navigator.geolocation.getCurrentPosition(pos=>{
    post({
@@ -172,11 +206,14 @@ function captureFace(){
      subjectId,
      signature,
      deviceId:getDeviceId(),
-     faceImage:faceFrames[0],
+     faceImage,
      latitude:pos.coords.latitude,
      longitude:pos.coords.longitude
    }).then(r=>{
      toast(r.message);
+     lastScanTime=Date.now();
+     document.getElementById("lastScan").innerText=
+       "Last Scan: "+new Date().toLocaleTimeString();
      stopCam();
    });
  });
@@ -192,7 +229,10 @@ function viewMyAttendance(){
  post({action:"getMyStudentAttendance",email})
  .then(r=>{
    attBody.innerHTML="";
-   if(!r.data.length){toast("No attendance");return;}
+   if(!r.data || !r.data.length){
+     toast("No attendance");
+     return;
+   }
 
    let present=0;
 
@@ -207,7 +247,10 @@ function viewMyAttendance(){
    });
 
    const pct=Math.round(present/r.data.length*100);
-   percentBox.innerHTML=`Attendance %: <b>${pct}%</b>`;
+
+   const color=pct>=75?"#2e7d32":"#c62828";
+   percentBox.innerHTML=
+   `Attendance %: <span class="badge" style="background:${color}">${pct}%</span>`;
 
    drawChart(r.data);
    showMap(r.data.at(-1));
