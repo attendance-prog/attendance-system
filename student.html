@@ -104,6 +104,14 @@ if(!/Android|iPhone/i.test(navigator.userAgent)){
 <iframe id="mapBox" width="100%" height="200"></iframe>
 
 <div id="toast"></div>
+<hr>
+
+<h3>📅 My Timetable</h3>
+
+<table id="stuTT" border="1" style="width:100%;font-size:12px">
+<thead id="stuTTHead"></thead>
+<tbody id="stuTTBody"></tbody>
+</table>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
@@ -288,6 +296,45 @@ document.addEventListener("visibilitychange",()=>{
  if(document.hidden)
    document.body.innerHTML="<h2>⚠️ Screenshot blocked</h2>";
 });
+ /* ===== STUDENT TIMETABLE VIEW ===== */
+
+function loadStudentTimetable(){
+
+ post({action:"getStudentTimetableView"})
+ .then(r=>{
+
+   if(!r.success || !r.data.length){
+     return;
+   }
+
+   const head = document.getElementById("stuTTHead");
+   const body = document.getElementById("stuTTBody");
+
+   head.innerHTML="";
+   body.innerHTML="";
+
+   const cols = Object.keys(r.data[0]);
+
+   // header row
+   let h = "<tr>";
+   cols.forEach(c=> h += `<th>${c}</th>`);
+   h += "</tr>";
+   head.innerHTML = h;
+
+   // rows
+   r.data.forEach(row=>{
+     let tr = "<tr>";
+     cols.forEach(c=>{
+       tr += `<td>${row[c]||""}</td>`;
+     });
+     tr += "</tr>";
+     body.innerHTML += tr;
+   });
+
+ });
+}
+loadStudentTimetable();
+
 </script>
 
 </body>
