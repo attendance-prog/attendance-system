@@ -9,32 +9,12 @@
 <script src="https://www.gstatic.com/charts/loader.js"></script>
 
 <style>
-body{
- font-family:Arial;
- padding:20px;
- background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
-}
+body{font-family:Arial;padding:20px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);}
 h2{color:#2e7d32}
 button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px}
-#welcomeBar{
- background:#1b5e20;
- color:white;
- padding:12px;
- border-radius:8px;
- margin-bottom:15px;
-}
-#toast{
- position:fixed;
- bottom:20px;
- right:20px;
- background:#1b5e20;
- color:white;
- padding:10px 16px;
- border-radius:6px;
- display:none;
-}
-table{border-collapse:collapse}
-td,th{padding:6px}
+#welcomeBar{background:#1b5e20;color:white;padding:12px;border-radius:8px;margin-bottom:15px;}
+#toast{position:fixed;bottom:20px;right:20px;background:#1b5e20;color:white;padding:10px 16px;border-radius:6px;display:none;}
+table{border-collapse:collapse} td,th{padding:6px}
 </style>
 </head>
 
@@ -48,7 +28,6 @@ if(localStorage.getItem("role")!=="faculty"){
 </script>
 
 <div id="welcomeBar"></div>
-
 <h2>🌱 GO GREEN – Faculty Dashboard</h2>
 <button onclick="logout()">Logout</button>
 
@@ -64,30 +43,19 @@ if(localStorage.getItem("role")!=="faculty"){
 </div>
 
 <table id="attTable" style="display:none" border="1">
-<thead>
-<tr><th>Date</th><th>Status</th><th>Time</th></tr>
-</thead>
+<thead><tr><th>Date</th><th>Status</th><th>Time</th></tr></thead>
 <tbody id="attBody"></tbody>
 </table>
 
 <hr>
 
 <h3>Generate QR Session</h3>
-
 <div>Current Slot Subject: <b id="autoSubject">Checking...</b></div>
-
 <input id="topic" placeholder="Topic"><br>
 <input id="notes" placeholder="Notes link"><br>
-
 <button id="qrBtn" onclick="generateQR()" disabled>Generate QR</button>
-
 <div id="qrBox"></div>
 <div id="qrTimer"></div>
-
-<hr>
-
-<h3>📊 My Attendance Trend</h3>
-<canvas id="attChart"></canvas>
 
 <hr>
 
@@ -102,14 +70,9 @@ Attendance %: <b id="myPct">--</b>
 <thead>
 <tr>
 <th>Day</th>
-<th>09:00–09:50</th>
-<th>09:50–10:40</th>
-<th>10:40–11:30</th>
-<th>11:35–12:25</th>
-<th>13:15–14:05</th>
-<th>14:10–15:00</th>
-<th>15:00–15:50</th>
-<th>15:50–16:40</th>
+<th>09:00–09:50</th><th>09:50–10:40</th><th>10:40–11:30</th>
+<th>11:35–12:25</th><th>13:15–14:05</th>
+<th>14:10–15:00</th><th>15:00–15:50</th><th>15:50–16:40</th>
 </tr>
 </thead>
 <tbody></tbody>
@@ -128,214 +91,105 @@ Attendance %: <b id="myPct">--</b>
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email=localStorage.getItem("email");
-const name=localStorage.getItem("name") || email.split("@")[0];
+const name=localStorage.getItem("name")||email.split("@")[0];
 
 const qrBtn=document.getElementById("qrBtn");
-const qrBox=document.getElementById("qrBox");
-const qrTimerEl=document.getElementById("qrTimer");
 const toastBox=document.getElementById("toast");
 
-let stream=null;
-let qrCountdown=null;
-
-/* ===== utils ===== */
 function post(d){
- return fetch(API,{
-  method:"POST",
-  headers:{"Content-Type":"text/plain"},
-  body:JSON.stringify(d)
- }).then(r=>r.json());
+ return fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(d)})
+ .then(r=>r.json());
 }
+function toast(m){toastBox.innerText=m;toastBox.style.display="block";setTimeout(()=>toastBox.style.display="none",2500);}
+function logout(){localStorage.clear();location.href="index.html";}
 
-function toast(m){
- toastBox.innerText=m;
- toastBox.style.display="block";
- setTimeout(()=>toastBox.style.display="none",2500);
-}
+welcomeBar.innerHTML=`Good Day, ${name} 👋 | Faculty Portal`;
 
-function logout(){
- localStorage.clear();
- location.href="index.html";
-}
-
-/* ===== greeting ===== */
-const hr=new Date().getHours();
-const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
-welcomeBar.innerHTML=`${g}, ${name} 👋 | Faculty Portal`;
-
-/* ===== camera ===== */
+/* CAMERA */
+let stream=null;
 function startCamera(){
  cam.style.display="block";
- navigator.mediaDevices.getUserMedia({video:true})
- .then(s=>{
-   stream=s;
-   video.srcObject=s;
+ navigator.mediaDevices.getUserMedia({video:true}).then(s=>{
+  stream=s; video.srcObject=s;
  });
 }
-
 function captureAttendance(){
  navigator.geolocation.getCurrentPosition(pos=>{
-   post({
-     action:"markStaffAttendance",
-     email,
-     role:"FACULTY",
-     latitude:pos.coords.latitude,
-     longitude:pos.coords.longitude
-   }).then(r=>{
-     toast(r.message);
-     stopCamera();
-     loadCurrentSlot();
-     loadMyAnalytics();
-   });
+  post({action:"markStaffAttendance",email,role:"FACULTY",latitude:pos.coords.latitude,longitude:pos.coords.longitude})
+  .then(r=>{toast(r.message); stopCamera(); loadCurrentSlot(); loadMyAnalytics();});
  });
 }
+function stopCamera(){if(stream)stream.getTracks().forEach(t=>t.stop()); cam.style.display="none";}
 
-function stopCamera(){
- if(stream) stream.getTracks().forEach(t=>t.stop());
- cam.style.display="none";
-}
-
-/* ===== attendance view ===== */
+/* VIEW ATT */
 function viewMyAttendance(){
- post({action:"getMyAttendance",email})
- .then(r=>{
-   attBody.innerHTML="";
-   r.data.forEach(x=>{
-     attBody.innerHTML+=`
-     <tr>
-       <td>${new Date(x[0]).toLocaleDateString()}</td>
-       <td>${x[6]}</td>
-       <td>${new Date(x[8]).toLocaleTimeString()}</td>
-     </tr>`;
-   });
-   attTable.style.display="table";
- });
-}
-
-/* ===== current slot subject ===== */
-function loadCurrentSlot(){
- post({action:"getCurrentSlot"}).then(r=>{
-   if(!r.data){
-     autoSubject.innerText="No active slot";
-     qrBtn.disabled=true;
-     return;
-   }
-   autoSubject.innerText=r.data.subject;
-   qrBtn.disabled=false;
- });
-}
-
-/* ===== QR ===== */
-function generateQR(){
- checkSlotBeforeQR().then(ok=>{
-  if(!ok) return;
-
-  navigator.geolocation.getCurrentPosition(pos=>{
-    post({
-      action:"createFacultySession",
-      facultyEmail:email,
-      latitude:pos.coords.latitude,
-      longitude:pos.coords.longitude,
-      topic:topic.value,
-      notesLink:notes.value
-    }).then(r=>{
-      if(!r.success){
-        alert(r.message);
-        return;
-      }
-
-      qrBox.innerHTML=
-      `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">`;
-
-      startQrTimer(300);
-    });
+ post({action:"getMyAttendance",email}).then(r=>{
+  attBody.innerHTML="";
+  r.data.forEach(x=>{
+   attBody.innerHTML+=`<tr><td>${new Date(x[0]).toLocaleDateString()}</td><td>${x[6]}</td><td>${new Date(x[8]).toLocaleTimeString()}</td></tr>`;
   });
+  attTable.style.display="table";
  });
 }
 
-function checkSlotBeforeQR(){
- return post({action:"getCurrentSlot"}).then(r=>{
-  if(!r.data){
-    alert("❌ No active slot now");
-    return false;
-  }
-  if(r.data.faculty.toLowerCase()!==email.toLowerCase()){
-    alert("❌ Slot not assigned to you");
-    return false;
-  }
-  return true;
- });
-}
-
-/* ===== QR timer ===== */
-function startQrTimer(sec){
- clearInterval(qrCountdown);
- qrCountdown=setInterval(()=>{
-  sec--;
-  qrTimerEl.innerText="QR expires in "+sec+" sec";
-  if(sec<=0){
-    clearInterval(qrCountdown);
-    qrBox.innerHTML="";
-  }
- },1000);
-}
-
-/* ===== leave ===== */
-function applyLeave(){
+/* SLOT AUTO */
+function loadCurrentSlot(){
  post({
-  action:"applyLeave",
-  email,
-  from:leaveFrom.value,
-  to:leaveTo.value,
-  reason:leaveReason.value
- }).then(r=>toast(r.message));
+ action:"getCurrentSlot"
+}).then(r=>{
+ if(!r.data){
+   subjectSel.innerHTML="<option>No slot</option>";
+   qrBtn.disabled=true;
+   return;
+ }
+
+ subjectSel.innerHTML =
+ `<option value="${r.data.subject}">
+   ${r.data.subject}
+ </option>`;
+});
+
+
+/* QR */
+function generateQR(){
+ post({action:"createFacultySession",facultyEmail:email,topic:topic.value,notesLink:notes.value})
+ .then(r=>{
+  if(!r.success){alert(r.message);return;}
+  qrBox.innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">`;
+ });
 }
 
-/* ===== analytics ===== */
+/* LEAVE */
+function applyLeave(){
+ post({action:"applyLeave",email,from:leaveFrom.value,to:leaveTo.value,reason:leaveReason.value})
+ .then(r=>toast(r.message));
+}
+
+/* ANALYTICS */
 google.charts.load('current',{packages:['corechart']});
 google.charts.setOnLoadCallback(loadMyAnalytics);
-
 function loadMyAnalytics(){
- post({action:"getMyAttendanceAnalytics",email})
- .then(r=>{
+ post({action:"getMyAttendanceAnalytics",email}).then(r=>{
   myPct.innerText=r.percent+"%";
   const data=google.visualization.arrayToDataTable([
-    ["Status","Count"],
-    ["Present",r.present],
-    ["Late",r.late],
-    ["Absent",r.absent]
-  ]);
+   ["Status","Count"],["Present",r.present],["Late",r.late],["Absent",r.absent]]);
   new google.visualization.PieChart(myChart).draw(data);
  });
 }
 
-/* ===== timetable ===== */
+/* TIMETABLE */
 function loadMyTimetable(){
- post({action:"getFacultyOwnTimetable",email})
- .then(r=>{
-  const slots=[9,9.5,10.4,11.35,13.15,14.1,15,15.5];
-  const days=["Monday","Tuesday","Wednesday","Thursday","Friday"];
-  myTT.querySelector("tbody").innerHTML="";
-
-  days.forEach(d=>{
-   let row=`<tr><td>${d}</td>`;
-   slots.forEach(s=>{
-    const lec=r.data.find(x=>x.day===d && Number(x.start)==Number(s));
-    row+=lec?`<td>${lec.subject}<br>${lec.room}</td>`:`<td></td>`;
-   });
-   row+="</tr>";
-   myTT.querySelector("tbody").innerHTML+=row;
+ post({action:"getFacultyOwnTimetable",email}).then(r=>{
+  const body=myTT.querySelector("tbody"); body.innerHTML="";
+  ["Monday","Tuesday","Wednesday","Thursday","Friday"].forEach(d=>{
+   body.innerHTML+=`<tr><td>${d}</td><td colspan="8">Loaded</td></tr>`;
   });
  });
 }
 
-/* ===== init ===== */
 loadCurrentSlot();
 loadMyAnalytics();
 loadMyTimetable();
-setInterval(loadCurrentSlot,60000);
-
 </script>
-
 </body>
 </html>
