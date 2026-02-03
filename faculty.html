@@ -1,195 +1,289 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>GO GREEN – Faculty</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://www.gstatic.com/charts/loader.js"></script>
-
-<style>
-body{font-family:Arial;padding:20px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);}
-h2{color:#2e7d32}
-button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px}
-#welcomeBar{background:#1b5e20;color:white;padding:12px;border-radius:8px;margin-bottom:15px;}
-#toast{position:fixed;bottom:20px;right:20px;background:#1b5e20;color:white;padding:10px 16px;border-radius:6px;display:none;}
-table{border-collapse:collapse} td,th{padding:6px}
-</style>
-</head>
-
-<body>
-
-<script>
-if(localStorage.getItem("role")!=="faculty"){
- alert("Unauthorized");
- location.href="index.html";
-}
-</script>
-
-<div id="welcomeBar"></div>
-<h2>🌱 GO GREEN – Faculty Dashboard</h2>
-<button onclick="logout()">Logout</button>
-
-<hr>
-
-<h3>Mark My Attendance</h3>
-<button onclick="startCamera()">Mark Attendance</button>
-<button onclick="viewMyAttendance()">View My Attendance</button>
-
-<div id="cam" style="display:none">
-<video id="video" width="260" autoplay playsinline></video><br>
-<button onclick="captureAttendance()">Capture</button>
-</div>
-
-<table id="attTable" style="display:none" border="1">
-<thead><tr><th>Date</th><th>Status</th><th>Time</th></tr></thead>
-<tbody id="attBody"></tbody>
-</table>
-
-<hr>
-
-<h3>Generate QR Session</h3>
-<div>Current Slot Subject: <b id="autoSubject">Checking...</b></div>
-<input id="topic" placeholder="Topic"><br>
+<html>  
+<head>  
+<meta charset="UTF-8">  
+<title>GO GREEN – Faculty</title>  
+<meta name="viewport" content="width=device-width,initial-scale=1">  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  <script src="https://www.gstatic.com/charts/loader.js"></script>  <style>  
+body{  
+ font-family:Arial;  
+ padding:20px;  
+ background:linear-gradient(135deg,#e8f5e9,#c8e6c9);  
+}  
+h2{color:#2e7d32}  
+button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px}  
+#welcomeBar{  
+ background:#1b5e20;  
+ color:white;  
+ padding:12px;  
+ border-radius:8px;  
+ margin-bottom:15px;  
+}  
+#toast{  
+ position:fixed;  
+ bottom:20px;  
+ right:20px;  
+ background:#1b5e20;  
+ color:white;  
+ padding:10px 16px;  
+ border-radius:6px;  
+ display:none;  
+}  
+table{border-collapse:collapse}  
+td,th{padding:6px}  
+</style>  </head>  <body>  <script>  
+if(localStorage.getItem("role")!=="faculty"){  
+ alert("Unauthorized");  
+ location.href="index.html";  
+}  
+</script>  <div id="welcomeBar"></div>  <h2>🌱 GO GREEN – Faculty Dashboard</h2>  
+<button onclick="logout()">Logout</button>  <hr>  <h3>Mark My Attendance</h3>  
+<button onclick="startCamera()">Mark Attendance</button>  
+<button onclick="viewMyAttendance()">View My Attendance</button>  <div id="cam" style="display:none">  
+<video id="video" width="260" autoplay playsinline></video><br>  
+<button onclick="captureAttendance()">Capture</button>  
+</div>  <table id="attTable" style="display:none" border="1">  
+<thead>  
+<tr><th>Date</th><th>Status</th><th>Time</th></tr>  
+</thead>  
+<tbody id="attBody"></tbody>  
+</table>  <hr>  <h3>Generate QR Session</h3>  <div>Current Slot Subject: <b id="autoSubject">Checking...</b></div>  <input id="topic" placeholder="Topic"><br>
 <input id="notes" placeholder="Notes link"><br>
+
 <button id="qrBtn" onclick="generateQR()" disabled>Generate QR</button>
-<div id="qrBox"></div>
-<div id="qrTimer"></div>
 
-<hr>
-
-<h3>📊 My Attendance Analytics</h3>
-Attendance %: <b id="myPct">--</b>
-<div id="myChart" style="height:300px"></div>
-
-<hr>
-
-<h3>📅 My Timetable</h3>
-<table id="myTT" border="1">
-<thead>
-<tr>
-<th>Day</th>
-<th>09:00–09:50</th><th>09:50–10:40</th><th>10:40–11:30</th>
-<th>11:35–12:25</th><th>13:15–14:05</th>
-<th>14:10–15:00</th><th>15:00–15:50</th><th>15:50–16:40</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-
-<hr>
-
-<h3>📝 Apply Leave</h3>
-<input type="date" id="leaveFrom">
-<input type="date" id="leaveTo">
-<input placeholder="Reason" id="leaveReason">
-<button onclick="applyLeave()">Apply Leave</button>
-
-<div id="toast"></div>
-
-<script>
-const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-const email=localStorage.getItem("email");
-const name=localStorage.getItem("name")||email.split("@")[0];
-
-const qrBtn=document.getElementById("qrBtn");
-const toastBox=document.getElementById("toast");
-
-function post(d){
- return fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(d)})
- .then(r=>r.json());
-}
-function toast(m){toastBox.innerText=m;toastBox.style.display="block";setTimeout(()=>toastBox.style.display="none",2500);}
-function logout(){localStorage.clear();location.href="index.html";}
-
-welcomeBar.innerHTML=`Good Day, ${name} 👋 | Faculty Portal`;
-
-/* CAMERA */
-let stream=null;
-function startCamera(){
- cam.style.display="block";
- navigator.mediaDevices.getUserMedia({video:true}).then(s=>{
-  stream=s; video.srcObject=s;
- });
-}
-function captureAttendance(){
- navigator.geolocation.getCurrentPosition(pos=>{
-  post({action:"markStaffAttendance",email,role:"FACULTY",latitude:pos.coords.latitude,longitude:pos.coords.longitude})
-  .then(r=>{toast(r.message); stopCamera(); loadCurrentSlot(); loadMyAnalytics();});
- });
-}
-function stopCamera(){if(stream)stream.getTracks().forEach(t=>t.stop()); cam.style.display="none";}
-
-/* VIEW ATT */
-function viewMyAttendance(){
- post({action:"getMyAttendance",email}).then(r=>{
-  attBody.innerHTML="";
-  r.data.forEach(x=>{
-   attBody.innerHTML+=`<tr><td>${new Date(x[0]).toLocaleDateString()}</td><td>${x[6]}</td><td>${new Date(x[8]).toLocaleTimeString()}</td></tr>`;
-  });
-  attTable.style.display="table";
- });
-}
-
-/* SLOT AUTO */
-function loadCurrentSlot(){
- post({
- action:"getCurrentSlot"
-}).then(r=>{
- if(!r.data){
-   subjectSel.innerHTML="<option>No slot</option>";
-   qrBtn.disabled=true;
-   return;
- }
-
- subjectSel.innerHTML =
- `<option value="${r.data.subject}">
-   ${r.data.subject}
- </option>`;
-});
-
-
-/* QR */
-function generateQR(){
- post({action:"createFacultySession",facultyEmail:email,topic:topic.value,notesLink:notes.value})
- .then(r=>{
-  if(!r.success){alert(r.message);return;}
-  qrBox.innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">`;
- });
-}
-
-/* LEAVE */
-function applyLeave(){
- post({action:"applyLeave",email,from:leaveFrom.value,to:leaveTo.value,reason:leaveReason.value})
- .then(r=>toast(r.message));
-}
-
-/* ANALYTICS */
-google.charts.load('current',{packages:['corechart']});
-google.charts.setOnLoadCallback(loadMyAnalytics);
-function loadMyAnalytics(){
- post({action:"getMyAttendanceAnalytics",email}).then(r=>{
-  myPct.innerText=r.percent+"%";
-  const data=google.visualization.arrayToDataTable([
-   ["Status","Count"],["Present",r.present],["Late",r.late],["Absent",r.absent]]);
-  new google.visualization.PieChart(myChart).draw(data);
- });
-}
-
-/* TIMETABLE */
-function loadMyTimetable(){
- post({action:"getFacultyOwnTimetable",email}).then(r=>{
-  const body=myTT.querySelector("tbody"); body.innerHTML="";
-  ["Monday","Tuesday","Wednesday","Thursday","Friday"].forEach(d=>{
-   body.innerHTML+=`<tr><td>${d}</td><td colspan="8">Loaded</td></tr>`;
-  });
- });
-}
-
-loadCurrentSlot();
-loadMyAnalytics();
-loadMyTimetable();
-</script>
-</body>
+<div id="qrBox"></div>  
+<div id="qrTimer"></div>  <hr>  <h3>📊 My Attendance Trend</h3>  
+<canvas id="attChart"></canvas>  <hr>  <h3>📊 My Attendance Analytics</h3>  
+Attendance %: <b id="myPct">--</b>  
+<div id="myChart" style="height:300px"></div>  <hr>  <h3>📅 My Timetable</h3>  
+<table id="myTT" border="1">  
+<thead>  
+<tr>  
+<th>Day</th>  
+<th>09:00–09:50</th>  
+<th>09:50–10:40</th>  
+<th>10:40–11:30</th>  
+<th>11:35–12:25</th>  
+<th>13:15–14:05</th>  
+<th>14:10–15:00</th>  
+<th>15:00–15:50</th>  
+<th>15:50–16:40</th>  
+</tr>  
+</thead>  
+<tbody></tbody>  
+</table>  <hr>  <h3>📝 Apply Leave</h3>  
+<input type="date" id="leaveFrom">  
+<input type="date" id="leaveTo">  
+<input placeholder="Reason" id="leaveReason">  
+<button onclick="applyLeave()">Apply Leave</button>  <div id="toast"></div>  <script>  
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";  
+const email=localStorage.getItem("email");  
+const name=localStorage.getItem("name") || email.split("@")[0];  
+  
+const qrBtn=document.getElementById("qrBtn");  
+const qrBox=document.getElementById("qrBox");  
+const qrTimerEl=document.getElementById("qrTimer");  
+const toastBox=document.getElementById("toast");  
+  
+let stream=null;  
+let qrCountdown=null;  
+  
+/* ===== utils ===== */  
+function post(d){  
+ return fetch(API,{  
+  method:"POST",  
+  headers:{"Content-Type":"text/plain"},  
+  body:JSON.stringify(d)  
+ }).then(r=>r.json());  
+}  
+  
+function toast(m){  
+ toastBox.innerText=m;  
+ toastBox.style.display="block";  
+ setTimeout(()=>toastBox.style.display="none",2500);  
+}  
+  
+function logout(){  
+ localStorage.clear();  
+ location.href="index.html";  
+}  
+  
+/* ===== greeting ===== */  
+const hr=new Date().getHours();  
+const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";  
+welcomeBar.innerHTML=`${g}, ${name} 👋 | Faculty Portal`;  
+  
+/* ===== camera ===== */  
+function startCamera(){  
+ cam.style.display="block";  
+ navigator.mediaDevices.getUserMedia({video:true})  
+ .then(s=>{  
+   stream=s;  
+   video.srcObject=s;  
+ });  
+}  
+  
+function captureAttendance(){  
+ navigator.geolocation.getCurrentPosition(pos=>{  
+   post({  
+     action:"markStaffAttendance",  
+     email,  
+     role:"FACULTY",  
+     latitude:pos.coords.latitude,  
+     longitude:pos.coords.longitude  
+   }).then(r=>{  
+     toast(r.message);  
+     stopCamera();  
+     loadCurrentSlot();  
+     loadMyAnalytics();  
+   });  
+ });  
+}  
+  
+function stopCamera(){  
+ if(stream) stream.getTracks().forEach(t=>t.stop());  
+ cam.style.display="none";  
+}  
+  
+/* ===== attendance view ===== */  
+function viewMyAttendance(){  
+ post({action:"getMyAttendance",email})  
+ .then(r=>{  
+   attBody.innerHTML="";  
+   r.data.forEach(x=>{  
+     attBody.innerHTML+=`  
+     <tr>  
+       <td>${new Date(x[0]).toLocaleDateString()}</td>  
+       <td>${x[6]}</td>  
+       <td>${new Date(x[8]).toLocaleTimeString()}</td>  
+     </tr>`;  
+   });  
+   attTable.style.display="table";  
+ });  
+}  
+  
+/* ===== current slot subject ===== */  
+function loadCurrentSlot(){  
+ post({action:"getCurrentSlot"}).then(r=>{  
+   if(!r.data){  
+     autoSubject.innerText="No active slot";  
+     qrBtn.disabled=true;  
+     return;  
+   }  
+   autoSubject.innerText=r.data.subject;  
+   qrBtn.disabled=false;  
+ });  
+}  
+  
+/* ===== QR ===== */  
+function generateQR(){  
+ checkSlotBeforeQR().then(ok=>{  
+  if(!ok) return;  
+  
+  navigator.geolocation.getCurrentPosition(pos=>{  
+    post({  
+      action:"createFacultySession",  
+      facultyEmail:email,  
+      latitude:pos.coords.latitude,  
+      longitude:pos.coords.longitude,  
+      topic:topic.value,  
+      notesLink:notes.value  
+    }).then(r=>{  
+      if(!r.success){  
+        alert(r.message);  
+        return;  
+      }  
+  
+      qrBox.innerHTML=  
+      `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">`;  
+  
+      startQrTimer(300);  
+    });  
+  });  
+ });  
+}  
+  
+function checkSlotBeforeQR(){  
+ return post({action:"getCurrentSlot"}).then(r=>{  
+  if(!r.data){  
+    alert("❌ No active slot now");  
+    return false;  
+  }  
+  if(r.data.faculty.toLowerCase()!==email.toLowerCase()){  
+    alert("❌ Slot not assigned to you");  
+    return false;  
+  }  
+  return true;  
+ });  
+}  
+  
+/* ===== QR timer ===== */  
+function startQrTimer(sec){  
+ clearInterval(qrCountdown);  
+ qrCountdown=setInterval(()=>{  
+  sec--;  
+  qrTimerEl.innerText="QR expires in "+sec+" sec";  
+  if(sec<=0){  
+    clearInterval(qrCountdown);  
+    qrBox.innerHTML="";  
+  }  
+ },1000);  
+}  
+  
+/* ===== leave ===== */  
+function applyLeave(){  
+ post({  
+  action:"applyLeave",  
+  email,  
+  from:leaveFrom.value,  
+  to:leaveTo.value,  
+  reason:leaveReason.value  
+ }).then(r=>toast(r.message));  
+}  
+  
+/* ===== analytics ===== */  
+google.charts.load('current',{packages:['corechart']});  
+google.charts.setOnLoadCallback(loadMyAnalytics);  
+  
+function loadMyAnalytics(){  
+ post({action:"getMyAttendanceAnalytics",email})  
+ .then(r=>{  
+  myPct.innerText=r.percent+"%";  
+  const data=google.visualization.arrayToDataTable([  
+    ["Status","Count"],  
+    ["Present",r.present],  
+    ["Late",r.late],  
+    ["Absent",r.absent]  
+  ]);  
+  new google.visualization.PieChart(myChart).draw(data);  
+ });  
+}  
+  
+/* ===== timetable ===== */  
+function loadMyTimetable(){  
+ post({action:"getFacultyOwnTimetable",email})  
+ .then(r=>{  
+  const slots=[9,9.5,10.4,11.35,13.15,14.1,15,15.5];  
+  const days=["Monday","Tuesday","Wednesday","Thursday","Friday"];  
+  myTT.querySelector("tbody").innerHTML="";  
+  
+  days.forEach(d=>{  
+   let row=`<tr><td>${d}</td>`;  
+   slots.forEach(s=>{  
+    const lec=r.data.find(x=>x.day===d && Number(x.start)==Number(s));  
+    row+=lec?`<td>${lec.subject}<br>${lec.room}</td>`:`<td></td>`;  
+   });  
+   row+="</tr>";  
+   myTT.querySelector("tbody").innerHTML+=row;  
+  });  
+ });  
+}  
+  
+/* ===== init ===== */  
+loadCurrentSlot();  
+loadMyAnalytics();  
+loadMyTimetable();  
+setInterval(loadCurrentSlot,60000);  
+  
+</script>  </body>  
 </html>
