@@ -63,8 +63,6 @@ if(localStorage.getItem("role")!=="faculty"){
 <button onclick="captureAttendance()">Capture</button>
 </div>
 
-<canvas id="canvas" width="260" height="200" style="display:none"></canvas>
-
 <table id="attTable" style="display:none" border="1">
 <thead>
 <tr><th>Date</th><th>Status</th><th>Time</th></tr>
@@ -76,7 +74,8 @@ if(localStorage.getItem("role")!=="faculty"){
 
 <h3>Generate QR Session</h3>
 
-<select id="subject"></select><br>
+<div>Current Slot Subject: <b id="autoSubject">Checking...</b></div>
+
 <input id="topic" placeholder="Topic"><br>
 <input id="notes" placeholder="Notes link"><br>
 
@@ -116,15 +115,21 @@ Attendance %: <b id="myPct">--</b>
 <tbody></tbody>
 </table>
 
+<hr>
+
+<h3>📝 Apply Leave</h3>
+<input type="date" id="leaveFrom">
+<input type="date" id="leaveTo">
+<input placeholder="Reason" id="leaveReason">
+<button onclick="applyLeave()">Apply Leave</button>
+
 <div id="toast"></div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec"; // ← keep your deployed URL
-
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email=localStorage.getItem("email");
 const name=localStorage.getItem("name") || email.split("@")[0];
 
-const subjectSel=document.getElementById("subject");
 const qrBtn=document.getElementById("qrBtn");
 const qrBox=document.getElementById("qrBox");
 const qrTimerEl=document.getElementById("qrTimer");
@@ -133,8 +138,7 @@ const toastBox=document.getElementById("toast");
 let stream=null;
 let qrCountdown=null;
 
-/* ========= UTIL ========= */
-
+/* ===== utils ===== */
 function post(d){
  return fetch(API,{
   method:"POST",
@@ -154,23 +158,19 @@ function logout(){
  location.href="index.html";
 }
 
-/* ========= GREETING ========= */
-
+/* ===== greeting ===== */
 const hr=new Date().getHours();
 const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
-document.getElementById("welcomeBar").innerHTML =
- `${g}, ${name} 👋 | Faculty Portal`;
+welcomeBar.innerHTML=`${g}, ${name} 👋 | Faculty Portal`;
 
-/* ========= CAMERA ========= */
-
+/* ===== camera ===== */
 function startCamera(){
- document.getElementById("cam").style.display="block";
+ cam.style.display="block";
  navigator.mediaDevices.getUserMedia({video:true})
  .then(s=>{
    stream=s;
-   document.getElementById("video").srcObject=s;
- })
- .catch(()=>toast("Camera permission denied"));
+   video.srcObject=s;
+ });
 }
 
 function captureAttendance(){
@@ -180,292 +180,160 @@ function captureAttendance(){
      email,
      role:"FACULTY",
      latitude:pos.coords.latitude,
-     longitude:pos.coords.longitude,
-     room:"CLASSROOM"
+     longitude:pos.coords.longitude
    }).then(r=>{
      toast(r.message);
-     if(r.success){
-       qrBtn.disabled=false;
-       loadSubjects();
-       loadMyAnalytics();
-     }
      stopCamera();
+     loadCurrentSlot();
+     loadMyAnalytics();
    });
  });
 }
 
 function stopCamera(){
  if(stream) stream.getTracks().forEach(t=>t.stop());
- document.getElementById("cam").style.display="none";
+ cam.style.display="none";
 }
 
-/* ========= ATTENDANCE VIEW ========= */
-
+/* ===== attendance view ===== */
 function viewMyAttendance(){
  post({action:"getMyAttendance",email})
  .then(r=>{
-   const body=document.getElementById("attBody");
-   body.innerHTML="";
+   attBody.innerHTML="";
    r.data.forEach(x=>{
-     body.innerHTML+=`
+     attBody.innerHTML+=`
      <tr>
        <td>${new Date(x[0]).toLocaleDateString()}</td>
        <td>${x[6]}</td>
        <td>${new Date(x[8]).toLocaleTimeString()}</td>
      </tr>`;
    });
-   document.getElementById("attTable").style.display="table";
-   drawChart(r.data);
+   attTable.style.display="table";
  });
 }
-<hr>
 
-<h3>📅 Apply Leave</h3>
-
-<input type="date" id="leaveFrom">
-<input type="date" id="leaveTo">
-<input placeholder="Reason" id="leaveReason">
-
-<button onclick="applyLeave()">Apply Leave</button>
-
-/* ========= TREND CHART ========= */
-
-function drawChart(rows){
- new Chart(document.getElementById("attChart"),{
-   type:"line",
-   data:{
-     labels:rows.map(r=>new Date(r[0]).toLocaleDateString()),
-     datasets:[{
-       label:"Present",
-       data:rows.map(r=>r[6]==="PRESENT"?1:0)
-     }]
+/* ===== current slot subject ===== */
+function loadCurrentSlot(){
+ post({action:"getCurrentSlot"}).then(r=>{
+   if(!r.data){
+     autoSubject.innerText="No active slot";
+     qrBtn.disabled=true;
+     return;
    }
+   autoSubject.innerText=r.data.subject;
+   qrBtn.disabled=false;
  });
 }
 
-/* ========= SUBJECTS (OWN ONLY) ========= */
-
-function loadSubjects(){
-
-  post({
-    action:"getCurrentSlot"
-  }).then(r=>{
-
-    if(!r.data){
-      subjectSel.innerHTML = "<option>No active slot</option>";
-      qrBtn.disabled = true;
-      return;
-    }
-
-    subjectSel.innerHTML =
-      `<option value="${r.data.subject}">
-        ${r.data.subject}
-      </option>`;
-
-    qrBtn.disabled = false;
-  });
-
-}
-
-function isWithinSlot(){
-
- const now = new Date();
- const time = now.getHours() + now.getMinutes()/60;
-
- /* YOUR SLOT TABLE */
- const slots = [
-  [9.00,9.50],
-  [9.50,10.40],
-  [10.40,11.30],
-  [11.35,12.25],
-  [13.15,14.05],
-  [14.10,15.00],
-  [15.00,15.50],
-  [15.50,16.40]
- ];
-
- return slots.some(s => time >= s[0] && time <= s[1]);
-}
-
-/* ========= QR ========= */
-
+/* ===== QR ===== */
 function generateQR(){
+ checkSlotBeforeQR().then(ok=>{
+  if(!ok) return;
 
-  checkSlotBeforeQR().then(ok=>{
-    if(!ok) return;
+  navigator.geolocation.getCurrentPosition(pos=>{
+    post({
+      action:"createFacultySession",
+      facultyEmail:email,
+      latitude:pos.coords.latitude,
+      longitude:pos.coords.longitude,
+      topic:topic.value,
+      notesLink:notes.value
+    }).then(r=>{
+      if(!r.success){
+        alert(r.message);
+        return;
+      }
 
-    // existing code continues here
+      qrBox.innerHTML=
+      `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">`;
 
-
- /* FRONT SLOT CHECK */
- if(!isWithinSlot()){
-   alert("❌ QR can be generated only during your lecture time slot");
-   return;
- }
-
- navigator.geolocation.getCurrentPosition(pos=>{
-
-   post({
-     action:"createFacultySession",
-     subjectId:subjectSel.value,
-     facultyEmail:email,
-     latitude:pos.coords.latitude,
-     longitude:pos.coords.longitude,
-     topic:document.getElementById("topic").value,
-     notesLink:document.getElementById("notes").value
-   })
-   .then(r=>{
-
-     if(!r.success){
-       alert("❌ " + r.message);
-       return;
-     }
-
-     qrBox.innerHTML =
-       `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">`;
-
-     startQrTimer(300);
-
-   });
-
+      startQrTimer(300);
+    });
+  });
  });
-
 }
 
-/* ========= QR TIMER ========= */
+function checkSlotBeforeQR(){
+ return post({action:"getCurrentSlot"}).then(r=>{
+  if(!r.data){
+    alert("❌ No active slot now");
+    return false;
+  }
+  if(r.data.faculty.toLowerCase()!==email.toLowerCase()){
+    alert("❌ Slot not assigned to you");
+    return false;
+  }
+  return true;
+ });
+}
 
+/* ===== QR timer ===== */
 function startQrTimer(sec){
  clearInterval(qrCountdown);
  qrCountdown=setInterval(()=>{
-   sec--;
-   qrTimerEl.innerText="QR expires in "+sec+" sec";
-   if(sec<=0){
-     clearInterval(qrCountdown);
-     qrTimerEl.innerText="QR expired";
-     qrBox.innerHTML="";
-   }
+  sec--;
+  qrTimerEl.innerText="QR expires in "+sec+" sec";
+  if(sec<=0){
+    clearInterval(qrCountdown);
+    qrBox.innerHTML="";
+  }
  },1000);
 }
 
-/* ========= OWN ANALYTICS ========= */
+/* ===== leave ===== */
+function applyLeave(){
+ post({
+  action:"applyLeave",
+  email,
+  from:leaveFrom.value,
+  to:leaveTo.value,
+  reason:leaveReason.value
+ }).then(r=>toast(r.message));
+}
 
+/* ===== analytics ===== */
 google.charts.load('current',{packages:['corechart']});
 google.charts.setOnLoadCallback(loadMyAnalytics);
 
 function loadMyAnalytics(){
  post({action:"getMyAttendanceAnalytics",email})
  .then(r=>{
-   if(!r.success) return;
-
-   document.getElementById("myPct").innerText=r.percent+"%";
-
-   const data=google.visualization.arrayToDataTable([
-     ["Status","Count"],
-     ["Present",r.present],
-     ["Late",r.late],
-     ["Absent",r.absent]
-   ]);
-
-   new google.visualization.PieChart(
-     document.getElementById("myChart")
-   ).draw(data);
+  myPct.innerText=r.percent+"%";
+  const data=google.visualization.arrayToDataTable([
+    ["Status","Count"],
+    ["Present",r.present],
+    ["Late",r.late],
+    ["Absent",r.absent]
+  ]);
+  new google.visualization.PieChart(myChart).draw(data);
  });
 }
 
-/* ========= OWN TIMETABLE ========= */
-
+/* ===== timetable ===== */
 function loadMyTimetable(){
-
-post({
-  action:"getFacultyOwnTimetable",
-  email: email
-})
+ post({action:"getFacultyOwnTimetable",email})
  .then(r=>{
+  const slots=[9,9.5,10.4,11.35,13.15,14.1,15,15.5];
+  const days=["Monday","Tuesday","Wednesday","Thursday","Friday"];
+  myTT.querySelector("tbody").innerHTML="";
 
-   const slots=[9,9.5,10.4,11.35,13.15,14.1,15,15.5];
-   const days=["Monday","Tuesday","Wednesday","Thursday","Friday"];
-
-   const body=document.querySelector("#myTT tbody");
-   body.innerHTML="";
-
-   days.forEach(d=>{
-     let row=`<tr><td>${d}</td>`;
-
-     slots.forEach(s=>{
-       const lec=r.data.find(x =>
-         x.day===d && Number(x.start)==Number(s)
-       );
-       row += lec
-        ? `<td>${lec.subject}<br>Room ${lec.room}</td>`
-        : `<td></td>`;
-     });
-
-     row+="</tr>";
-     body.innerHTML+=row;
+  days.forEach(d=>{
+   let row=`<tr><td>${d}</td>`;
+   slots.forEach(s=>{
+    const lec=r.data.find(x=>x.day===d && Number(x.start)==Number(s));
+    row+=lec?`<td>${lec.subject}<br>${lec.room}</td>`:`<td></td>`;
    });
-
+   row+="</tr>";
+   myTT.querySelector("tbody").innerHTML+=row;
+  });
  });
 }
 
-/* ========= INIT ========= */
-
-loadSubjects();
+/* ===== init ===== */
+loadCurrentSlot();
 loadMyAnalytics();
 loadMyTimetable();
- function controlQrButtonByTime(){
-
- if(isWithinSlot()){
-   qrBtn.disabled = false;
- } else {
-   qrBtn.disabled = true;
- }
-
-}
-
-setInterval(controlQrButtonByTime, 60000);
-controlQrButtonByTime();
-
-function applyLeave(){
-
-  const from = document.getElementById("leaveFrom").value;
-  const to = document.getElementById("leaveTo").value;
-  const reason = document.getElementById("leaveReason").value;
-
-  if(!from || !to){
-    toast("Select leave dates");
-    return;
-  }
-
-  post({
-    action:"applyLeave",
-    email: email,
-    from: from,
-    to: to,
-    reason: reason
-  }).then(r=>{
-    toast(r.message || "Leave applied");
-  });
-}
-function checkSlotBeforeQR(){
-
-  return post({
-    action:"getCurrentSlot"
-  }).then(r=>{
-
-    if(!r.data){
-      alert("❌ No active lecture slot now");
-      return false;
-    }
-
-    if(r.data.faculty.toLowerCase() !== email.toLowerCase()){
-      alert("❌ This slot is not assigned to you");
-      return false;
-    }
-
-    return true;
-  });
-
-}
+setInterval(loadCurrentSlot,60000);
 
 </script>
 
