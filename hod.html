@@ -126,6 +126,25 @@ Attendance %: <b id="myPct">--</b>
 <button onclick="addLocation()">Add</button>
 
 <div id="toast"></div>
+<hr>
+
+<h3>📝 Faculty Leave Approval</h3>
+<button onclick="loadLeaves()">Load Pending Leaves</button>
+
+<table>
+<thead>
+<tr>
+<th>ID</th><th>Email</th><th>From</th><th>To</th><th>Reason</th><th>Action</th>
+</tr>
+</thead>
+<tbody id="leaveBody"></tbody>
+</table>
+
+<hr>
+
+<h3>🤖 Substitute Suggestion</h3>
+<button onclick="suggestSub()">Suggest Substitute</button>
+<div id="subBox"></div>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
@@ -297,6 +316,37 @@ function addLocation(){
   radius:rad.value
  }).then(()=>toast("Location Added"));
 }
+ function loadLeaves(){
+ post({action:"getPendingLeaves"}).then(r=>{
+  leaveBody.innerHTML="";
+  r.data.forEach(l=>{
+   leaveBody.innerHTML+=`
+   <tr>
+   <td>${l[0]}</td>
+   <td>${l[1]}</td>
+   <td>${l[2]}</td>
+   <td>${l[3]}</td>
+   <td>${l[4]}</td>
+   <td><button onclick="approveLeave('${l[0]}')">Approve</button></td>
+   </tr>`;
+  });
+ });
+}
+
+function approveLeave(id){
+ post({
+  action:"approveLeave",
+  leaveId:id,
+  approver:email
+ }).then(()=>toast("Approved"));
+}
+
+function suggestSub(){
+ post({action:"suggestSubstitute"}).then(r=>{
+  subBox.innerText = "Suggested: " + (r.suggested||[]).join(", ");
+ });
+}
+
 </script>
 
 </body>
