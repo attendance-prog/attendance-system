@@ -248,16 +248,43 @@ function loadSubjects(){
    });
  });
 }
+function isWithinSlot(){
+
+ const now = new Date();
+ const time = now.getHours() + now.getMinutes()/60;
+
+ /* YOUR SLOT TABLE */
+ const slots = [
+  [9.00,9.50],
+  [9.50,10.40],
+  [10.40,11.30],
+  [11.35,12.25],
+  [13.15,14.05],
+  [14.10,15.00],
+  [15.00,15.50],
+  [15.50,16.40]
+ ];
+
+ return slots.some(s => time >= s[0] && time <= s[1]);
+}
 
 /* ========= QR ========= */
 
 function generateQR(){
+
  if(!subjectSel.value){
-   toast("Select subject");
+   toast("Select subject first");
+   return;
+ }
+
+ /* FRONT SLOT CHECK */
+ if(!isWithinSlot()){
+   alert("❌ QR can be generated only during your lecture time slot");
    return;
  }
 
  navigator.geolocation.getCurrentPosition(pos=>{
+
    post({
      action:"createFacultySession",
      subjectId:subjectSel.value,
@@ -266,18 +293,23 @@ function generateQR(){
      longitude:pos.coords.longitude,
      topic:document.getElementById("topic").value,
      notesLink:document.getElementById("notes").value
-   }).then(r=>{
+   })
+   .then(r=>{
+
      if(!r.success){
-       toast(r.message);
+       alert("❌ " + r.message);
        return;
      }
 
      qrBox.innerHTML =
-      `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">`;
+       `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}">`;
 
      startQrTimer(300);
+
    });
+
  });
+
 }
 
 /* ========= QR TIMER ========= */
@@ -360,6 +392,19 @@ post({
 loadSubjects();
 loadMyAnalytics();
 loadMyTimetable();
+ function controlQrButtonByTime(){
+
+ if(isWithinSlot()){
+   qrBtn.disabled = false;
+ } else {
+   qrBtn.disabled = true;
+ }
+
+}
+
+setInterval(controlQrButtonByTime, 60000);
+controlQrButtonByTime();
+
 
 </script>
 
