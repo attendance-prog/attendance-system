@@ -218,6 +218,15 @@ function viewMyAttendance(){
    drawChart(r.data);
  });
 }
+<hr>
+
+<h3>📅 Apply Leave</h3>
+
+<input type="date" id="leaveFrom">
+<input type="date" id="leaveTo">
+<input placeholder="Reason" id="leaveReason">
+
+<button onclick="applyLeave()">Apply Leave</button>
 
 /* ========= TREND CHART ========= */
 
@@ -237,17 +246,27 @@ function drawChart(rows){
 /* ========= SUBJECTS (OWN ONLY) ========= */
 
 function loadSubjects(){
- post({
-   action:"getFacultySubjects",
-   email:email
- }).then(r=>{
-   subjectSel.innerHTML="";
-   r.data.forEach(s=>{
-     subjectSel.innerHTML+=
-       `<option value="${s[0]}">${s[1]}</option>`;
-   });
- });
+
+  post({
+    action:"getCurrentSlot"
+  }).then(r=>{
+
+    if(!r.data){
+      subjectSel.innerHTML = "<option>No active slot</option>";
+      qrBtn.disabled = true;
+      return;
+    }
+
+    subjectSel.innerHTML =
+      `<option value="${r.data.subject}">
+        ${r.data.subject}
+      </option>`;
+
+    qrBtn.disabled = false;
+  });
+
 }
+
 function isWithinSlot(){
 
  const now = new Date();
@@ -272,10 +291,11 @@ function isWithinSlot(){
 
 function generateQR(){
 
- if(!subjectSel.value){
-   toast("Select subject first");
-   return;
- }
+  checkSlotBeforeQR().then(ok=>{
+    if(!ok) return;
+
+    // existing code continues here
+
 
  /* FRONT SLOT CHECK */
  if(!isWithinSlot()){
@@ -405,6 +425,47 @@ loadMyTimetable();
 setInterval(controlQrButtonByTime, 60000);
 controlQrButtonByTime();
 
+function applyLeave(){
+
+  const from = document.getElementById("leaveFrom").value;
+  const to = document.getElementById("leaveTo").value;
+  const reason = document.getElementById("leaveReason").value;
+
+  if(!from || !to){
+    toast("Select leave dates");
+    return;
+  }
+
+  post({
+    action:"applyLeave",
+    email: email,
+    from: from,
+    to: to,
+    reason: reason
+  }).then(r=>{
+    toast(r.message || "Leave applied");
+  });
+}
+function checkSlotBeforeQR(){
+
+  return post({
+    action:"getCurrentSlot"
+  }).then(r=>{
+
+    if(!r.data){
+      alert("❌ No active lecture slot now");
+      return false;
+    }
+
+    if(r.data.faculty.toLowerCase() !== email.toLowerCase()){
+      alert("❌ This slot is not assigned to you");
+      return false;
+    }
+
+    return true;
+  });
+
+}
 
 </script>
 
