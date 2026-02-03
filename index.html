@@ -122,6 +122,7 @@ function verifyOtp() {
     localStorage.setItem("email", email);
     localStorage.setItem("role", role);
     localStorage.setItem("name", email.split("@")[0]);
+    localStorage.setItem("dept", res.dept || "");
 
     // ✅ REDIRECT
     window.location.href = role + ".html";
