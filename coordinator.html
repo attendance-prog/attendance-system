@@ -13,34 +13,13 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <style>
-body{
- font-family:Arial;
- padding:20px;
- background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
-}
+body{font-family:Arial;padding:20px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);}
 h2{color:#2e7d32}
 button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px}
 table{border-collapse:collapse;width:100%}
 th,td{border:1px solid #ccc;padding:6px}
-
-#welcomeBar{
- background:#1b5e20;
- color:white;
- padding:12px;
- border-radius:8px;
- margin-bottom:15px;
-}
-
-#toast{
- position:fixed;
- bottom:20px;
- right:20px;
- background:#1b5e20;
- color:white;
- padding:10px 16px;
- border-radius:6px;
- display:none;
-}
+#welcomeBar{background:#1b5e20;color:white;padding:12px;border-radius:8px;margin-bottom:15px;}
+#toast{position:fixed;bottom:20px;right:20px;background:#1b5e20;color:white;padding:10px 16px;border-radius:6px;display:none;}
 </style>
 </head>
 
@@ -48,13 +27,11 @@ th,td{border:1px solid #ccc;padding:6px}
 
 <script>
 if(localStorage.getItem("role")!=="coordinator"){
- alert("Unauthorized");
- location.href="index.html";
+ alert("Unauthorized"); location.href="index.html";
 }
 </script>
 
 <div id="welcomeBar"></div>
-
 <h2>🌱 GO GREEN – Coordinator Dashboard</h2>
 <button onclick="logout()">Logout</button>
 
@@ -69,8 +46,6 @@ if(localStorage.getItem("role")!=="coordinator"){
 <button onclick="capture()">Capture</button>
 </div>
 
-<canvas id="canvas" width="260" height="200" style="display:none"></canvas>
-
 <table id="attTable" style="display:none">
 <thead><tr><th>Date</th><th>Status</th><th>Time</th></tr></thead>
 <tbody id="attBody"></tbody>
@@ -84,43 +59,34 @@ Attendance %: <b id="myPct">--</b>
 
 <hr>
 
-<h3>Faculty Timetable (View Only)</h3>
-<button onclick="loadTimetable()">🔄 Refresh</button>
-
-<table>
-<thead>
-<tr>
-<th>Day</th>
-<th>Subject</th>
-<th>Faculty</th>
-<th>Room</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody id="ttBody"></tbody>
-</table>
+<h3>Faculty Timetable</h3>
+<button onclick="loadTimetable()">Refresh</button>
+<table><tbody id="ttBody"></tbody></table>
 
 <hr>
 
-<h3>👨‍🏫 View Faculty Attendance</h3>
-<button onclick="loadFacultyAttendance()">Load Faculty Attendance</button>
-
+<h3>👨‍🏫 Faculty Attendance</h3>
+<button onclick="loadFacultyAttendance()">Load</button>
 <table id="facTable" style="display:none">
-<thead>
-<tr>
-<th>Date</th>
-<th>Email</th>
-<th>Status</th>
-<th>Time</th>
-</tr>
-</thead>
 <tbody id="facBody"></tbody>
 </table>
 
 <hr>
 
-<h3>📊 Lecture Assist Analytics</h3>
-<canvas id="assistChart"></canvas>
+<h3>📝 Faculty Leave Approval</h3>
+<button onclick="loadLeaves()">Load Pending Leaves</button>
+<table id="leaveTable">
+<thead>
+<tr><th>ID</th><th>Email</th><th>From</th><th>To</th><th>Reason</th><th>Action</th></tr>
+</thead>
+<tbody id="leaveBody"></tbody>
+</table>
+
+<hr>
+
+<h3>🤖 Substitute Suggestions</h3>
+<button onclick="suggestSub()">Suggest Substitute</button>
+<div id="subBox"></div>
 
 <hr>
 
@@ -132,176 +98,62 @@ Attendance %: <b id="myPct">--</b>
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email=localStorage.getItem("email");
-let stream=null;
+const toastBox=document.getElementById("toast");
 
 /* ===== utils ===== */
 function post(d){
- return fetch(API,{
-  method:"POST",
-  headers:{"Content-Type":"text/plain"},
-  body:JSON.stringify(d)
- }).then(r=>r.json());
+ return fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(d)}).then(r=>r.json());
 }
-
-function toast(m){
- toastBox.innerText=m;
- toastBox.style.display="block";
- setTimeout(()=>toastBox.style.display="none",2500);
-}
-const toastBox=document.getElementById("toast");
-
+function toast(m){toastBox.innerText=m;toastBox.style.display="block";setTimeout(()=>toastBox.style.display="none",2500);}
 function logout(){localStorage.clear();location.href="index.html"}
 
 /* ===== greeting ===== */
-const name=localStorage.getItem("name")||email.split("@")[0];
-const hr=new Date().getHours();
-const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
-welcomeBar.innerHTML=`${g}, ${name} 👋 | Role: Coordinator`;
+welcomeBar.innerHTML="Coordinator Panel";
 
-/* ===== camera ===== */
-function startCamera(){
- cam.style.display="block";
- navigator.mediaDevices.getUserMedia({video:true})
- .then(s=>{stream=s;video.srcObject=s});
-}
-
-function capture(){
- canvas.getContext("2d").drawImage(video,0,0,260,200);
- navigator.geolocation.getCurrentPosition(pos=>{
-   post({
-     action:"markCoordinatorAttendance",
-     email,
-     latitude:pos.coords.latitude,
-     longitude:pos.coords.longitude
-   }).then(r=>{
-     toast(r.message);
-     stopCamera();
-     loadMyAnalytics();
-   });
- });
-}
-
-function stopCamera(){
- if(stream){stream.getTracks().forEach(t=>t.stop())}
- cam.style.display="none";
-}
-
-/* ===== attendance view ===== */
-function viewMyAttendance(){
- post({action:"getMyAttendance",email}).then(r=>{
-   attBody.innerHTML="";
-   r.data.forEach(x=>{
-     attBody.innerHTML+=`
-     <tr>
-       <td>${new Date(x[0]).toLocaleDateString()}</td>
-       <td>${x[6]}</td>
-       <td>${new Date(x[8]).toLocaleTimeString()}</td>
-     </tr>`;
-   });
-   attTable.style.display="table";
- });
-}
-
-/* ===== own analytics ===== */
-google.charts.load('current',{packages:['corechart']});
-google.charts.setOnLoadCallback(loadMyAnalytics);
-
-function loadMyAnalytics(){
- post({action:"getMyAttendanceAnalytics",email})
- .then(r=>{
-  if(!r.success){ myChart.innerHTML="No data"; return; }
-
-  myPct.innerText=r.percent+"%";
-
-  const data=google.visualization.arrayToDataTable([
-   ["Status","Count"],
-   ["Present",r.present],
-   ["Late",r.late],
-   ["Absent",r.absent]
-  ]);
-
-  const chart=new google.visualization.PieChart(myChart);
-  chart.draw(data,{title:"My Attendance"});
- });
-}
-
-/* ===== timetable ===== */
-function loadTimetable(){
- post({action:"getFacultyTimetable"}).then(r=>{
-  ttBody.innerHTML="";
-  (r.data||[]).forEach(x=>{
-   ttBody.innerHTML+=`
+/* ===== leaves ===== */
+function loadLeaves(){
+ post({action:"getPendingLeaves"}).then(r=>{
+  leaveBody.innerHTML="";
+  r.data.forEach(l=>{
+   leaveBody.innerHTML+=`
    <tr>
-    <td>${x.day}</td>
-    <td>${x.subject}</td>
-    <td>${x.faculty}</td>
-    <td>${x.room}</td>
-    <td>
-     <button onclick="takeLecture('${x.subject}','${x.faculty}')">
-     Take Lecture</button>
-    </td>
+   <td>${l[0]}</td>
+   <td>${l[1]}</td>
+   <td>${l[2]}</td>
+   <td>${l[3]}</td>
+   <td>${l[4]}</td>
+   <td>
+   <button onclick="approve('${l[0]}')">Approve</button>
+   </td>
    </tr>`;
   });
  });
 }
 
-/* ===== take lecture ===== */
-function takeLecture(subject,faculty){
- if(!confirm("Take lecture as coordinator?")) return;
-
- navigator.geolocation.getCurrentPosition(pos=>{
-   post({
-     action:"coordinatorTakeLecture",
-     subject,faculty,coordinator:email,
-     assist:true,room:"CLASSROOM",
-     latitude:pos.coords.latitude,
-     longitude:pos.coords.longitude
-   }).then(r=>toast(r.message));
- });
+function approve(id){
+ post({
+  action:"approveLeave",
+  leaveId:id,
+  approver:email
+ }).then(()=>toast("Approved"));
 }
 
-/* ===== faculty attendance ===== */
-function loadFacultyAttendance(){
- post({action:"getStaffAttendance"})
- .then(r=>{
-   facBody.innerHTML="";
-   (r.data||[]).forEach(x=>{
-     facBody.innerHTML+=`
-     <tr>
-       <td>${new Date(x[0]).toLocaleDateString()}</td>
-       <td>${x[1]}</td>
-       <td>${x[6]}</td>
-       <td>${new Date(x[8]).toLocaleTimeString()}</td>
-     </tr>`;
-   });
-   facTable.style.display="table";
+/* ===== substitute ===== */
+function suggestSub(){
+ post({action:"suggestSubstitute"}).then(r=>{
+  subBox.innerHTML="Suggested: "+(r.suggested||[]).join(", ");
  });
 }
-
-/* ===== assist analytics ===== */
-post({action:"getAssistAnalytics"}).then(r=>{
- new Chart(assistChart,{
-   type:"bar",
-   data:{
-     labels:Object.keys(r.data||{}),
-     datasets:[{data:Object.values(r.data||{})}]
-   }
- });
-});
 
 /* ===== map ===== */
 const map=L.map("map").setView([28.47,77.48],16);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
 
 post({action:"getGpsPoints"}).then(r=>{
- (r.data||[]).forEach(p=>{
-   L.marker([p.lat,p.lng]).addTo(map)
-   .bindPopup(p.email);
+ r.data.forEach(p=>{
+  if(p.lat) L.marker([p.lat,p.lng]).addTo(map);
  });
 });
-
-loadTimetable();
 </script>
-
 </body>
 </html>
