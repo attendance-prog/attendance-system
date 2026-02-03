@@ -4,143 +4,25 @@
 <meta charset="UTF-8">
 <title>GO GREEN – HOD Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<!-- Charts -->
 <script src="https://www.gstatic.com/charts/loader.js"></script>
-
-<!-- Leaflet Map -->
-<link rel="stylesheet"
- href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 <style>
-body{
- font-family:Arial;
- padding:20px;
- background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
-}
-h2{color:#2e7d32}
-button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px}
-input,select{padding:6px;margin:4px}
-table{border-collapse:collapse;width:100%}
-th,td{border:1px solid #ccc;padding:6px}
-
-#welcomeBar{
- background:#1b5e20;
- color:white;
- padding:12px;
- border-radius:8px;
- margin-bottom:15px;
-}
-
-#toast{
- position:fixed;
- bottom:20px;
- right:20px;
- background:#1b5e20;
- color:white;
- padding:10px 16px;
- border-radius:6px;
- display:none;
-}
+body{font-family:Arial;padding:20px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);}
+button{background:#2e7d32;color:white;padding:8px;margin:4px;border:none}
+#welcomeBar{background:#1b5e20;color:white;padding:12px;border-radius:8px}
 </style>
 </head>
 
 <body>
 
-<script>
-if(localStorage.getItem("role")!=="hod"){
- alert("Unauthorized");
- location.href="index.html";
-}
-</script>
-
 <div id="welcomeBar"></div>
-
-<h2>🌱 GO GREEN – HOD Dashboard</h2>
-<button onclick="logout()">Logout</button>
-
-<!-- ================= MY ATTENDANCE ================= -->
-
-<h3>My Attendance</h3>
-<button onclick="startCamera()">Mark My Attendance</button>
-<button onclick="viewMyAttendance()">View My Attendance</button>
-
-<div id="cam" style="display:none">
-<video id="video" autoplay playsinline width="260"></video><br>
-<button onclick="capture()">Capture</button>
-</div>
-
-<canvas id="canvas" width="260" height="200" style="display:none"></canvas>
-
-<table id="attTable" style="display:none">
-<thead>
-<tr><th>Date</th><th>Status</th><th>Time</th></tr>
-</thead>
-<tbody id="attBody"></tbody>
-</table>
-
-<!-- ================= MY ANALYTICS ================= -->
-
-<h3>📊 My Attendance Analytics</h3>
-Attendance %: <b id="myPct">--</b>
-<div id="myChart" style="height:300px"></div>
-
-<!-- ================= MAP ================= -->
-
-<h3>🗺 Attendance Map</h3>
-<div id="map" style="height:320px"></div>
-
-<!-- ================= SUBJECT ================= -->
-
-<h3>Add Subject</h3>
-<input id="sid" placeholder="Subject ID">
-<input id="sname" placeholder="Subject Name">
-<input id="sem" placeholder="Semester">
-<button onclick="addSubject()">Add</button>
-
-<!-- ================= TIMETABLE ================= -->
-
-<h3>Add Timetable</h3>
-<select id="day">
-<option>Monday</option>
-<option>Tuesday</option>
-<option>Wednesday</option>
-<option>Thursday</option>
-<option>Friday</option>
-</select>
-
-<input id="tsub" placeholder="Subject ID">
-<input id="start" placeholder="Start (HH.MM)">
-<input id="end" placeholder="End (HH.MM)">
-<input id="room" placeholder="Room">
-<button onclick="addTimetable()">Add</button>
-
-<!-- ================= GPS ================= -->
-
-<h3>Add GPS Location</h3>
-<input id="groom" placeholder="Room">
-<input id="lat" placeholder="Latitude">
-<input id="lng" placeholder="Longitude">
-<input id="rad" placeholder="Radius">
-<button onclick="addLocation()">Add</button>
-
-<div id="toast"></div>
-<hr>
+<h2>HOD Dashboard</h2>
 
 <h3>📝 Faculty Leave Approval</h3>
 <button onclick="loadLeaves()">Load Pending Leaves</button>
-
-<table>
-<thead>
-<tr>
-<th>ID</th><th>Email</th><th>From</th><th>To</th><th>Reason</th><th>Action</th>
-</tr>
-</thead>
+<table border="1">
+<thead><tr><th>ID</th><th>Email</th><th>From</th><th>To</th><th>Action</th></tr></thead>
 <tbody id="leaveBody"></tbody>
 </table>
-
-<hr>
 
 <h3>🤖 Substitute Suggestion</h3>
 <button onclick="suggestSub()">Suggest Substitute</button>
@@ -149,205 +31,41 @@ Attendance %: <b id="myPct">--</b>
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email=localStorage.getItem("email");
-let stream=null;
+welcomeBar.innerText="Welcome HOD";
 
-/* ===== POST ===== */
 function post(d){
- return fetch(API,{
-  method:"POST",
-  headers:{"Content-Type":"text/plain"},
-  body:JSON.stringify(d)
- }).then(r=>r.json());
+ return fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(d)})
+ .then(r=>r.json());
 }
 
-/* ===== Toast ===== */
-function toast(m){
- const t=document.getElementById("toast");
- t.innerText=m;
- t.style.display="block";
- setTimeout(()=>t.style.display="none",2500);
-}
+function loadLeaves(){
+ const dept = localStorage.getItem("department");
 
-/* ===== Greeting ===== */
-const name=localStorage.getItem("name")||email.split("@")[0];
-const hr=new Date().getHours();
-const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
-document.getElementById("welcomeBar").innerHTML =
-`${g}, ${name} 👋 | Role: HOD`;
-
-function logout(){
- localStorage.clear();
- location.href="index.html";
-}
-
-/* ===== Camera ===== */
-
-function startCamera(){
- document.getElementById("cam").style.display="block";
- navigator.mediaDevices.getUserMedia({video:true})
- .then(s=>{
-  stream=s;
-  video.srcObject=s;
- });
-}
-
-function capture(){
- canvas.getContext("2d").drawImage(video,0,0,260,200);
-
- navigator.geolocation.getCurrentPosition(pos=>{
-  post({
-   action:"markHodAttendance",
-   email,
-   latitude:pos.coords.latitude,
-   longitude:pos.coords.longitude
-  }).then(r=>{
-   toast(r.message);
-   if(stream) stream.getTracks().forEach(t=>t.stop());
-   cam.style.display="none";
-  });
- });
-}
-
-/* ===== View Attendance ===== */
-
-function viewMyAttendance(){
- post({action:"getMyAttendance",email})
- .then(r=>{
-  attBody.innerHTML="";
-  r.data.forEach(x=>{
-   attBody.innerHTML+=`
-   <tr>
-   <td>${new Date(x[0]).toLocaleDateString()}</td>
-   <td>${x[6]}</td>
-   <td>${new Date(x[8]).toLocaleTimeString()}</td>
-   </tr>`;
-  });
-  attTable.style.display="table";
- });
-}
-
-/* ===== My Analytics ===== */
-
-google.charts.load('current',{packages:['corechart']});
-google.charts.setOnLoadCallback(loadMyAnalytics);
-
-function loadMyAnalytics(){
-
- post({
-  action:"getMyAttendanceAnalytics",
-  email
- }).then(r=>{
-
-  if(!r.success){
-   myChart.innerHTML="No data";
-   return;
-  }
-
-  document.getElementById("myPct").innerText =
-    r.percent + "%";
-
-  const data = google.visualization.arrayToDataTable([
-   ["Status","Count"],
-   ["Present", r.present],
-   ["Late", r.late],
-   ["Absent", r.absent]
-  ]);
-
-  const chart =
-   new google.visualization.PieChart(
-     document.getElementById("myChart")
-   );
-
-  chart.draw(data,{title:"My Attendance Breakdown"});
- });
-}
-
-/* ===== Map ===== */
-
-const map=L.map("map").setView([28.47,77.48],16);
-
-L.tileLayer(
- "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-).addTo(map);
-
-post({action:"getGpsPoints"}).then(r=>{
- r.data.forEach(p=>{
-  if(p.lat && p.lng){
-   L.marker([p.lat,p.lng])
-   .addTo(map)
-   .bindPopup(p.email);
-  }
- });
-});
-
-/* ===== Add Subject ===== */
-
-function addSubject(){
- post({
-  action:"addSubject",
-  subjectId:sid.value,
-  subjectName:sname.value,
-  department:"HOD",
-  semester:sem.value
- }).then(()=>toast("Subject Added"));
-}
-
-/* ===== Add Timetable ===== */
-
-function addTimetable(){
- post({
-  action:"addTimetable",
-  day:day.value,
-  subjectId:tsub.value,
-  start:start.value,
-  end:end.value,
-  room:room.value
- }).then(()=>toast("Timetable Added"));
-}
-
-/* ===== Add Location ===== */
-
-function addLocation(){
- post({
-  action:"addLocation",
-  room:groom.value,
-  lat:lat.value,
-  lng:lng.value,
-  radius:rad.value
- }).then(()=>toast("Location Added"));
-}
- function loadLeaves(){
- post({action:"getPendingLeaves"}).then(r=>{
+post({
+  action:"getPendingLeaves",
+  department:dept
+})
+{
   leaveBody.innerHTML="";
   r.data.forEach(l=>{
-   leaveBody.innerHTML+=`
-   <tr>
-   <td>${l[0]}</td>
-   <td>${l[1]}</td>
-   <td>${l[2]}</td>
-   <td>${l[3]}</td>
-   <td>${l[4]}</td>
-   <td><button onclick="approveLeave('${l[0]}')">Approve</button></td>
+   leaveBody.innerHTML+=`<tr>
+   <td>${l[0]}</td><td>${l[1]}</td>
+   <td>${l[2]}</td><td>${l[3]}</td>
+   <td><button onclick="approve('${l[0]}')">Approve</button></td>
    </tr>`;
   });
  });
 }
 
-function approveLeave(id){
- post({
-  action:"approveLeave",
-  leaveId:id,
-  approver:email
- }).then(()=>toast("Approved"));
+function approve(id){
+ post({action:"approveLeave",leaveId:id,approver:email})
+ .then(()=>loadLeaves());
 }
 
 function suggestSub(){
- post({action:"suggestSubstitute"}).then(r=>{
-  subBox.innerText = "Suggested: " + (r.suggested||[]).join(", ");
- });
+ post({action:"suggestSubstitute"})
+ .then(r=>subBox.innerText="Suggested: "+(r.suggested||[]).join(", "));
 }
-
 </script>
-
 </body>
 </html>
