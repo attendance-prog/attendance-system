@@ -148,9 +148,19 @@ Attendance %: <b id="myPct">--</b>
 
 <!-- ================= SUBSTITUTE ================= -->
 
-<h3>🤖 Substitute Suggestion</h3>
+<h3>🤖 Substitute Suggestion & Assignment</h3>
+
 <button onclick="suggestSub()">Suggest Substitute</button>
-<div id="subBox"></div>
+
+<table>
+<thead>
+<tr>
+<th>Suggested Faculty</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="subTable"></tbody>
+</table>
 
 <div id="toast"></div>
 
@@ -335,12 +345,54 @@ function rejectLeave(id){
 }
 
 /* ===== Substitute Suggestion ===== */
-
 function suggestSub(){
+
  post({action:"suggestSubstitute"}).then(r=>{
-  subBox.innerText="Suggested: "+(r.suggested||[]).join(", ");
+
+  const body = document.getElementById("subTable");
+  body.innerHTML = "";
+
+  if(!r.success || !r.suggested.length){
+    body.innerHTML = "<tr><td colspan=2>No free faculty</td></tr>";
+    return;
+  }
+
+  r.suggested.forEach(f=>{
+
+    body.innerHTML += `
+    <tr>
+      <td>${f}</td>
+      <td>
+        <button onclick="assignSub('${f}')">
+          Assign Substitute
+        </button>
+      </td>
+    </tr>`;
+  });
+
  });
 }
+function assignSub(subEmail){
+
+ post({action:"getCurrentSlot"}).then(s=>{
+
+  if(!s.data){
+    toast("No active slot");
+    return;
+  }
+
+  post({
+    action:"assignSubstitute",
+    substitute: subEmail,
+    original: s.data.faculty
+  }).then(r=>{
+    toast(r.message);
+    suggestSub(); // refresh list
+  });
+
+ });
+}
+
 
 </script>
 </body>
