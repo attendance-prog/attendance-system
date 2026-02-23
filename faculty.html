@@ -290,15 +290,51 @@ function loadMyTimetable(){
 <th>System ID</th>
 <th>Name</th>
 <th>Email</th>
+<th>Status</th>
 </tr>
 </thead>
 <tbody id="studentBody"></tbody>
 </table>
+ function loadMyStudents(){
+
+ post({
+   action:"getLiveClassStatus",
+   email: email
+ }).then(r=>{
+
+   const body = document.getElementById("studentBody");
+   body.innerHTML="";
+
+   if(!r.success){
+     body.innerHTML =
+     `<tr><td colspan="4">${r.message}</td></tr>`;
+     return;
+   }
+
+   r.data.forEach(s=>{
+
+     const badge =
+       s.status==="PRESENT"
+       ? "<span style='color:green;font-weight:bold'>🟢 Present</span>"
+       : "<span style='color:red;font-weight:bold'>🔴 Absent</span>";
+
+     body.innerHTML += `
+     <tr>
+       <td>${s.systemId}</td>
+       <td>${s.name}</td>
+       <td>${s.email}</td>
+       <td>${badge}</td>
+     </tr>`;
+   });
+
+ });
+}
 /* ===== init ===== */  
 loadCurrentSlot();  
 loadMyAnalytics();  
 loadMyTimetable();  
 setInterval(loadCurrentSlot,60000);  
-  
-</script>  </body>  
+ setInterval(loadMyStudents, 5000); // refresh every 5 seconds
+</script> 
+</body>  
 </html>
