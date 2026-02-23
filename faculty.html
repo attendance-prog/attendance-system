@@ -278,7 +278,22 @@ function loadMyTimetable(){
   });  
  });  
 }  
-  
+  <hr>
+
+<h3>👨‍🎓 My Class Students</h3>
+
+<button onclick="loadMyStudents()">Load Students</button>
+
+<table border="1">
+<thead>
+<tr>
+<th>System ID</th>
+<th>Name</th>
+<th>Email</th>
+</tr>
+</thead>
+<tbody id="studentBody"></tbody>
+</table>
 /* ===== init ===== */  
 loadCurrentSlot();  
 loadMyAnalytics();  
