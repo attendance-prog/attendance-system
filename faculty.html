@@ -389,7 +389,38 @@ function loadMyStudents(){
    });
  });
 }
+function loadPermanentStudents(){
+  post({
+    action:"getPermanentStudentsForFaculty",
+    email: email
+  }).then(r=>{
 
+    const body = document.getElementById("permanentBody");
+    body.innerHTML = "";
+
+    if(!r.success){
+      body.innerHTML = `<tr><td colspan="7">${r.message}</td></tr>`;
+      return;
+    }
+
+    r.data.forEach(s=>{
+
+      body.innerHTML += `
+      <tr>
+        <td>${s.systemId}</td>
+        <td>${s.name}</td>
+        <td>${s.email}</td>
+        <td><input type="number" id="ca_${s.email}" max="25" min="0"></td>
+        <td><input type="number" id="end_${s.email}" max="75" min="0"></td>
+        <td id="total_${s.email}">0</td>
+        <td>
+          <button onclick="saveMarks('${s.email}')">Save</button>
+        </td>
+      </tr>`;
+    });
+
+  });
+}
 /* ===== init ===== */
 loadCurrentSlot();
 loadMyAnalytics();
