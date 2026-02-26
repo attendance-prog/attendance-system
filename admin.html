@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>GO GREEN – Admin Dashboard</title>
+<title>GO GREEN – Admin Super Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://www.gstatic.com/charts/loader.js"></script>
@@ -57,10 +57,10 @@ if(localStorage.getItem("role")!=="admin"){
 <h2>🌱 GO GREEN – Admin Super Dashboard</h2>
 <div id="welcomeBar"></div>
 <button onclick="logout()">Logout</button>
-  <!-- ================= MY ATTENDANCE ================= -->
+
+<!-- ================= MY ATTENDANCE ================= -->
 <section>
 <h3>My Attendance</h3>
-
 <button onclick="markMyAttendance()">Mark My Attendance</button>
 <button onclick="viewMyAttendance()">View My Attendance</button>
 
@@ -81,88 +81,35 @@ if(localStorage.getItem("role")!=="admin"){
 
 <!-- ================= ANALYTICS ================= -->
 <section>
-<h3>📊 Attendance Analytics</h3>
+<h3>📊 Overall Attendance Analytics</h3>
 <div id="chartDiv" style="height:300px"></div>
 </section>
 
 <!-- ================= GPS MAP ================= -->
 <section>
-<h3>🗺 Attendance GPS Map</h3>
+<h3>🗺 Live GPS Map</h3>
+<button onclick="refreshMap()">Refresh Map</button>
 <div id="map"></div>
-</section>
-
-<!-- ================= ROLE CONTROL ================= -->
-<section>
-<h3>👑 Role Control Panel</h3>
-<input id="userEmail" placeholder="User Email">
-<select id="activeSel">
-<option value="true">Active</option>
-<option value="false">Inactive</option>
-</select>
-<button onclick="setActive()">Update Status</button>
-</section>
-
-<!-- ================= EXPORT ================= -->
-<section>
-<h3>📁 Export</h3>
-<button onclick="exportCSV()">Export Student Attendance CSV</button>
-</section>
-
-<!-- ================= ADD SUBJECT ================= -->
-<section>
-<h3>Add Subject</h3>
-<input id="sid" placeholder="Subject ID">
-<input id="sname" placeholder="Subject Name">
-<input id="dept" placeholder="Department">
-<input id="sem" placeholder="Semester">
-<button onclick="addSubject()">Add</button>
-</section>
-
-<!-- ================= ADD LOCATION ================= -->
-<section>
-<h3>Add Location</h3>
-<input id="room" placeholder="Room">
-<input id="lat" placeholder="Latitude">
-<input id="lng" placeholder="Longitude">
-<input id="rad" placeholder="Radius">
-<button onclick="addLocation()">Add</button>
-</section>
-
-<!-- ================= FACULTY ================= -->
-<section>
-<h3>Faculty Panel</h3>
-<table>
-<thead><tr><th>Name</th><th>Email</th><th>Status</th></tr></thead>
-<tbody id="facultyBody"></tbody>
-</table>
-</section>
-
-<!-- ================= STUDENTS ================= -->
-<section>
-<h3>Student Panel</h3>
-<table>
-<thead><tr><th>Roll</th><th>Name</th><th>Email</th></tr></thead>
-<tbody id="studentBody"></tbody>
-</table>
 </section>
 
 <!-- ================= ADMIN SUPER CONTROLS ================= -->
 <section class="card">
 <h3>👑 Admin Super Controls</h3>
 
-<input id="userEmail" placeholder="User Email">
+<input id="adminUserEmail" placeholder="User Email">
+
 <select id="userType">
 <option value="Employees">Employee</option>
 <option value="Students">Student</option>
 </select>
 
-<select id="activeSel">
+<select id="adminActiveSel">
 <option value="true">Active</option>
 <option value="false">Inactive</option>
 </select>
 
 <button onclick="updateUser()">Update Status</button>
-<button onclick="forceLogout()">Force Logout</button>
+<button onclick="forceLogoutUser()">Force Logout</button>
 </section>
 
 <!-- ================= LIVE CLASSES ================= -->
@@ -180,27 +127,6 @@ if(localStorage.getItem("role")!=="admin"){
 </thead>
 <tbody id="liveBody"></tbody>
 </table>
-</section>
-
-<!-- ================= ANALYTICS ================= -->
-<section class="card">
-<h3>📊 Overall Attendance Analytics</h3>
-<div id="chartDiv" style="height:300px"></div>
-</section>
-
-<!-- ================= GPS MAP ================= -->
-<section class="card">
-<h3>🗺 Live GPS Map</h3>
-<button onclick="refreshMap()">Refresh Map</button>
-<div id="map"></div>
-</section>
-
-<!-- ================= MARKS APPROVAL SHORTCUT ================= -->
-<section class="card">
-<h3>📘 HOD Marks Approval</h3>
-<button onclick="window.open('hod-marks.html','_blank')">
-Open Marks Approval Panel
-</button>
 </section>
 
 <!-- ================= FACULTY ================= -->
@@ -224,7 +150,10 @@ Open Marks Approval Panel
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email=localStorage.getItem("email");
-  function post(d){
+let stream=null;
+
+/* ===== POST ===== */
+function post(d){
  return fetch(API_URL,{
   method:"POST",
   headers:{"Content-Type":"text/plain;charset=utf-8"},
@@ -232,6 +161,7 @@ const email=localStorage.getItem("email");
  }).then(r=>r.json());
 }
 
+/* ===== LOGOUT ===== */
 function logout(){
  localStorage.clear();
  location.href="index.html";
@@ -241,20 +171,23 @@ function logout(){
 const name=localStorage.getItem("name")||"Admin";
 const hr=new Date().getHours();
 const greet=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
-welcomeBar.innerHTML=${greet}, ${name} 👋;
+document.getElementById("welcomeBar").innerHTML =
+`${greet}, ${name} 👋`;
 
 /* ===== CAMERA ATTENDANCE ===== */
-let stream=null;
-
 function markMyAttendance(){
- cameraSection.style.display="block";
+ document.getElementById("cameraSection").style.display="block";
  navigator.mediaDevices.getUserMedia({video:true}).then(s=>{
-  stream=s; video.srcObject=s;
+  stream=s;
+  document.getElementById("video").srcObject=s;
  });
 }
 
 function captureAndMark(){
- canvas.getContext("2d").drawImage(video,0,0,260,200);
+ document.getElementById("canvas")
+   .getContext("2d")
+   .drawImage(document.getElementById("video"),0,0,260,200);
+
  navigator.geolocation.getCurrentPosition(pos=>{
   post({
    action:"markStaffAttendance",
@@ -269,26 +202,28 @@ function captureAndMark(){
 
 function stopCam(){
  if(stream) stream.getTracks().forEach(t=>t.stop());
- cameraSection.style.display="none";
+ document.getElementById("cameraSection").style.display="none";
 }
 
+/* ===== VIEW MY ATTENDANCE ===== */
 function viewMyAttendance(){
  post({action:"getMyAttendance",email})
  .then(r=>{
-  myAttendanceBody.innerHTML="";
+  const body=document.getElementById("myAttendanceBody");
+  body.innerHTML="";
   r.data.forEach(x=>{
-   myAttendanceBody.innerHTML+=`
+   body.innerHTML+=`
    <tr>
     <td>${new Date(x[0]).toLocaleDateString()}</td>
     <td>${x[6]}</td>
     <td>${new Date(x[8]).toLocaleTimeString()}</td>
    </tr>`;
   });
-  myAttendanceSection.style.display="table";
+  document.getElementById("myAttendanceSection").style.display="table";
  });
 }
 
-/* ===== ANALYTICS CHART ===== */
+/* ===== CHART ===== */
 google.charts.load('current',{packages:['corechart']});
 google.charts.setOnLoadCallback(loadChart);
 
@@ -299,145 +234,14 @@ function loadChart(){
    ["Present",r.present],
    ["Total",r.total]
   ]);
-  new google.visualization.PieChart(chartDiv)
-    .draw(data,{title:"Overall Attendance"});
+  new google.visualization.PieChart(
+    document.getElementById("chartDiv")
+  ).draw(data,{title:"Overall Attendance"});
  });
 }
 
 /* ===== MAP ===== */
 const map=L.map('map').setView([28.47,77.48],10);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-post({action:"getGpsPoints"}).then(r=>{
- r.data.forEach(p=>{
-  if(p.lat) L.marker([p.lat,p.lng]).addTo(map);
- });
-});
-
-/* ===== ROLE ACTIVE ===== */
-function setActive(){
- post({
-  action:"setUserActive",
-  email:userEmail.value,
-  active:activeSel.value==="true"
- }).then(()=>alert("Updated"));
-}
-
-/* ===== SUBJECT + LOCATION ===== */
-function addSubject(){
- post({
-  action:"addSubject",
-  subjectId:sid.value,
-  subjectName:sname.value,
-  department:dept.value,
-  semester:sem.value
- }).then(()=>alert("Subject added"));
-}
-
-function addLocation(){
- post({
-  action:"addLocation",
-  room:room.value,
-  lat:lat.value,
-  lng:lng.value,
-  radius:rad.value
- }).then(()=>alert("Location added"));
-}
-
-/* ===== FACULTY + STUDENTS ===== */
-post({action:"getFaculty"}).then(r=>{
- r.data.forEach(x=>{
-  facultyBody.innerHTML+=`<tr>
-  <td>${x[2]}</td><td>${x[1]}</td><td>${x[3]}</td></tr>`;
- });
-});
-
-post({action:"getStudents"}).then(r=>{
- r.data.forEach(x=>{
-  studentBody.innerHTML+=`<tr>
-  <td>${x[0]}</td><td>${x[1]}</td><td>${x[2]}</td></tr>`;
- });
-});
-
-/* ===== EXPORT ===== */
-function exportCSV(){
- window.open(API_URL+"?export=students");
-}
-
-function post(d){
- return fetch(API_URL,{
-  method:"POST",
-  headers:{"Content-Type":"text/plain;charset=utf-8"},
-  body:JSON.stringify(d)
- }).then(r=>r.json());
-}
-
-function logout(){
- localStorage.clear();
- location.href="index.html";
-}
-
-/* ===== GREETING ===== */
-const name=localStorage.getItem("name")||"Admin";
-const hr=new Date().getHours();
-const greet=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
-welcomeBar.innerHTML=`${greet}, ${name} 👋`;
-
-/* ===== ADMIN CONTROLS ===== */
-function updateUser(){
- post({
-  action:"toggleUserStatus",
-  email:userEmail.value,
-  type:userType.value,
-  active:activeSel.value==="true"
- }).then(()=>alert("User status updated"));
-}
-
-function forceLogout(){
- post({
-  action:"forceLogout",
-  email:userEmail.value
- }).then(()=>alert("User forced logout"));
-}
-
-/* ===== LIVE CLASSES ===== */
-function loadLiveClasses(){
- post({action:"getLiveClasses"})
- .then(r=>{
-  liveBody.innerHTML="";
-  if(!r.data) return;
-  r.data.forEach(c=>{
-   liveBody.innerHTML+=`
-   <tr>
-    <td>${c.sessionId}</td>
-    <td>${c.subject}</td>
-    <td>${c.faculty}</td>
-    <td>${c.room}</td>
-   </tr>`;
-  });
- });
-}
-loadLiveClasses();
-setInterval(loadLiveClasses,20000);
-
-/* ===== ANALYTICS ===== */
-google.charts.load('current',{packages:['corechart']});
-google.charts.setOnLoadCallback(loadChart);
-
-function loadChart(){
- post({action:"getAnalytics"}).then(r=>{
-  const data=google.visualization.arrayToDataTable([
-   ["Type","Count"],
-   ["Present",r.present],
-   ["Total",r.total]
-  ]);
-  new google.visualization.PieChart(chartDiv)
-    .draw(data,{title:"Overall Attendance"});
- });
-}
-
-/* ===== MAP ===== */
-let map=L.map('map').setView([28.47,77.48],10);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
 function refreshMap(){
@@ -453,10 +257,49 @@ function refreshMap(){
 }
 refreshMap();
 
-/* ===== FACULTY ===== */
+/* ===== ADMIN CONTROLS ===== */
+function updateUser(){
+ post({
+  action:"toggleUserStatus",
+  email:document.getElementById("adminUserEmail").value,
+  type:document.getElementById("userType").value,
+  active:document.getElementById("adminActiveSel").value==="true"
+ }).then(()=>alert("User status updated"));
+}
+
+function forceLogoutUser(){
+ post({
+  action:"forceLogout",
+  email:document.getElementById("adminUserEmail").value
+ }).then(()=>alert("User forced logout"));
+}
+
+/* ===== LIVE CLASSES ===== */
+function loadLiveClasses(){
+ post({action:"getLiveClasses"})
+ .then(r=>{
+  const body=document.getElementById("liveBody");
+  body.innerHTML="";
+  if(!r.data) return;
+  r.data.forEach(c=>{
+   body.innerHTML+=`
+   <tr>
+    <td>${c.sessionId}</td>
+    <td>${c.subject}</td>
+    <td>${c.faculty}</td>
+    <td>${c.room}</td>
+   </tr>`;
+  });
+ });
+}
+loadLiveClasses();
+setInterval(loadLiveClasses,20000);
+
+/* ===== LOAD FACULTY ===== */
 post({action:"getFaculty"}).then(r=>{
+ const body=document.getElementById("facultyBody");
  r.data.forEach(x=>{
-  facultyBody.innerHTML+=`
+  body.innerHTML+=`
   <tr>
    <td>${x[2]}</td>
    <td>${x[1]}</td>
@@ -465,10 +308,11 @@ post({action:"getFaculty"}).then(r=>{
  });
 });
 
-/* ===== STUDENTS ===== */
+/* ===== LOAD STUDENTS ===== */
 post({action:"getStudents"}).then(r=>{
+ const body=document.getElementById("studentBody");
  r.data.forEach(x=>{
-  studentBody.innerHTML+=`
+  body.innerHTML+=`
   <tr>
    <td>${x[0]}</td>
    <td>${x[1]}</td>
@@ -477,12 +321,12 @@ post({action:"getStudents"}).then(r=>{
  });
 });
 
-/* ===== AUTO FORCE LOGOUT CHECK ===== */
+/* ===== FORCE LOGOUT CHECK ===== */
 setInterval(()=>{
  post({action:"checkForceLogout",email})
  .then(r=>{
   if(r.logout){
-   alert("You have been logged out by Admin");
+   alert("You have been logged out by Super Admin");
    logout();
   }
  });
