@@ -397,32 +397,6 @@ function suggestSub(){
   subBox.innerText = "Suggested: " + (r.suggested||[]).join(", ");
  });
 }
-function post(d){
- return fetch(API,{
-  method:"POST",
-  headers:{"Content-Type":"text/plain"},
-  body:JSON.stringify(d)
- }).then(r=>r.json());
-}
-
-function toast(m){
- const t=document.getElementById("toast");
- t.innerText=m;
- t.style.display="block";
- setTimeout(()=>t.style.display="none",2500);
-}
-
-function logout(){
- localStorage.clear();
- location.href="index.html";
-}
-
-/* ===== Greeting ===== */
-const name=localStorage.getItem("name")||email.split("@")[0];
-const hr=new Date().getHours();
-const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
-welcomeBar.innerHTML=`${g}, ${name} 👋 | Role: HOD`;
-
 /* ================= MARKS ================= */
 
 function loadMarks(){
