@@ -40,6 +40,7 @@ th,td{border:1px solid #ccc;padding:6px}
  border-radius:6px;
  display:none;
 }
+
 .section{
  background:white;
  padding:15px;
@@ -62,7 +63,8 @@ if(localStorage.getItem("role")!=="hod"){
 <div id="welcomeBar"></div>
 <h2>🌱 GO GREEN – HOD Dashboard</h2>
 <button onclick="logout()">Logout</button>
- <!-- ================= MY ATTENDANCE ================= -->
+
+<!-- ================= MY ATTENDANCE ================= -->
 
 <h3>My Attendance</h3>
 <button onclick="startCamera()">Mark My Attendance</button>
@@ -81,6 +83,7 @@ if(localStorage.getItem("role")!=="hod"){
 </thead>
 <tbody id="attBody"></tbody>
 </table>
+
 <!-- ================= MY ANALYTICS ================= -->
 
 <h3>📊 My Attendance Analytics</h3>
@@ -126,7 +129,6 @@ Attendance %: <b id="myPct">--</b>
 <input id="rad" placeholder="Radius">
 <button onclick="addLocation()">Add</button>
 
-<div id="toast"></div>
 <hr>
 
 <h3>📝 Faculty Leave Approval</h3>
@@ -198,6 +200,8 @@ Attendance %: <b id="myPct">--</b>
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email=localStorage.getItem("email");
+let stream=null;
+
 /* ===== POST ===== */
 function post(d){
  return fetch(API,{
@@ -220,7 +224,7 @@ const name=localStorage.getItem("name")||email.split("@")[0];
 const hr=new Date().getHours();
 const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
 document.getElementById("welcomeBar").innerHTML =
-${g}, ${name} 👋 | Role: HOD;
+`${g}, ${name} 👋 | Role: HOD`;
 
 function logout(){
  localStorage.clear();
@@ -228,18 +232,19 @@ function logout(){
 }
 
 /* ===== Camera ===== */
-
 function startCamera(){
  document.getElementById("cam").style.display="block";
  navigator.mediaDevices.getUserMedia({video:true})
  .then(s=>{
   stream=s;
-  video.srcObject=s;
+  document.getElementById("video").srcObject=s;
  });
 }
 
 function capture(){
- canvas.getContext("2d").drawImage(video,0,0,260,200);
+ document.getElementById("canvas")
+   .getContext("2d")
+   .drawImage(document.getElementById("video"),0,0,260,200);
 
  navigator.geolocation.getCurrentPosition(pos=>{
   post({
@@ -250,11 +255,10 @@ function capture(){
   }).then(r=>{
    toast(r.message);
    if(stream) stream.getTracks().forEach(t=>t.stop());
-   cam.style.display="none";
+   document.getElementById("cam").style.display="none";
   });
  });
 }
-
 /* ===== View Attendance ===== */
 
 function viewMyAttendance(){
