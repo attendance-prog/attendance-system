@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://www.gstatic.com/charts/loader.js"></script>
-
 <link rel="stylesheet"
  href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -41,6 +40,13 @@ th,td{border:1px solid #ccc;padding:6px}
  border-radius:6px;
  display:none;
 }
+.section{
+ background:white;
+ padding:15px;
+ margin-top:20px;
+ border-radius:10px;
+ box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
 </style>
 </head>
 
@@ -54,122 +60,61 @@ if(localStorage.getItem("role")!=="hod"){
 </script>
 
 <div id="welcomeBar"></div>
-
 <h2>🌱 GO GREEN – HOD Dashboard</h2>
 <button onclick="logout()">Logout</button>
 
-<!-- ================= MY ATTENDANCE ================= -->
-
-<h3>My Attendance</h3>
-<button onclick="startCamera()">Mark My Attendance</button>
-<button onclick="viewMyAttendance()">View My Attendance</button>
-
-<div id="cam" style="display:none">
-<video id="video" autoplay playsinline width="260"></video><br>
-<button onclick="capture()">Capture</button>
+<div class="section">
+<h3>📘 Marks Approval Panel</h3>
+<button onclick="loadMarks()">Load Draft Marks</button>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Faculty</th>
+<th>Student</th>
+<th>CA</th>
+<th>End</th>
+<th>Total</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="marksBody"></tbody>
+</table>
 </div>
 
-<canvas id="canvas" width="260" height="200" style="display:none"></canvas>
+<div class="section">
+<h3>📊 Department Attendance Overview</h3>
+<div id="deptChart" style="height:300px"></div>
+</div>
 
-<table id="attTable" style="display:none">
-<thead>
-<tr><th>Date</th><th>Status</th><th>Time</th></tr>
-</thead>
-<tbody id="attBody"></tbody>
-</table>
+<div class="section">
+<h3>🚨 Early Warning Monitor</h3>
+<button onclick="runWarnings()">Run Warning Check</button>
+</div>
 
-<!-- ================= MY ANALYTICS ================= -->
-
-<h3>📊 My Attendance Analytics</h3>
-Attendance %: <b id="myPct">--</b>
-<div id="myChart" style="height:300px"></div>
-
-<!-- ================= MAP ================= -->
-
-<h3>🗺 Attendance Map</h3>
-<div id="map" style="height:320px"></div>
-
-<!-- ================= SUBJECT ================= -->
-
-<h3>Add Subject</h3>
-<input id="sid" placeholder="Subject ID">
-<input id="sname" placeholder="Subject Name">
-<input id="sem" placeholder="Semester">
-<button onclick="addSubject()">Add</button>
-
-<!-- ================= TIMETABLE ================= -->
-
-<h3>Add Timetable</h3>
-<select id="day">
-<option>Monday</option>
-<option>Tuesday</option>
-<option>Wednesday</option>
-<option>Thursday</option>
-<option>Friday</option>
-</select>
-
-<input id="tsub" placeholder="Subject ID">
-<input id="start" placeholder="Start (HH.MM)">
-<input id="end" placeholder="End (HH.MM)">
-<input id="room" placeholder="Room">
-<button onclick="addTimetable()">Add</button>
-
-<!-- ================= GPS ================= -->
-
-<h3>Add GPS Location</h3>
-<input id="groom" placeholder="Room">
-<input id="lat" placeholder="Latitude">
-<input id="lng" placeholder="Longitude">
-<input id="rad" placeholder="Radius">
-<button onclick="addLocation()">Add</button>
-
-<hr>
-
-<!-- ================= LEAVE APPROVAL ================= -->
-
-<h3>📝 Faculty Leave Approval</h3>
-<button onclick="loadLeaves()">Load Pending Leaves</button>
-
+<div class="section">
+<h3>📡 Live Running Classes</h3>
+<button onclick="loadLiveClasses()">Refresh</button>
 <table>
 <thead>
 <tr>
-<th>ID</th>
-<th>Email</th>
-<th>From</th>
-<th>To</th>
-<th>Reason</th>
-<th>Action</th>
+<th>Session</th>
+<th>Subject</th>
+<th>Faculty</th>
+<th>Room</th>
 </tr>
 </thead>
-<tbody id="leaveBody"></tbody>
+<tbody id="liveBody"></tbody>
 </table>
-
-<hr>
-
-<!-- ================= SUBSTITUTE ================= -->
-
-<h3>🤖 Substitute Suggestion & Assignment</h3>
-
-<button onclick="suggestSub()">Suggest Substitute</button>
-
-<table>
-<thead>
-<tr>
-<th>Suggested Faculty</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody id="subTable"></tbody>
-</table>
+</div>
 
 <div id="toast"></div>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email=localStorage.getItem("email");
-let stream=null;
 
-/* ===== POST ===== */
 function post(d){
  return fetch(API,{
   method:"POST",
@@ -178,12 +123,16 @@ function post(d){
  }).then(r=>r.json());
 }
 
-/* ===== Toast ===== */
 function toast(m){
  const t=document.getElementById("toast");
  t.innerText=m;
  t.style.display="block";
  setTimeout(()=>t.style.display="none",2500);
+}
+
+function logout(){
+ localStorage.clear();
+ location.href="index.html";
 }
 
 /* ===== Greeting ===== */
@@ -192,208 +141,97 @@ const hr=new Date().getHours();
 const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
 welcomeBar.innerHTML=`${g}, ${name} 👋 | Role: HOD`;
 
-function logout(){
- localStorage.clear();
- location.href="index.html";
-}
+/* ================= MARKS ================= */
 
-/* ===== Camera ===== */
-
-function startCamera(){
- cam.style.display="block";
- navigator.mediaDevices.getUserMedia({video:true})
- .then(s=>{stream=s;video.srcObject=s});
-}
-
-function capture(){
- navigator.geolocation.getCurrentPosition(pos=>{
-  post({
-   action:"markHodAttendance",
-   email,
-   latitude:pos.coords.latitude,
-   longitude:pos.coords.longitude
-  }).then(r=>{
-   toast(r.message);
-   stopCam();
-  });
- });
-}
-
-function stopCam(){
- if(stream) stream.getTracks().forEach(t=>t.stop());
- cam.style.display="none";
-}
-
-/* ===== Attendance View ===== */
-
-function viewMyAttendance(){
- post({action:"getMyAttendance",email})
- .then(r=>{
-  attBody.innerHTML="";
-  r.data.forEach(x=>{
-   attBody.innerHTML+=`
+function loadMarks(){
+ post({action:"getAllMarks"}).then(r=>{
+  marksBody.innerHTML="";
+  (r.data||[]).forEach(m=>{
+   marksBody.innerHTML+=`
    <tr>
-   <td>${new Date(x[0]).toLocaleDateString()}</td>
-   <td>${x[6]}</td>
-   <td>${new Date(x[8]).toLocaleTimeString()}</td>
+    <td>${new Date(m.date).toLocaleDateString()}</td>
+    <td>${m.faculty}</td>
+    <td>${m.student}</td>
+    <td>${m.ca}</td>
+    <td>${m.end}</td>
+    <td>${m.total}</td>
+    <td>${m.status}</td>
+    <td>
+     ${m.status==="DRAFT"
+      ? `<button onclick="approveMarks('${m.student}')">Approve</button>`
+      : "Locked"}
+    </td>
    </tr>`;
   });
-  attTable.style.display="table";
  });
 }
 
-/* ===== Analytics ===== */
+function approveMarks(student){
+ post({
+  action:"lockMarks",
+  studentEmail:student
+ }).then(()=>{
+  toast("Marks Approved & Locked");
+  loadMarks();
+ });
+}
+
+/* ================= LIVE CLASSES ================= */
+
+function loadLiveClasses(){
+ post({action:"getLiveClasses"}).then(r=>{
+  liveBody.innerHTML="";
+  (r.data||[]).forEach(c=>{
+   liveBody.innerHTML+=`
+   <tr>
+    <td>${c.sessionId}</td>
+    <td>${c.subject}</td>
+    <td>${c.faculty}</td>
+    <td>${c.room}</td>
+   </tr>`;
+  });
+ });
+}
+loadLiveClasses();
+setInterval(loadLiveClasses,20000);
+
+/* ================= WARNING ================= */
+
+function runWarnings(){
+ post({action:"runEarlyWarningCheck"})
+ .then(()=>toast("Warning check completed"));
+}
+
+/* ================= DEPARTMENT ANALYTICS ================= */
 
 google.charts.load('current',{packages:['corechart']});
-google.charts.setOnLoadCallback(loadMyAnalytics);
+google.charts.setOnLoadCallback(loadDeptChart);
 
-function loadMyAnalytics(){
- post({action:"getMyAttendanceAnalytics",email})
- .then(r=>{
-  myPct.innerText=r.percent+"%";
+function loadDeptChart(){
+ post({action:"getAnalytics"}).then(r=>{
   const data=google.visualization.arrayToDataTable([
-   ["Status","Count"],
+   ["Type","Count"],
    ["Present",r.present],
-   ["Late",r.late],
-   ["Absent",r.absent]
+   ["Total",r.total]
   ]);
-  new google.visualization.PieChart(myChart).draw(data);
+  new google.visualization.PieChart(deptChart)
+   .draw(data,{title:"Department Attendance"});
  });
 }
 
-/* ===== Map ===== */
+/* ================= FORCE LOGOUT CHECK ================= */
 
-const map=L.map("map").setView([28.47,77.48],16);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-
-post({action:"getGpsPoints"}).then(r=>{
- (r.data||[]).forEach(p=>{
-  if(p.lat && p.lng){
-   L.marker([p.lat,p.lng]).addTo(map).bindPopup(p.email);
+setInterval(()=>{
+ post({action:"checkForceLogout",email})
+ .then(r=>{
+  if(r.logout){
+   alert("You have been logged out by Admin");
+   logout();
   }
  });
-});
-
-/* ===== Subject / Timetable / GPS ===== */
-
-function addSubject(){
- post({
-  action:"addSubject",
-  subjectId:sid.value,
-  subjectName:sname.value,
-  semester:sem.value
- }).then(()=>toast("Subject Added"));
-}
-
-function addTimetable(){
- post({
-  action:"addTimetable",
-  day:day.value,
-  subjectId:tsub.value,
-  start:start.value,
-  end:end.value,
-  room:room.value
- }).then(()=>toast("Timetable Added"));
-}
-
-function addLocation(){
- post({
-  action:"addLocation",
-  room:groom.value,
-  lat:lat.value,
-  lng:lng.value,
-  radius:rad.value
- }).then(()=>toast("Location Added"));
-}
-
-/* ===== Leave Approval ===== */
-
-function loadLeaves(){
- post({action:"getPendingLeaves"}).then(r=>{
-  leaveBody.innerHTML="";
-  (r.data||[]).forEach(l=>{
-   leaveBody.innerHTML+=`
-   <tr>
-   <td>${l[0]}</td>
-   <td>${l[1]}</td>
-   <td>${l[2]}</td>
-   <td>${l[3]}</td>
-   <td>${l[4]}</td>
-   <td>
-    <button onclick="approveLeave('${l[0]}')">Approve</button>
-    <button onclick="rejectLeave('${l[0]}')">Reject</button>
-   </td>
-   </tr>`;
-  });
- });
-}
-
-function approveLeave(id){
- post({
-  action:"approveLeave",
-  leaveId:id,
-  approver:email
- }).then(()=>toast("Approved"));
-}
-
-function rejectLeave(id){
- post({
-  action:"rejectLeave",
-  leaveId:id,
-  approver:email
- }).then(()=>toast("Rejected"));
-}
-
-/* ===== Substitute Suggestion ===== */
-function suggestSub(){
-
- post({action:"suggestSubstitute"}).then(r=>{
-
-  const body = document.getElementById("subTable");
-  body.innerHTML = "";
-
-  if(!r.success || !r.suggested.length){
-    body.innerHTML = "<tr><td colspan=2>No free faculty</td></tr>";
-    return;
-  }
-
-  r.suggested.forEach(f=>{
-
-    body.innerHTML += `
-    <tr>
-      <td>${f}</td>
-      <td>
-        <button onclick="assignSub('${f}')">
-          Assign Substitute
-        </button>
-      </td>
-    </tr>`;
-  });
-
- });
-}
-function assignSub(subEmail){
-
- post({action:"getCurrentSlot"}).then(s=>{
-
-  if(!s.data){
-    toast("No active slot");
-    return;
-  }
-
-  post({
-    action:"assignSubstitute",
-    substitute: subEmail,
-    original: s.data.faculty
-  }).then(r=>{
-    toast(r.message);
-    suggestSub(); // refresh list
-  });
-
- });
-}
-
+},5000);
 
 </script>
+
 </body>
 </html>
