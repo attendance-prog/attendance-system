@@ -5,34 +5,34 @@
 <title>GO GREEN Login</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #eaf6ea;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  .card {
-    background: #fff;
-    padding: 25px;
-    border-radius: 10px;
-    width: 320px;
-    box-shadow: 0 4px 12px rgba(0,0,0,.2);
-    text-align: center;
-  }
-  h2 { color: #2e7d32; }
-  input, select, button {
-    width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-  }
-  button {
-    background: #2e7d32;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-  }
+body {
+  font-family: Arial, sans-serif;
+  background: #eaf6ea;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+.card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  width: 320px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  text-align: center;
+}
+h2 { color: #2e7d32; }
+input, select, button {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+}
+button {
+  background: #2e7d32;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
 </style>
 </head>
 
@@ -60,12 +60,12 @@
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const API_URL = "YOUR_WEB_APP_URL_HERE";
 
-/* ---- CLEAR OLD SESSION ON LOGIN PAGE ---- */
+/* Clear session */
 localStorage.clear();
 
-/* ---- SEND OTP ---- */
+/* Send OTP */
 function sendOtp() {
   const email = document.getElementById("email").value.trim();
   const role  = document.getElementById("role").value;
@@ -77,10 +77,11 @@ function sendOtp() {
 
   fetch(API_URL, {
     method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({
       action: "sendOtp",
-      email: email,
-      role: role
+      email,
+      role
     })
   })
   .then(r => r.json())
@@ -88,7 +89,7 @@ function sendOtp() {
   .catch(() => alert("Network error"));
 }
 
-/* ---- VERIFY OTP ---- */
+/* Verify OTP */
 function verifyOtp() {
   const email = document.getElementById("email").value.trim();
   const role  = document.getElementById("role").value;
@@ -101,42 +102,32 @@ function verifyOtp() {
 
   fetch(API_URL, {
     method: "POST",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8"
-    },
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({
       action: "verifyOtp",
-      email: email,
-      otp: otp
+      email,
+      otp
     })
   })
   .then(r => r.json())
   .then(res => {
-
     if (!res.success) {
       alert(res.message);
       return;
     }
 
-    // ✅ SAVE SESSION
-   localStorage.setItem("email", email);
-localStorage.setItem("role", role);
-localStorage.setItem("name", email.split("@")[0]);
+    localStorage.setItem("email", email);
+    localStorage.setItem("role", role);
+    localStorage.setItem("name", email.split("@")[0]);
 
-redirectByRole(role);
-
-    // ✅ REDIRECT
     window.location.href = role + ".html";
   })
-  .catch(err => {
-    console.error(err);
-    alert("Verification error");
-  });
+  .catch(() => alert("Verification error"));
 }
-
 </script>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
 
 </body>
 </html>
-<script src="js/api.js"></script>
-<script src="js/auth.js"></script>
