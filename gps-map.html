@@ -17,10 +17,21 @@ const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-
 
 function initMap(){
 
- const map=new google.maps.Map(document.getElementById("map"),{
-  zoom:15,
-  center:{lat:28.4500,lng:77.5840}
- });
+const map = L.map('map').setView([28.47,77.48],15);
+
+L.tileLayer(
+ "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+).addTo(map);
+
+post({action:"getGpsPoints"}).then(r=>{
+  (r.data||[]).forEach(p=>{
+    if(p.lat && p.lng){
+      L.marker([Number(p.lat),Number(p.lng)])
+      .addTo(map)
+      .bindPopup(p.email);
+    }
+  });
+});
 
  fetch(API,{
   method:"POST",
