@@ -63,7 +63,53 @@ if(localStorage.getItem("role")!=="hod"){
 <div id="welcomeBar"></div>
 <h2>🌱 GO GREEN – HOD Dashboard</h2>
 <button onclick="logout()">Logout</button>
+<script src="js/api.js"></script>
+<script src="js/common.js"></script>
 
+<script>
+
+protectPage("hod");
+
+const email = localStorage.getItem("email");
+const name = localStorage.getItem("name");
+
+document.getElementById("welcomeBar").innerHTML =
+`Good ${new Date().getHours()<12?"Morning":new Date().getHours()<18?"Afternoon":"Evening"}, ${name} 👋`;
+
+function loadLiveClasses(){
+ post({action:"getLiveClasses"})
+ .then(r=>{
+   liveBody.innerHTML="";
+   (r.data||[]).forEach(c=>{
+     liveBody.innerHTML+=`
+     <tr>
+      <td>${c.sessionId}</td>
+      <td>${c.subject}</td>
+      <td>${c.faculty}</td>
+      <td>${c.room}</td>
+     </tr>`;
+   });
+ });
+}
+
+loadLiveClasses();
+setInterval(loadLiveClasses,20000);
+<div class="nav">
+  <button onclick="window.location.href='hod-marks.html'">
+    📘 Marks
+  </button>
+
+  <button onclick="window.location.href='hod-leaves.html'">
+    📝 Leaves
+  </button>
+
+  <button onclick="window.location.href='hod-live.html'">
+    📡 Live Classes
+  </button>
+
+  <button onclick="logout()">Logout</button>
+</div>
+</script>
 <!-- ================= MY ATTENDANCE ================= -->
 
 <h3>My Attendance</h3>
@@ -491,50 +537,3 @@ setInterval(()=>{
 
 </body>
 </html>
-<script src="js/api.js"></script>
-<script src="js/common.js"></script>
-
-<script>
-
-protectPage("hod");
-
-const email = localStorage.getItem("email");
-const name = localStorage.getItem("name");
-
-document.getElementById("welcomeBar").innerHTML =
-`Good ${new Date().getHours()<12?"Morning":new Date().getHours()<18?"Afternoon":"Evening"}, ${name} 👋`;
-
-function loadLiveClasses(){
- post({action:"getLiveClasses"})
- .then(r=>{
-   liveBody.innerHTML="";
-   (r.data||[]).forEach(c=>{
-     liveBody.innerHTML+=`
-     <tr>
-      <td>${c.sessionId}</td>
-      <td>${c.subject}</td>
-      <td>${c.faculty}</td>
-      <td>${c.room}</td>
-     </tr>`;
-   });
- });
-}
-
-loadLiveClasses();
-setInterval(loadLiveClasses,20000);
-<div class="nav">
-  <button onclick="window.location.href='hod-marks.html'">
-    📘 Marks
-  </button>
-
-  <button onclick="window.location.href='hod-leaves.html'">
-    📝 Leaves
-  </button>
-
-  <button onclick="window.location.href='hod-live.html'">
-    📡 Live Classes
-  </button>
-
-  <button onclick="logout()">Logout</button>
-</div>
-</script>
