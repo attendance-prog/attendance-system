@@ -6,8 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://www.gstatic.com/charts/loader.js"></script>
-<link rel="stylesheet"
- href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <style>
@@ -21,7 +20,6 @@ button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px}
 input,select{padding:6px;margin:4px}
 table{border-collapse:collapse;width:100%}
 th,td{border:1px solid #ccc;padding:6px}
-
 #welcomeBar{
  background:#1b5e20;
  color:white;
@@ -29,7 +27,6 @@ th,td{border:1px solid #ccc;padding:6px}
  border-radius:8px;
  margin-bottom:15px;
 }
-
 #toast{
  position:fixed;
  bottom:20px;
@@ -40,7 +37,6 @@ th,td{border:1px solid #ccc;padding:6px}
  border-radius:6px;
  display:none;
 }
-
 .section{
  background:white;
  padding:15px;
@@ -62,54 +58,14 @@ if(localStorage.getItem("role")!=="hod"){
 
 <div id="welcomeBar"></div>
 <h2>🌱 GO GREEN – HOD Dashboard</h2>
-<button onclick="logout()">Logout</button>
- <div class="nav">
-  <button onclick="window.location.href='hod-marks.html'">
-    📘 Marks
-  </button>
 
-  <button onclick="window.location.href='hod-leaves.html'">
-    📝 Leaves
-  </button>
-
-  <button onclick="window.location.href='hod-live.html'">
-    📡 Live Classes
-  </button>
-
+<div class="nav">
+  <button onclick="window.location.href='hod-marks.html'">📘 Marks</button>
+  <button onclick="window.location.href='hod-leaves.html'">📝 Leaves</button>
+  <button onclick="window.location.href='hod-live.html'">📡 Live Classes</button>
   <button onclick="logout()">Logout</button>
 </div>
-<script src="js/api.js"></script>
-<script src="js/common.js"></script>
 
-<script>
-
-protectPage("hod");
-
-const email = localStorage.getItem("email");
-const name = localStorage.getItem("name");
-
-document.getElementById("welcomeBar").innerHTML =
-`Good ${new Date().getHours()<12?"Morning":new Date().getHours()<18?"Afternoon":"Evening"}, ${name} 👋`;
-
-function loadLiveClasses(){
- post({action:"getLiveClasses"})
- .then(r=>{
-   liveBody.innerHTML="";
-   (r.data||[]).forEach(c=>{
-     liveBody.innerHTML+=`
-     <tr>
-      <td>${c.sessionId}</td>
-      <td>${c.subject}</td>
-      <td>${c.faculty}</td>
-      <td>${c.room}</td>
-     </tr>`;
-   });
- });
-}
-
-loadLiveClasses();
-setInterval(loadLiveClasses,20000);
-</script>
 <!-- ================= MY ATTENDANCE ================= -->
 
 <h3>My Attendance</h3>
@@ -201,14 +157,8 @@ Attendance %: <b id="myPct">--</b>
 <table>
 <thead>
 <tr>
-<th>Date</th>
-<th>Faculty</th>
-<th>Student</th>
-<th>CA</th>
-<th>End</th>
-<th>Total</th>
-<th>Status</th>
-<th>Action</th>
+<th>Date</th><th>Faculty</th><th>Student</th><th>CA</th>
+<th>End</th><th>Total</th><th>Status</th><th>Action</th>
 </tr>
 </thead>
 <tbody id="marksBody"></tbody>
@@ -230,12 +180,7 @@ Attendance %: <b id="myPct">--</b>
 <button onclick="loadLiveClasses()">Refresh</button>
 <table>
 <thead>
-<tr>
-<th>Session</th>
-<th>Subject</th>
-<th>Faculty</th>
-<th>Room</th>
-</tr>
+<tr><th>Session</th><th>Subject</th><th>Faculty</th><th>Room</th></tr>
 </thead>
 <tbody id="liveBody"></tbody>
 </table>
@@ -245,10 +190,13 @@ Attendance %: <b id="myPct">--</b>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-const email=localStorage.getItem("email");
+const email = localStorage.getItem("email");
+const name = localStorage.getItem("name") || email.split("@")[0];
 let stream=null;
 
-/* ===== POST ===== */
+document.getElementById("welcomeBar").innerHTML =
+`Good ${new Date().getHours()<12?"Morning":new Date().getHours()<18?"Afternoon":"Evening"}, ${name} 👋 | Role: HOD`;
+
 function post(d){
  return fetch(API,{
   method:"POST",
@@ -257,7 +205,6 @@ function post(d){
  }).then(r=>r.json());
 }
 
-/* ===== Toast ===== */
 function toast(m){
  const t=document.getElementById("toast");
  t.innerText=m;
@@ -265,19 +212,12 @@ function toast(m){
  setTimeout(()=>t.style.display="none",2500);
 }
 
-/* ===== Greeting ===== */
-const name=localStorage.getItem("name")||email.split("@")[0];
-const hr=new Date().getHours();
-const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
-document.getElementById("welcomeBar").innerHTML =
-`${g}, ${name} 👋 | Role: HOD`;
-
 function logout(){
  localStorage.clear();
  location.href="index.html";
 }
 
-/* ===== Camera ===== */
+/* CAMERA */
 function startCamera(){
  document.getElementById("cam").style.display="block";
  navigator.mediaDevices.getUserMedia({video:true})
@@ -305,186 +245,43 @@ function capture(){
   });
  });
 }
-/* ===== View Attendance ===== */
 
+/* VIEW ATTENDANCE */
 function viewMyAttendance(){
  post({action:"getMyAttendance",email})
  .then(r=>{
-  attBody.innerHTML="";
+  const body=document.getElementById("attBody");
+  body.innerHTML="";
   r.data.forEach(x=>{
-   attBody.innerHTML+=`
+   body.innerHTML+=`
    <tr>
    <td>${new Date(x[0]).toLocaleDateString()}</td>
    <td>${x[6]}</td>
    <td>${new Date(x[8]).toLocaleTimeString()}</td>
    </tr>`;
   });
-  attTable.style.display="table";
+  document.getElementById("attTable").style.display="table";
  });
 }
 
-/* ===== My Analytics ===== */
-
-google.charts.load('current',{packages:['corechart']});
-google.charts.setOnLoadCallback(loadMyAnalytics);
-
-function loadMyAnalytics(){
-
- post({
-  action:"getMyAttendanceAnalytics",
-  email
- }).then(r=>{
-
-  if(!r.success){
-   myChart.innerHTML="No data";
-   return;
-  }
-
-  document.getElementById("myPct").innerText =
-    r.percent + "%";
-
-  const data = google.visualization.arrayToDataTable([
-   ["Status","Count"],
-   ["Present", r.present],
-   ["Late", r.late],
-   ["Absent", r.absent]
-  ]);
-
-  const chart =
-   new google.visualization.PieChart(
-     document.getElementById("myChart")
-   );
-
-  chart.draw(data,{title:"My Attendance Breakdown"});
- });
-}
-
-/* ===== Map ===== */
-
+/* MAP */
 const map=L.map("map").setView([28.47,77.48],16);
-
-L.tileLayer(
- "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-).addTo(map);
-
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
 post({action:"getGpsPoints"}).then(r=>{
- r.data.forEach(p=>{
+ (r.data||[]).forEach(p=>{
   if(p.lat && p.lng){
-   L.marker([p.lat,p.lng])
-   .addTo(map)
-   .bindPopup(p.email);
+   L.marker([p.lat,p.lng]).addTo(map).bindPopup(p.email);
   }
  });
 });
 
-/* ===== Add Subject ===== */
-
-function addSubject(){
- post({
-  action:"addSubject",
-  subjectId:sid.value,
-  subjectName:sname.value,
-  department:"HOD",
-  semester:sem.value
- }).then(()=>toast("Subject Added"));
-}
-
-/* ===== Add Timetable ===== */
-
-function addTimetable(){
- post({
-  action:"addTimetable",
-  day:day.value,
-  subjectId:tsub.value,
-  start:start.value,
-  end:end.value,
-  room:room.value
- }).then(()=>toast("Timetable Added"));
-}
-
-/* ===== Add Location ===== */
-
-function addLocation(){
- post({
-  action:"addLocation",
-  room:groom.value,
-  lat:lat.value,
-  lng:lng.value,
-  radius:rad.value
- }).then(()=>toast("Location Added"));
-}
- function loadLeaves(){
- post({action:"getPendingLeaves"}).then(r=>{
-  leaveBody.innerHTML="";
-  r.data.forEach(l=>{
-   leaveBody.innerHTML+=`
-   <tr>
-   <td>${l[0]}</td>
-   <td>${l[1]}</td>
-   <td>${l[2]}</td>
-   <td>${l[3]}</td>
-   <td>${l[4]}</td>
-   <td><button onclick="approveLeave('${l[0]}')">Approve</button></td>
-   </tr>`;
-  });
- });
-}
-
-function approveLeave(id){
- post({
-  action:"approveLeave",
-  leaveId:id,
-  approver:email
- }).then(()=>toast("Approved"));
-}
-
-function suggestSub(){
- post({action:"suggestSubstitute"}).then(r=>{
-  subBox.innerText = "Suggested: " + (r.suggested||[]).join(", ");
- });
-}
-/* ================= MARKS ================= */
-
-function loadMarks(){
- post({action:"getAllMarks"}).then(r=>{
-  marksBody.innerHTML="";
-  (r.data||[]).forEach(m=>{
-   marksBody.innerHTML+=`
-   <tr>
-    <td>${new Date(m.date).toLocaleDateString()}</td>
-    <td>${m.faculty}</td>
-    <td>${m.student}</td>
-    <td>${m.ca}</td>
-    <td>${m.end}</td>
-    <td>${m.total}</td>
-    <td>${m.status}</td>
-    <td>
-     ${m.status==="DRAFT"
-      ? `<button onclick="approveMarks('${m.student}')">Approve</button>`
-      : "Locked"}
-    </td>
-   </tr>`;
-  });
- });
-}
-
-function approveMarks(student){
- post({
-  action:"lockMarks",
-  studentEmail:student
- }).then(()=>{
-  toast("Marks Approved & Locked");
-  loadMarks();
- });
-}
-
-/* ================= LIVE CLASSES ================= */
-
+/* LIVE CLASSES */
 function loadLiveClasses(){
  post({action:"getLiveClasses"}).then(r=>{
-  liveBody.innerHTML="";
+  const body=document.getElementById("liveBody");
+  body.innerHTML="";
   (r.data||[]).forEach(c=>{
-   liveBody.innerHTML+=`
+   body.innerHTML+=`
    <tr>
     <td>${c.sessionId}</td>
     <td>${c.subject}</td>
@@ -497,32 +294,7 @@ function loadLiveClasses(){
 loadLiveClasses();
 setInterval(loadLiveClasses,20000);
 
-/* ================= WARNING ================= */
-
-function runWarnings(){
- post({action:"runEarlyWarningCheck"})
- .then(()=>toast("Warning check completed"));
-}
-
-/* ================= DEPARTMENT ANALYTICS ================= */
-
-google.charts.load('current',{packages:['corechart']});
-google.charts.setOnLoadCallback(loadDeptChart);
-
-function loadDeptChart(){
- post({action:"getAnalytics"}).then(r=>{
-  const data=google.visualization.arrayToDataTable([
-   ["Type","Count"],
-   ["Present",r.present],
-   ["Total",r.total]
-  ]);
-  new google.visualization.PieChart(deptChart)
-   .draw(data,{title:"Department Attendance"});
- });
-}
-
-/* ================= FORCE LOGOUT CHECK ================= */
-
+/* FORCE LOGOUT CHECK */
 setInterval(()=>{
  post({action:"checkForceLogout",email})
  .then(r=>{
@@ -532,7 +304,6 @@ setInterval(()=>{
   }
  });
 },5000);
-
 </script>
 
 </body>
