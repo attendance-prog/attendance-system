@@ -348,5 +348,19 @@ const name = localStorage.getItem("name");
 
 document.getElementById("welcomeBar").innerHTML =
 `Welcome ${name} 👑`;
+<div class="nav">
+  <button onclick="window.location.href='admin-users.html'">
+    👥 Users
+  </button>
 
+  <button onclick="window.location.href='admin-analytics.html'">
+    📊 Analytics
+  </button>
+
+  <button onclick="window.location.href='admin-gps.html'">
+    📍 GPS Map
+  </button>
+
+  <button onclick="logout()">Logout</button>
+</div>
 </script>
