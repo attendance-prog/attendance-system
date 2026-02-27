@@ -119,10 +119,11 @@ function verifyOtp() {
     }
 
     // ✅ SAVE SESSION
-    localStorage.setItem("email", email);
-    localStorage.setItem("role", role);
-    localStorage.setItem("name", email.split("@")[0]);
-    localStorage.setItem("dept", res.dept || "");
+   localStorage.setItem("email", email);
+localStorage.setItem("role", role);
+localStorage.setItem("name", email.split("@")[0]);
+
+redirectByRole(role);
 
     // ✅ REDIRECT
     window.location.href = role + ".html";
@@ -137,3 +138,5 @@ function verifyOtp() {
 
 </body>
 </html>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
