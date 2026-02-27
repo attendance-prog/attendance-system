@@ -63,6 +63,21 @@ if(localStorage.getItem("role")!=="hod"){
 <div id="welcomeBar"></div>
 <h2>🌱 GO GREEN – HOD Dashboard</h2>
 <button onclick="logout()">Logout</button>
+ <div class="nav">
+  <button onclick="window.location.href='hod-marks.html'">
+    📘 Marks
+  </button>
+
+  <button onclick="window.location.href='hod-leaves.html'">
+    📝 Leaves
+  </button>
+
+  <button onclick="window.location.href='hod-live.html'">
+    📡 Live Classes
+  </button>
+
+  <button onclick="logout()">Logout</button>
+</div>
 <script src="js/api.js"></script>
 <script src="js/common.js"></script>
 
@@ -94,21 +109,6 @@ function loadLiveClasses(){
 
 loadLiveClasses();
 setInterval(loadLiveClasses,20000);
-<div class="nav">
-  <button onclick="window.location.href='hod-marks.html'">
-    📘 Marks
-  </button>
-
-  <button onclick="window.location.href='hod-leaves.html'">
-    📝 Leaves
-  </button>
-
-  <button onclick="window.location.href='hod-live.html'">
-    📡 Live Classes
-  </button>
-
-  <button onclick="logout()">Logout</button>
-</div>
 </script>
 <!-- ================= MY ATTENDANCE ================= -->
 
