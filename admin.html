@@ -42,6 +42,9 @@ th,td{border:1px solid #ccc;padding:6px}
  margin-top:15px;
  box-shadow:0 2px 6px rgba(0,0,0,0.1)
 }
+.nav{
+ margin:10px 0;
+}
 </style>
 </head>
 
@@ -57,35 +60,13 @@ if(localStorage.getItem("role")!=="admin"){
 <h2>🌱 GO GREEN – Admin Super Dashboard</h2>
 <div id="welcomeBar"></div>
 <button onclick="logout()">Logout</button>
-  <script src="js/api.js"></script>
-<script src="js/common.js"></script>
 
-<script>
-
-protectPage("admin");
-
-const email = localStorage.getItem("email");
-const name = localStorage.getItem("name");
-
-document.getElementById("welcomeBar").innerHTML =
-`Welcome ${name} 👑`;
 <div class="nav">
-  <button onclick="window.location.href='admin-users.html'">
-    👥 Users
-  </button>
-
-  <button onclick="window.location.href='admin-analytics.html'">
-    📊 Analytics
-  </button>
-
-  <button onclick="window.location.href='admin-gps.html'">
-    📍 GPS Map
-  </button>
-
+  <button onclick="window.location.href='admin-users.html'">👥 Users</button>
+  <button onclick="window.location.href='admin-analytics.html'">📊 Analytics</button>
+  <button onclick="window.location.href='admin-gps.html'">📍 GPS Map</button>
   <button onclick="logout()">Logout</button>
 </div>
-</script>
-
 
 <!-- ================= MY ATTENDANCE ================= -->
 <section>
@@ -178,8 +159,22 @@ document.getElementById("welcomeBar").innerHTML =
 
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-const email=localStorage.getItem("email");
+
+const email = localStorage.getItem("email");
+const name = localStorage.getItem("name") || "Admin";
 let stream=null;
+
+/* ===== LOGOUT ===== */
+function logout(){
+ localStorage.clear();
+ location.href="index.html";
+}
+
+/* ===== GREETING ===== */
+const hr=new Date().getHours();
+const greet=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
+document.getElementById("welcomeBar").innerHTML =
+`${greet}, ${name} 👋`;
 
 /* ===== POST ===== */
 function post(d){
@@ -189,19 +184,6 @@ function post(d){
   body:JSON.stringify(d)
  }).then(r=>r.json());
 }
-
-/* ===== LOGOUT ===== */
-function logout(){
- localStorage.clear();
- location.href="index.html";
-}
-
-/* ===== GREETING ===== */
-const name=localStorage.getItem("name")||"Admin";
-const hr=new Date().getHours();
-const greet=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
-document.getElementById("welcomeBar").innerHTML =
-`${greet}, ${name} 👋`;
 
 /* ===== CAMERA ATTENDANCE ===== */
 function markMyAttendance(){
@@ -240,7 +222,7 @@ function viewMyAttendance(){
  .then(r=>{
   const body=document.getElementById("myAttendanceBody");
   body.innerHTML="";
-  r.data.forEach(x=>{
+  (r.data||[]).forEach(x=>{
    body.innerHTML+=`
    <tr>
     <td>${new Date(x[0]).toLocaleDateString()}</td>
@@ -275,7 +257,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
 function refreshMap(){
  post({action:"getGpsPoints"}).then(r=>{
-  r.data.forEach(p=>{
+  (r.data||[]).forEach(p=>{
    if(p.lat){
     L.marker([Number(p.lat),Number(p.lng)])
      .addTo(map)
@@ -309,8 +291,7 @@ function loadLiveClasses(){
  .then(r=>{
   const body=document.getElementById("liveBody");
   body.innerHTML="";
-  if(!r.data) return;
-  r.data.forEach(c=>{
+  (r.data||[]).forEach(c=>{
    body.innerHTML+=`
    <tr>
     <td>${c.sessionId}</td>
@@ -327,7 +308,7 @@ setInterval(loadLiveClasses,20000);
 /* ===== LOAD FACULTY ===== */
 post({action:"getFaculty"}).then(r=>{
  const body=document.getElementById("facultyBody");
- r.data.forEach(x=>{
+ (r.data||[]).forEach(x=>{
   body.innerHTML+=`
   <tr>
    <td>${x[2]}</td>
@@ -340,7 +321,7 @@ post({action:"getFaculty"}).then(r=>{
 /* ===== LOAD STUDENTS ===== */
 post({action:"getStudents"}).then(r=>{
  const body=document.getElementById("studentBody");
- r.data.forEach(x=>{
+ (r.data||[]).forEach(x=>{
   body.innerHTML+=`
   <tr>
    <td>${x[0]}</td>
