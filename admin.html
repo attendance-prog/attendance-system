@@ -57,6 +57,35 @@ if(localStorage.getItem("role")!=="admin"){
 <h2>🌱 GO GREEN – Admin Super Dashboard</h2>
 <div id="welcomeBar"></div>
 <button onclick="logout()">Logout</button>
+  <script src="js/api.js"></script>
+<script src="js/common.js"></script>
+
+<script>
+
+protectPage("admin");
+
+const email = localStorage.getItem("email");
+const name = localStorage.getItem("name");
+
+document.getElementById("welcomeBar").innerHTML =
+`Welcome ${name} 👑`;
+<div class="nav">
+  <button onclick="window.location.href='admin-users.html'">
+    👥 Users
+  </button>
+
+  <button onclick="window.location.href='admin-analytics.html'">
+    📊 Analytics
+  </button>
+
+  <button onclick="window.location.href='admin-gps.html'">
+    📍 GPS Map
+  </button>
+
+  <button onclick="logout()">Logout</button>
+</div>
+</script>
+
 
 <!-- ================= MY ATTENDANCE ================= -->
 <section>
@@ -336,31 +365,3 @@ setInterval(()=>{
 
 </body>
 </html>
-<script src="js/api.js"></script>
-<script src="js/common.js"></script>
-
-<script>
-
-protectPage("admin");
-
-const email = localStorage.getItem("email");
-const name = localStorage.getItem("name");
-
-document.getElementById("welcomeBar").innerHTML =
-`Welcome ${name} 👑`;
-<div class="nav">
-  <button onclick="window.location.href='admin-users.html'">
-    👥 Users
-  </button>
-
-  <button onclick="window.location.href='admin-analytics.html'">
-    📊 Analytics
-  </button>
-
-  <button onclick="window.location.href='admin-gps.html'">
-    📍 GPS Map
-  </button>
-
-  <button onclick="logout()">Logout</button>
-</div>
-</script>
