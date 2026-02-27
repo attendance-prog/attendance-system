@@ -76,19 +76,22 @@ function sendOtp() {
   }
 
   fetch(API_URL, {
-  method: "POST",
-  headers: {
-    "Content-Type": "text/plain;charset=utf-8"
-  },
-  body: JSON.stringify({
-    action: "sendOtp",
-    email: email,
-    role: role
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
+    body: JSON.stringify({
+      action: "sendOtp",
+      email: email,
+      role: role
+    })
   })
-})
   .then(r => r.json())
   .then(res => alert(res.message))
-  .catch(() => alert("Network error"));
+  .catch(err => {
+    console.error(err);
+    alert("Send OTP failed");
+  });
 }
 
 /* Verify OTP */
