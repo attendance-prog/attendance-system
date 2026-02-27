@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>HOD – Marks Approval</title>
+</head>
+<body>
+
+<script src="js/api.js"></script>
+<script src="js/common.js"></script>
+<script>
+protectPage("hod");
+</script>
+
+<h2>📘 Marks Approval Panel</h2>
+
+<button onclick="window.location.href='hod.html'">⬅ Back</button>
+
+<div id="marksContent"></div>
+
+<script>
+post({action:"getPendingLeaves"}).then(r=>{
+  document.getElementById("getPendingLeaves").innerText =
+  JSON.stringify(r.data,null,2);
+});
+</script>
+
+</body>
+</html>
