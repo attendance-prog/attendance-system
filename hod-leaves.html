@@ -2,27 +2,200 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HOD – Marks Approval</title>
+<title>HOD – Leave & Substitute</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#e8f5e9;
+}
+
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.container{
+  padding:30px;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  margin-bottom:25px;
+}
+
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:6px 12px;
+  border-radius:5px;
+  cursor:pointer;
+  margin-right:5px;
+}
+
+button.reject{
+  background:#d32f2f;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+th,td{
+  border:1px solid #ccc;
+  padding:8px;
+  text-align:left;
+}
+</style>
 </head>
+
 <body>
 
-<script src="js/api.js"></script>
-<script src="js/common.js"></script>
 <script>
-protectPage("hod");
+if(localStorage.getItem("role")!=="hod"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
 </script>
 
-<h2>📘 Marks Approval Panel</h2>
+<div class="header">
+  <div>🌱 HOD – Leave & Substitute</div>
+  <div>
+    <button onclick="goBack()">⬅ Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
 
-<button onclick="window.location.href='hod.html'">⬅ Back</button>
+<div class="container">
 
-<div id="marksContent"></div>
+  <!-- Leave Approval -->
+  <div class="card">
+    <h3>📄 Faculty Leave Approval</h3>
+    <button onclick="loadLeaves()">Load Pending Leaves</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Email</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Reason</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="leaveBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Substitute Suggestion -->
+  <div class="card">
+    <h3>🤖 Substitute Suggestion</h3>
+    <button onclick="suggestSubstitute()">Suggest Substitute</button>
+    <div id="subResult" style="margin-top:10px;"></div>
+  </div>
+
+</div>
 
 <script>
-post({action:"getPendingLeaves"}).then(r=>{
-  document.getElementById("getPendingLeaves").innerText =
-  JSON.stringify(r.data,null,2);
-});
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const email=localStorage.getItem("email");
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+
+function goBack(){
+  window.location.href="hod.html";
+}
+
+/* Load Pending Leaves */
+function loadLeaves(){
+  post({action:"getPendingLeaves"}).then(r=>{
+    const body=document.getElementById("leaveBody");
+    body.innerHTML="";
+
+    (r.data||[]).forEach(row=>{
+      body.innerHTML+=`
+      <tr>
+        <td>${row[0]}</td>
+        <td>${row[1]}</td>
+        <td>${row[2]}</td>
+        <td>${row[3]}</td>
+        <td>${row[4]}</td>
+        <td>
+          <button onclick="approve('${row[0]}')">Approve</button>
+          <button class="reject" onclick="reject('${row[0]}')">Reject</button>
+        </td>
+      </tr>`;
+    });
+  });
+}
+
+/* Approve Leave */
+function approve(id){
+  post({
+    action:"approveLeave",
+    leaveId:id,
+    approver:email
+  }).then(res=>{
+    alert(res.message);
+    loadLeaves();
+  });
+}
+
+/* Reject Leave */
+function reject(id){
+  post({
+    action:"rejectLeave",
+    leaveId:id,
+    approver:email
+  }).then(res=>{
+    alert(res.message);
+    loadLeaves();
+  });
+}
+
+/* Suggest Substitute */
+function suggestSubstitute(){
+  post({action:"smartSubstituteSuggest"})
+  .then(r=>{
+    const div=document.getElementById("subResult");
+    div.innerHTML="";
+
+    if(!r.success){
+      div.innerHTML="No active slot.";
+      return;
+    }
+
+    (r.suggested||[]).forEach(s=>{
+      div.innerHTML+=`
+        <p><b>${s.faculty}</b> – Score: ${s.availabilityScore}</p>
+      `;
+    });
+  });
+}
 </script>
 
 </body>
