@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Faculty – Generate QR Session</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#e8f5e9;
+}
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.container{
+  padding:40px;
+}
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  max-width:600px;
+}
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:5px;
+  cursor:pointer;
+}
+input{
+  width:100%;
+  padding:8px;
+  margin-bottom:10px;
+}
+#qrBox{
+  margin-top:20px;
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("role")!=="faculty"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
+</script>
+
+<div class="header">
+  <div>🌱 Faculty – Generate QR Session</div>
+  <div>
+    <button onclick="goBack()">⬅ Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+
+    <h3>📷 Generate QR Session</h3>
+
+    <p><b>Current Slot:</b> <span id="slotStatus">Checking...</span></p>
+
+    <input type="text" id="topic" placeholder="Enter Topic">
+    <input type="text" id="notes" placeholder="Enter Notes Link">
+
+    <button onclick="generateQR()">Generate QR</button>
+
+    <div id="qrBox"></div>
+
+  </div>
+</div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const email=localStorage.getItem("email");
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+function goBack(){
+  window.location.href="faculty.html";
+}
+
+/* Check active slot */
+function checkSlot(){
+  post({action:"getActiveSlot",email})
+  .then(r=>{
+    if(!r.success || !r.subject){
+      document.getElementById("slotStatus").innerText="No active slot";
+    }else{
+      document.getElementById("slotStatus").innerText=
+        r.subject + " (" + r.room + ")";
+    }
+  });
+}
+
+/* Generate QR */
+function generateQR(){
+
+  const topic=document.getElementById("topic").value.trim();
+  const notes=document.getElementById("notes").value.trim();
+
+  if(!topic){
+    alert("Enter topic");
+    return;
+  }
+
+  // Step 1: Check attendance + slot
+  post({
+    action:"validateQRGeneration",
+    email
+  }).then(validation=>{
+
+    if(!validation.success){
+
+      if(validation.reason==="attendance"){
+        alert("⚠ Please mark attendance first.");
+        return;
+      }
+
+      if(validation.reason==="slot"){
+        alert("⚠ No active slot found.");
+        return;
+      }
+
+      alert("Validation failed");
+      return;
+    }
+
+    // Step 2: Generate QR if validation passed
+    post({
+      action:"generateQRSession",
+      email,
+      topic,
+      notes
+    }).then(r=>{
+      if(!r.success){
+        alert(r.message);
+        return;
+      }
+
+      document.getElementById("qrBox").innerHTML=
+      `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}" />`;
+
+    });
+
+  });
+}
+
+checkSlot();
+</script>
+
+</body>
+</html>
