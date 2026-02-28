@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Faculty – My Class Students</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#e8f5e9;
+}
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.container{
+  padding:40px;
+}
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  border:1px solid #ccc;
+  padding:8px;
+}
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:5px;
+  cursor:pointer;
+  margin-bottom:15px;
+}
+.present{
+  color:green;
+  font-weight:bold;
+}
+.absent{
+  color:red;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("role")!=="faculty"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
+</script>
+
+<div class="header">
+  <div>🌱 Faculty – My Class Students</div>
+  <div>
+    <button onclick="goBack()">⬅ Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+
+    <h3>👨‍🎓 Active Class Students</h3>
+
+    <button onclick="loadStudents()">Load Students</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>System ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="studentBody"></tbody>
+    </table>
+
+  </div>
+</div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const email=localStorage.getItem("email");
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+function goBack(){
+  window.location.href="faculty.html";
+}
+
+/* Load Students */
+function loadStudents(){
+
+  post({
+    action:"getLiveClassStatus",
+    email
+  }).then(r=>{
+
+    const body=document.getElementById("studentBody");
+    body.innerHTML="";
+
+    if(!r.success){
+      alert(r.message || "No active class");
+      return;
+    }
+
+    (r.data||[]).forEach(s=>{
+
+      body.innerHTML+=`
+      <tr>
+        <td>${s.systemId}</td>
+        <td>${s.name}</td>
+        <td>${s.email}</td>
+        <td class="${s.status==='PRESENT'?'present':'absent'}">
+          ${s.status}
+        </td>
+      </tr>`;
+
+    });
+
+  });
+}
+</script>
+
+</body>
+</html>
