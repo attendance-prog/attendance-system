@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin – Super Controls</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  font-family: Arial;
+  margin:0;
+  background:#e8f5e9;
+}
+
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.container{
+  padding:30px;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  max-width:500px;
+}
+
+input,select{
+  width:100%;
+  padding:10px;
+  margin:10px 0;
+}
+
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:5px;
+  cursor:pointer;
+  margin-right:10px;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("role")!=="admin"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
+</script>
+
+<div class="header">
+  <div>🌱 GO GREEN – Admin Super Controls</div>
+  <div>
+    <button onclick="goBack()">⬅ Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <h3>⚙ Manage User</h3>
+
+    <input id="adminUserEmail" placeholder="Enter User Email">
+
+    <select id="userType">
+      <option value="Employees">Employee</option>
+      <option value="Students">Student</option>
+    </select>
+
+    <select id="adminActiveSel">
+      <option value="true">Active</option>
+      <option value="false">Inactive</option>
+    </select>
+
+    <button onclick="updateUser()">Update Status</button>
+    <button onclick="forceLogoutUser()">Force Logout</button>
+
+  </div>
+
+</div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+
+function goBack(){
+  window.location.href="admin.html";
+}
+
+/* Update User Status */
+function updateUser(){
+  const email=document.getElementById("adminUserEmail").value;
+  const type=document.getElementById("userType").value;
+  const active=document.getElementById("adminActiveSel").value==="true";
+
+  post({
+    action:"toggleUserStatus",
+    email:email,
+    type:type,
+    active:active
+  }).then(()=>alert("User status updated"));
+}
+
+/* Force Logout */
+function forceLogoutUser(){
+  const email=document.getElementById("adminUserEmail").value;
+
+  post({
+    action:"forceLogout",
+    email:email
+  }).then(()=>alert("User forced logout"));
+}
+</script>
+
+</body>
+</html>
