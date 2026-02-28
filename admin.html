@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>GO GREEN – Admin Dashboard</title>
+<title>Admin Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
-  font-family: Arial;
   margin:0;
+  font-family:Arial;
   background:#e8f5e9;
 }
 
@@ -22,14 +22,10 @@ body{
 }
 
 .container{
-  padding:30px;
-}
-
-.grid{
+  padding:40px;
   display:grid;
-  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
   gap:20px;
-  margin-top:30px;
 }
 
 .card{
@@ -37,20 +33,20 @@ body{
   padding:25px;
   border-radius:10px;
   box-shadow:0 4px 10px rgba(0,0,0,0.1);
-  text-align:center;
   cursor:pointer;
-  transition:0.3s;
+  text-align:center;
+  font-weight:bold;
 }
 
 .card:hover{
-  transform:translateY(-5px);
+  background:#c8e6c9;
 }
 
 button{
   background:#2e7d32;
   color:white;
   border:none;
-  padding:8px 15px;
+  padding:8px 14px;
   border-radius:5px;
   cursor:pointer;
 }
@@ -67,50 +63,43 @@ if(localStorage.getItem("role")!=="admin"){
 </script>
 
 <div class="header">
-  <div>
-    🌱 GO GREEN – Admin Dashboard<br>
-    <small id="greet"></small>
-  </div>
+  <div>🌱 GO GREEN – Admin Dashboard</div>
   <button onclick="logout()">Logout</button>
 </div>
 
 <div class="container">
 
-  <h2>Select Feature</h2>
+  <div class="card" onclick="go('admin-my-attendance.html')">
+    📌 My Attendance
+  </div>
 
-  <div class="grid">
+  <div class="card" onclick="go('admin-analytics.html')">
+    📊 Overall Analytics
+  </div>
 
-    <div class="card" onclick="go('admin-users.html')">
-      👥 Users Panel
-    </div>
+  <div class="card" onclick="go('admin-users.html')">
+    👥 Faculty & Students
+  </div>
 
-    <div class="card" onclick="go('admin-analytics.html')">
-      📊 Attendance Analytics
-    </div>
+  <div class="card" onclick="go('admin-gps.html')">
+    📍 Live GPS Map
+  </div>
 
-    <div class="card" onclick="go('admin-gps.html')">
-      📍 GPS Map
-    </div>
+  <div class="card" onclick="go('admin-live.html')">
+    📡 Live Classes
+  </div>
 
-    <div class="card" onclick="go('admin-controls.html')">
-      ⚙ Admin Controls
-    </div>
+  <div class="card" onclick="go('admin-controls.html')">
+    ⚙ Super Controls
+  </div>
 
-    <div class="card" onclick="go('admin-live.html')">
-      📡 Live Classes
-    </div>
-
+  <div class="card" onclick="go('admin-warning.html')">
+    🚨 Early Warning
   </div>
 
 </div>
 
 <script>
-const name = localStorage.getItem("name") || "Admin";
-const hr = new Date().getHours();
-const greet = hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
-document.getElementById("greet").innerText =
-`${greet}, ${name} 👋`;
-
 function logout(){
   localStorage.clear();
   location.href="index.html";
