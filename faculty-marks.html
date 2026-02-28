@@ -117,10 +117,10 @@ function goBack(){
 
 /* Load Permanent Students */
 function loadPermanentStudents(){
-  post({
-    action:"getPermanentStudentsForFaculty",
-    email: email
-  }).then(r=>{
+ post({
+  action:"getPermanentStudentsForFaculty",
+  email: facultyEmail
+}).then(r=>{
 
     const body = document.getElementById("marksBody");
     body.innerHTML = "";
