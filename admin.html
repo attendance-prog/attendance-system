@@ -2,48 +2,57 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>GO GREEN – Admin Super Dashboard</title>
+<title>GO GREEN – Admin Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<script src="https://www.gstatic.com/charts/loader.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <style>
 body{
-  font-family:Arial;
-  padding:20px;
-  background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+  font-family: Arial;
+  margin:0;
+  background:#e8f5e9;
 }
-h2{color:#2e7d32}
-section{margin-bottom:30px}
+
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.container{
+  padding:30px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+  margin-top:30px;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  text-align:center;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.card:hover{
+  transform:translateY(-5px);
+}
+
 button{
   background:#2e7d32;
-  color:#fff;
+  color:white;
   border:none;
-  padding:8px;
-  margin:4px;
+  padding:8px 15px;
+  border-radius:5px;
   cursor:pointer;
-}
-input,select{padding:8px;margin:4px}
-table{border-collapse:collapse;width:100%}
-th,td{border:1px solid #ccc;padding:6px}
-#welcomeBar{
-  background:#ffffffaa;
-  padding:10px;
-  border-radius:8px;
-  margin-bottom:15px;
-}
-#map{height:320px;border-radius:10px}
-.card{
- background:white;
- padding:15px;
- border-radius:10px;
- margin-top:15px;
- box-shadow:0 2px 6px rgba(0,0,0,0.1)
-}
-.nav{
- margin:10px 0;
 }
 </style>
 </head>
@@ -57,291 +66,59 @@ if(localStorage.getItem("role")!=="admin"){
 }
 </script>
 
-<h2>🌱 GO GREEN – Admin Super Dashboard</h2>
-<div id="welcomeBar"></div>
-<button onclick="logout()">Logout</button>
-
-<div class="nav">
-  <button onclick="window.location.href='admin-users.html'">👥 Users</button>
-  <button onclick="window.location.href='admin-analytics.html'">📊 Analytics</button>
-  <button onclick="window.location.href='admin-gps.html'">📍 GPS Map</button>
+<div class="header">
+  <div>
+    🌱 GO GREEN – Admin Dashboard<br>
+    <small id="greet"></small>
+  </div>
   <button onclick="logout()">Logout</button>
 </div>
 
-<!-- ================= MY ATTENDANCE ================= -->
-<section>
-<h3>My Attendance</h3>
-<button onclick="markMyAttendance()">Mark My Attendance</button>
-<button onclick="viewMyAttendance()">View My Attendance</button>
+<div class="container">
 
-<div id="cameraSection" style="display:none">
-  <video id="video" width="260" autoplay></video><br>
-  <button onclick="captureAndMark()">Capture</button>
+  <h2>Select Feature</h2>
+
+  <div class="grid">
+
+    <div class="card" onclick="go('admin-users.html')">
+      👥 Users Panel
+    </div>
+
+    <div class="card" onclick="go('admin-analytics.html')">
+      📊 Attendance Analytics
+    </div>
+
+    <div class="card" onclick="go('admin-gps.html')">
+      📍 GPS Map
+    </div>
+
+    <div class="card" onclick="go('admin-controls.html')">
+      ⚙ Admin Controls
+    </div>
+
+    <div class="card" onclick="go('admin-live.html')">
+      📡 Live Classes
+    </div>
+
+  </div>
+
 </div>
 
-<canvas id="canvas" width="260" height="200" style="display:none"></canvas>
-
-<table id="myAttendanceSection" style="display:none">
-<thead>
-<tr><th>Date</th><th>Status</th><th>Time</th></tr>
-</thead>
-<tbody id="myAttendanceBody"></tbody>
-</table>
-</section>
-
-<!-- ================= ANALYTICS ================= -->
-<section>
-<h3>📊 Overall Attendance Analytics</h3>
-<div id="chartDiv" style="height:300px"></div>
-</section>
-
-<!-- ================= GPS MAP ================= -->
-<section>
-<h3>🗺 Live GPS Map</h3>
-<button onclick="refreshMap()">Refresh Map</button>
-<div id="map"></div>
-</section>
-
-<!-- ================= ADMIN SUPER CONTROLS ================= -->
-<section class="card">
-<h3>👑 Admin Super Controls</h3>
-
-<input id="adminUserEmail" placeholder="User Email">
-
-<select id="userType">
-<option value="Employees">Employee</option>
-<option value="Students">Student</option>
-</select>
-
-<select id="adminActiveSel">
-<option value="true">Active</option>
-<option value="false">Inactive</option>
-</select>
-
-<button onclick="updateUser()">Update Status</button>
-<button onclick="forceLogoutUser()">Force Logout</button>
-</section>
-
-<!-- ================= LIVE CLASSES ================= -->
-<section class="card">
-<h3>📡 Live Running Classes</h3>
-<button onclick="loadLiveClasses()">Refresh</button>
-<table>
-<thead>
-<tr>
-<th>Session</th>
-<th>Subject</th>
-<th>Faculty</th>
-<th>Room</th>
-</tr>
-</thead>
-<tbody id="liveBody"></tbody>
-</table>
-</section>
-
-<!-- ================= FACULTY ================= -->
-<section class="card">
-<h3>Faculty Panel</h3>
-<table>
-<thead><tr><th>Name</th><th>Email</th><th>Status</th></tr></thead>
-<tbody id="facultyBody"></tbody>
-</table>
-</section>
-
-<!-- ================= STUDENTS ================= -->
-<section class="card">
-<h3>Student Panel</h3>
-<table>
-<thead><tr><th>Roll</th><th>Name</th><th>Email</th></tr></thead>
-<tbody id="studentBody"></tbody>
-</table>
-</section>
-
 <script>
-const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-
-const email = localStorage.getItem("email");
 const name = localStorage.getItem("name") || "Admin";
-let stream=null;
-
-/* ===== LOGOUT ===== */
-function logout(){
- localStorage.clear();
- location.href="index.html";
-}
-
-/* ===== GREETING ===== */
-const hr=new Date().getHours();
-const greet=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
-document.getElementById("welcomeBar").innerHTML =
+const hr = new Date().getHours();
+const greet = hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
+document.getElementById("greet").innerText =
 `${greet}, ${name} 👋`;
 
-/* ===== POST ===== */
-function post(d){
- return fetch(API_URL,{
-  method:"POST",
-  headers:{"Content-Type":"text/plain;charset=utf-8"},
-  body:JSON.stringify(d)
- }).then(r=>r.json());
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
 }
 
-/* ===== CAMERA ATTENDANCE ===== */
-function markMyAttendance(){
- document.getElementById("cameraSection").style.display="block";
- navigator.mediaDevices.getUserMedia({video:true}).then(s=>{
-  stream=s;
-  document.getElementById("video").srcObject=s;
- });
+function go(page){
+  window.location.href = page;
 }
-
-function captureAndMark(){
- document.getElementById("canvas")
-   .getContext("2d")
-   .drawImage(document.getElementById("video"),0,0,260,200);
-
- navigator.geolocation.getCurrentPosition(pos=>{
-  post({
-   action:"markStaffAttendance",
-   email,
-   role:"ADMIN",
-   latitude:pos.coords.latitude,
-   longitude:pos.coords.longitude
-  }).then(()=>alert("Attendance marked"));
-  stopCam();
- });
-}
-
-function stopCam(){
- if(stream) stream.getTracks().forEach(t=>t.stop());
- document.getElementById("cameraSection").style.display="none";
-}
-
-/* ===== VIEW MY ATTENDANCE ===== */
-function viewMyAttendance(){
- post({action:"getMyAttendance",email})
- .then(r=>{
-  const body=document.getElementById("myAttendanceBody");
-  body.innerHTML="";
-  (r.data||[]).forEach(x=>{
-   body.innerHTML+=`
-   <tr>
-    <td>${new Date(x[0]).toLocaleDateString()}</td>
-    <td>${x[6]}</td>
-    <td>${new Date(x[8]).toLocaleTimeString()}</td>
-   </tr>`;
-  });
-  document.getElementById("myAttendanceSection").style.display="table";
- });
-}
-
-/* ===== CHART ===== */
-google.charts.load('current',{packages:['corechart']});
-google.charts.setOnLoadCallback(loadChart);
-
-function loadChart(){
- post({action:"getAnalytics"}).then(r=>{
-  const data=google.visualization.arrayToDataTable([
-   ["Type","Count"],
-   ["Present",r.present],
-   ["Total",r.total]
-  ]);
-  new google.visualization.PieChart(
-    document.getElementById("chartDiv")
-  ).draw(data,{title:"Overall Attendance"});
- });
-}
-
-/* ===== MAP ===== */
-const map=L.map('map').setView([28.47,77.48],10);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-function refreshMap(){
- post({action:"getGpsPoints"}).then(r=>{
-  (r.data||[]).forEach(p=>{
-   if(p.lat){
-    L.marker([Number(p.lat),Number(p.lng)])
-     .addTo(map)
-     .bindPopup(p.email);
-   }
-  });
- });
-}
-refreshMap();
-
-/* ===== ADMIN CONTROLS ===== */
-function updateUser(){
- post({
-  action:"toggleUserStatus",
-  email:document.getElementById("adminUserEmail").value,
-  type:document.getElementById("userType").value,
-  active:document.getElementById("adminActiveSel").value==="true"
- }).then(()=>alert("User status updated"));
-}
-
-function forceLogoutUser(){
- post({
-  action:"forceLogout",
-  email:document.getElementById("adminUserEmail").value
- }).then(()=>alert("User forced logout"));
-}
-
-/* ===== LIVE CLASSES ===== */
-function loadLiveClasses(){
- post({action:"getLiveClasses"})
- .then(r=>{
-  const body=document.getElementById("liveBody");
-  body.innerHTML="";
-  (r.data||[]).forEach(c=>{
-   body.innerHTML+=`
-   <tr>
-    <td>${c.sessionId}</td>
-    <td>${c.subject}</td>
-    <td>${c.faculty}</td>
-    <td>${c.room}</td>
-   </tr>`;
-  });
- });
-}
-loadLiveClasses();
-setInterval(loadLiveClasses,20000);
-
-/* ===== LOAD FACULTY ===== */
-post({action:"getFaculty"}).then(r=>{
- const body=document.getElementById("facultyBody");
- (r.data||[]).forEach(x=>{
-  body.innerHTML+=`
-  <tr>
-   <td>${x[2]}</td>
-   <td>${x[1]}</td>
-   <td>${x[3]}</td>
-  </tr>`;
- });
-});
-
-/* ===== LOAD STUDENTS ===== */
-post({action:"getStudents"}).then(r=>{
- const body=document.getElementById("studentBody");
- (r.data||[]).forEach(x=>{
-  body.innerHTML+=`
-  <tr>
-   <td>${x[0]}</td>
-   <td>${x[1]}</td>
-   <td>${x[2]}</td>
-  </tr>`;
- });
-});
-
-/* ===== FORCE LOGOUT CHECK ===== */
-setInterval(()=>{
- post({action:"checkForceLogout",email})
- .then(r=>{
-  if(r.logout){
-   alert("You have been logged out by Super Admin");
-   logout();
-  }
- });
-},5000);
-
 </script>
 
 </body>
