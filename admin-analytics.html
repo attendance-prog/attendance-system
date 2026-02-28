@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Admin – Attendance Analytics</title>
+<title>Admin – Overall Analytics</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://www.gstatic.com/charts/loader.js"></script>
 
 <style>
 body{
-  font-family: Arial;
   margin:0;
+  font-family:Arial;
   background:#e8f5e9;
 }
 
@@ -38,7 +38,7 @@ button{
   background:#2e7d32;
   color:white;
   border:none;
-  padding:6px 12px;
+  padding:8px 14px;
   border-radius:5px;
   cursor:pointer;
 }
@@ -55,7 +55,7 @@ if(localStorage.getItem("role")!=="admin"){
 </script>
 
 <div class="header">
-  <div>🌱 GO GREEN – Attendance Analytics</div>
+  <div>🌱 Admin – Overall Analytics</div>
   <div>
     <button onclick="goBack()">⬅ Dashboard</button>
     <button onclick="logout()">Logout</button>
@@ -63,10 +63,13 @@ if(localStorage.getItem("role")!=="admin"){
 </div>
 
 <div class="container">
+
   <div class="card">
     <h3>📊 Overall Attendance</h3>
-    <div id="chartDiv" style="height:400px;"></div>
+    <p>Attendance Percentage: <b id="percentText">--%</b></p>
+    <div id="chartDiv" style="height:350px"></div>
   </div>
+
 </div>
 
 <script>
@@ -90,24 +93,33 @@ function goBack(){
 }
 
 /* Load Chart */
-google.charts.load('current',{packages:['corechart']});
+google.charts.load('current', {'packages':['corechart']});
 google.charts.setOnLoadCallback(loadChart);
 
 function loadChart(){
   post({action:"getAnalytics"}).then(r=>{
-    if(!r.success) return;
+
+    if(!r.success){
+      alert("No data found");
+      return;
+    }
+
+    document.getElementById("percentText").innerText =
+      (r.percent || 0) + "%";
 
     const data = google.visualization.arrayToDataTable([
-      ["Type","Count"],
-      ["Present", r.present],
-      ["Total", r.total]
+      ['Type', 'Count'],
+      ['Present', r.present || 0],
+      ['Absent', (r.total - r.present) || 0]
     ]);
 
     const chart = new google.visualization.PieChart(
-      document.getElementById("chartDiv")
+      document.getElementById('chartDiv')
     );
 
-    chart.draw(data,{title:"Overall Attendance"});
+    chart.draw(data, {
+      title: 'Overall Attendance Distribution'
+    });
   });
 }
 </script>
