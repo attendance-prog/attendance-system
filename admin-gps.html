@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin – GPS Map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+body{
+  font-family: Arial;
+  margin:0;
+  background:#e8f5e9;
+}
+
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.container{
+  padding:20px;
+}
+
+#map{
+  height:500px;
+  border-radius:10px;
+}
+
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:6px 12px;
+  border-radius:5px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("role")!=="admin"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
+</script>
+
+<div class="header">
+  <div>🌱 GO GREEN – Live GPS Map</div>
+  <div>
+    <button onclick="goBack()">⬅ Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+  <div id="map"></div>
+</div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+
+function goBack(){
+  window.location.href="admin.html";
+}
+
+/* Initialize Map */
+const map = L.map('map').setView([28.47,77.48],10);
+
+L.tileLayer(
+ 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+).addTo(map);
+
+/* Load GPS Points */
+post({action:"getGpsPoints"}).then(r=>{
+  if(!r.success) return;
+
+  (r.data||[]).forEach(p=>{
+    if(p.lat && p.lng){
+      L.marker([Number(p.lat),Number(p.lng)])
+        .addTo(map)
+        .bindPopup(p.email);
+    }
+  });
+});
+</script>
+
+</body>
+</html>
