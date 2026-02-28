@@ -112,25 +112,50 @@ function post(data){
 }
 
 function loadMyTimetable(){
- post({action:"getFacultyOwnTimetable",email})
- .then(r=>{
-  const slots=[9,9.5,10.4,11.35,13.15,14.1,15,15.5];
-  const days=["Monday","Tuesday","Wednesday","Thursday","Friday"];
-  myTT.querySelector("tbody").innerHTML="";
 
-  days.forEach(d=>{
-   let row=<tr><td>${d}</td>;
-   slots.forEach(s=>{
-    const lec=r.data.find(x=>x.day===d && Number(x.start)==Number(s));
-    row+=lec?<td>${lec.subject}<br>${lec.room}</td>:<td></td>;
-   });
-   row+="</tr>";
-   myTT.querySelector("tbody").innerHTML+=row;
+  post({
+    action:"getFacultyOwnTimetable",
+    email: email
+  }).then(r=>{
+
+    if(!r.success){
+      alert("No timetable found");
+      return;
+    }
+
+    const slots=[9,9.5,10.4,11.35,12.25,13.15,14.1,15,15.5];
+    const days=["Monday","Tuesday","Wednesday","Thursday","Friday"];
+
+    const body=document.getElementById("ttBody");
+    body.innerHTML="";
+
+    days.forEach(d=>{
+
+      let row=`<tr><td>${d}</td>`;
+
+      slots.forEach(s=>{
+
+        const lec=r.data.find(x =>
+          x.day===d && Number(x.start)==Number(s)
+        );
+
+        if(lec){
+          row+=`<td>${lec.subject}<br>${lec.room}</td>`;
+        }else{
+          row+=`<td></td>`;
+        }
+
+      });
+
+      row+="</tr>";
+      body.innerHTML+=row;
+
+    });
+
   });
- });
 }
 
-loadTimetable();
+loadmyTimetable();
 </script>
 
 </body>
