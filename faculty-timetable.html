@@ -111,33 +111,23 @@ function post(data){
   }).then(r=>r.json());
 }
 
-function loadTimetable(){
+function loadMyTimetable(){
+ post({action:"getFacultyOwnTimetable",email})
+ .then(r=>{
+  const slots=[9,9.5,10.4,11.35,13.15,14.1,15,15.5];
+  const days=["Monday","Tuesday","Wednesday","Thursday","Friday"];
+  myTT.querySelector("tbody").innerHTML="";
 
-  post({
-    action:"getFacultyOwnTimetable",
-    email:email
-  }).then(r=>{
-
-    if(!r.success) return;
-
-    const days=["Mon","Tue","Wed","Thu","Fri","Sat"];
-    const body=document.getElementById("ttBody");
-    body.innerHTML="";
-
-    days.forEach(day=>{
-
-      let row=`<tr><td><b>${day}</b></td>`;
-
-      for(let i=0;i<7;i++){
-        row+=`<td></td>`;
-      }
-
-      row+="</tr>";
-      body.innerHTML+=row;
-
-    });
-
+  days.forEach(d=>{
+   let row=<tr><td>${d}</td>;
+   slots.forEach(s=>{
+    const lec=r.data.find(x=>x.day===d && Number(x.start)==Number(s));
+    row+=lec?<td>${lec.subject}<br>${lec.room}</td>:<td></td>;
+   });
+   row+="</tr>";
+   myTT.querySelector("tbody").innerHTML+=row;
   });
+ });
 }
 
 loadTimetable();
