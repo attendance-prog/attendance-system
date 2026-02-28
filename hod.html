@@ -2,47 +2,53 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>GO GREEN – HOD Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<script src="https://www.gstatic.com/charts/loader.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<title>HOD Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
- font-family:Arial;
- padding:20px;
- background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+  margin:0;
+  font-family:Arial;
+  background:#e8f5e9;
 }
-h2{color:#2e7d32}
-button{background:#2e7d32;color:#fff;border:none;padding:8px;margin:4px}
-input,select{padding:6px;margin:4px}
-table{border-collapse:collapse;width:100%}
-th,td{border:1px solid #ccc;padding:6px}
-#welcomeBar{
- background:#1b5e20;
- color:white;
- padding:12px;
- border-radius:8px;
- margin-bottom:15px;
+
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-#toast{
- position:fixed;
- bottom:20px;
- right:20px;
- background:#1b5e20;
- color:white;
- padding:10px 16px;
- border-radius:6px;
- display:none;
+
+.container{
+  padding:40px;
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  gap:20px;
 }
-.section{
- background:white;
- padding:15px;
- margin-top:20px;
- border-radius:10px;
- box-shadow:0 2px 6px rgba(0,0,0,0.1);
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  cursor:pointer;
+  text-align:center;
+  font-weight:bold;
+}
+
+.card:hover{
+  background:#c8e6c9;
+}
+
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:5px;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -51,259 +57,53 @@ th,td{border:1px solid #ccc;padding:6px}
 
 <script>
 if(localStorage.getItem("role")!=="hod"){
- alert("Unauthorized");
- location.href="index.html";
+  alert("Unauthorized");
+  location.href="index.html";
 }
 </script>
 
-<div id="welcomeBar"></div>
-<h2>🌱 GO GREEN – HOD Dashboard</h2>
-
-<div class="nav">
-  <button onclick="window.location.href='hod-marks.html'">📘 Marks</button>
-  <button onclick="window.location.href='hod-leaves.html'">📝 Leaves</button>
-  <button onclick="window.location.href='hod-live.html'">📡 Live Classes</button>
+<div class="header">
+  <div>🌱 GO GREEN – HOD Dashboard</div>
   <button onclick="logout()">Logout</button>
 </div>
 
-<!-- ================= MY ATTENDANCE ================= -->
+<div class="container">
 
-<h3>My Attendance</h3>
-<button onclick="startCamera()">Mark My Attendance</button>
-<button onclick="viewMyAttendance()">View My Attendance</button>
+  <div class="card" onclick="go('hod-my-attendance.html')">
+    📌 My Attendance
+  </div>
 
-<div id="cam" style="display:none">
-<video id="video" autoplay playsinline width="260"></video><br>
-<button onclick="capture()">Capture</button>
+  <div class="card" onclick="go('hod-academics.html')">
+    📚 Academics Management
+  </div>
+
+  <div class="card" onclick="go('hod-leaves.html')">
+    📝 Leave & Substitute
+  </div>
+
+  <div class="card" onclick="go('hod-marks.html')">
+    📊 Marks Approval
+  </div>
+
+  <div class="card" onclick="go('hod-live.html')">
+    📡 Live Classes
+  </div>
+
+  <div class="card" onclick="go('hod-warning.html')">
+    🚨 Early Warning
+  </div>
+
 </div>
-
-<canvas id="canvas" width="260" height="200" style="display:none"></canvas>
-
-<table id="attTable" style="display:none">
-<thead>
-<tr><th>Date</th><th>Status</th><th>Time</th></tr>
-</thead>
-<tbody id="attBody"></tbody>
-</table>
-
-<!-- ================= MY ANALYTICS ================= -->
-
-<h3>📊 My Attendance Analytics</h3>
-Attendance %: <b id="myPct">--</b>
-<div id="myChart" style="height:300px"></div>
-
-<!-- ================= MAP ================= -->
-
-<h3>🗺 Attendance Map</h3>
-<div id="map" style="height:320px"></div>
-
-<!-- ================= SUBJECT ================= -->
-
-<h3>Add Subject</h3>
-<input id="sid" placeholder="Subject ID">
-<input id="sname" placeholder="Subject Name">
-<input id="sem" placeholder="Semester">
-<button onclick="addSubject()">Add</button>
-
-<!-- ================= TIMETABLE ================= -->
-
-<h3>Add Timetable</h3>
-<select id="day">
-<option>Monday</option>
-<option>Tuesday</option>
-<option>Wednesday</option>
-<option>Thursday</option>
-<option>Friday</option>
-</select>
-
-<input id="tsub" placeholder="Subject ID">
-<input id="start" placeholder="Start (HH.MM)">
-<input id="end" placeholder="End (HH.MM)">
-<input id="room" placeholder="Room">
-<button onclick="addTimetable()">Add</button>
-
-<!-- ================= GPS ================= -->
-
-<h3>Add GPS Location</h3>
-<input id="groom" placeholder="Room">
-<input id="lat" placeholder="Latitude">
-<input id="lng" placeholder="Longitude">
-<input id="rad" placeholder="Radius">
-<button onclick="addLocation()">Add</button>
-
-<hr>
-
-<h3>📝 Faculty Leave Approval</h3>
-<button onclick="loadLeaves()">Load Pending Leaves</button>
-
-<table>
-<thead>
-<tr>
-<th>ID</th><th>Email</th><th>From</th><th>To</th><th>Reason</th><th>Action</th>
-</tr>
-</thead>
-<tbody id="leaveBody"></tbody>
-</table>
-
-<hr>
-
-<h3>🤖 Substitute Suggestion</h3>
-<button onclick="suggestSub()">Suggest Substitute</button>
-<div id="subBox"></div>
-
-<div class="section">
-<h3>📘 Marks Approval Panel</h3>
-<button onclick="loadMarks()">Load Draft Marks</button>
-<table>
-<thead>
-<tr>
-<th>Date</th><th>Faculty</th><th>Student</th><th>CA</th>
-<th>End</th><th>Total</th><th>Status</th><th>Action</th>
-</tr>
-</thead>
-<tbody id="marksBody"></tbody>
-</table>
-</div>
-
-<div class="section">
-<h3>📊 Department Attendance Overview</h3>
-<div id="deptChart" style="height:300px"></div>
-</div>
-
-<div class="section">
-<h3>🚨 Early Warning Monitor</h3>
-<button onclick="runWarnings()">Run Warning Check</button>
-</div>
-
-<div class="section">
-<h3>📡 Live Running Classes</h3>
-<button onclick="loadLiveClasses()">Refresh</button>
-<table>
-<thead>
-<tr><th>Session</th><th>Subject</th><th>Faculty</th><th>Room</th></tr>
-</thead>
-<tbody id="liveBody"></tbody>
-</table>
-</div>
-
-<div id="toast"></div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-const email = localStorage.getItem("email");
-const name = localStorage.getItem("name") || email.split("@")[0];
-let stream=null;
-
-document.getElementById("welcomeBar").innerHTML =
-`Good ${new Date().getHours()<12?"Morning":new Date().getHours()<18?"Afternoon":"Evening"}, ${name} 👋 | Role: HOD`;
-
-function post(d){
- return fetch(API,{
-  method:"POST",
-  headers:{"Content-Type":"text/plain"},
-  body:JSON.stringify(d)
- }).then(r=>r.json());
-}
-
-function toast(m){
- const t=document.getElementById("toast");
- t.innerText=m;
- t.style.display="block";
- setTimeout(()=>t.style.display="none",2500);
-}
-
 function logout(){
- localStorage.clear();
- location.href="index.html";
+  localStorage.clear();
+  location.href="index.html";
 }
 
-/* CAMERA */
-function startCamera(){
- document.getElementById("cam").style.display="block";
- navigator.mediaDevices.getUserMedia({video:true})
- .then(s=>{
-  stream=s;
-  document.getElementById("video").srcObject=s;
- });
+function go(page){
+  window.location.href = page;
 }
-
-function capture(){
- document.getElementById("canvas")
-   .getContext("2d")
-   .drawImage(document.getElementById("video"),0,0,260,200);
-
- navigator.geolocation.getCurrentPosition(pos=>{
-  post({
-   action:"markHodAttendance",
-   email,
-   latitude:pos.coords.latitude,
-   longitude:pos.coords.longitude
-  }).then(r=>{
-   toast(r.message);
-   if(stream) stream.getTracks().forEach(t=>t.stop());
-   document.getElementById("cam").style.display="none";
-  });
- });
-}
-
-/* VIEW ATTENDANCE */
-function viewMyAttendance(){
- post({action:"getMyAttendance",email})
- .then(r=>{
-  const body=document.getElementById("attBody");
-  body.innerHTML="";
-  r.data.forEach(x=>{
-   body.innerHTML+=`
-   <tr>
-   <td>${new Date(x[0]).toLocaleDateString()}</td>
-   <td>${x[6]}</td>
-   <td>${new Date(x[8]).toLocaleTimeString()}</td>
-   </tr>`;
-  });
-  document.getElementById("attTable").style.display="table";
- });
-}
-
-/* MAP */
-const map=L.map("map").setView([28.47,77.48],16);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-post({action:"getGpsPoints"}).then(r=>{
- (r.data||[]).forEach(p=>{
-  if(p.lat && p.lng){
-   L.marker([p.lat,p.lng]).addTo(map).bindPopup(p.email);
-  }
- });
-});
-
-/* LIVE CLASSES */
-function loadLiveClasses(){
- post({action:"getLiveClasses"}).then(r=>{
-  const body=document.getElementById("liveBody");
-  body.innerHTML="";
-  (r.data||[]).forEach(c=>{
-   body.innerHTML+=`
-   <tr>
-    <td>${c.sessionId}</td>
-    <td>${c.subject}</td>
-    <td>${c.faculty}</td>
-    <td>${c.room}</td>
-   </tr>`;
-  });
- });
-}
-loadLiveClasses();
-setInterval(loadLiveClasses,20000);
-
-/* FORCE LOGOUT CHECK */
-setInterval(()=>{
- post({action:"checkForceLogout",email})
- .then(r=>{
-  if(r.logout){
-   alert("You have been logged out by Admin");
-   logout();
-  }
- });
-},5000);
 </script>
 
 </body>
