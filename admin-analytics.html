@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin – Attendance Analytics</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+
+<style>
+body{
+  font-family: Arial;
+  margin:0;
+  background:#e8f5e9;
+}
+
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.container{
+  padding:30px;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:6px 12px;
+  border-radius:5px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("role")!=="admin"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
+</script>
+
+<div class="header">
+  <div>🌱 GO GREEN – Attendance Analytics</div>
+  <div>
+    <button onclick="goBack()">⬅ Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+    <h3>📊 Overall Attendance</h3>
+    <div id="chartDiv" style="height:400px;"></div>
+  </div>
+</div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+
+function goBack(){
+  window.location.href="admin.html";
+}
+
+/* Load Chart */
+google.charts.load('current',{packages:['corechart']});
+google.charts.setOnLoadCallback(loadChart);
+
+function loadChart(){
+  post({action:"getAnalytics"}).then(r=>{
+    if(!r.success) return;
+
+    const data = google.visualization.arrayToDataTable([
+      ["Type","Count"],
+      ["Present", r.present],
+      ["Total", r.total]
+    ]);
+
+    const chart = new google.visualization.PieChart(
+      document.getElementById("chartDiv")
+    );
+
+    chart.draw(data,{title:"Overall Attendance"});
+  });
+}
+</script>
+
+</body>
+</html>
