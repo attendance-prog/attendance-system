@@ -75,7 +75,7 @@ if(localStorage.getItem("role")!=="faculty"){
 
     <h3>📘 Permanent Student List</h3>
 
-    <button onclick="loadStudents()">Load Permanent List</button>
+    <button onclick="loadPermanentStudents()">Load Permanent List</button>
 
     <table>
       <thead>
@@ -97,7 +97,7 @@ if(localStorage.getItem("role")!=="faculty"){
 
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-const facultyEmail=localStorage.getItem("email");
+const facultyEmail=localStorage.getItem("facultyEmail");
 
 function post(data){
   return fetch(API_URL,{
@@ -122,11 +122,11 @@ function loadPermanentStudents(){
     email: email
   }).then(r=>{
 
-    const body = document.getElementById("permanentBody");
+    const body = document.getElementById("marksBody");
     body.innerHTML = "";
 
     if(!r.success){
-      body.innerHTML = <tr><td colspan="7">${r.message}</td></tr>;
+     body.innerHTML = `<tr><td colspan="7">${r.message}</td></tr>`;
       return;
     }
 
