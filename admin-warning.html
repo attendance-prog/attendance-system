@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin – Early Warning Monitor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#e8f5e9;
+}
+
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.container{
+  padding:40px;
+}
+
+.card{
+  background:white;
+  padding:30px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  max-width:600px;
+}
+
+button{
+  background:#d32f2f;
+  color:white;
+  border:none;
+  padding:10px 16px;
+  border-radius:5px;
+  cursor:pointer;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("role")!=="admin"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
+</script>
+
+<div class="header">
+  <div>🌱 Admin – Early Warning Monitor</div>
+  <div>
+    <button onclick="goBack()" style="background:#2e7d32;">⬅ Dashboard</button>
+    <button onclick="logout()" style="background:#2e7d32;">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+    <h3>🚨 Run Early Warning Check</h3>
+    <p>This will send warning emails for:</p>
+    <ul>
+      <li>Attendance below 75%</li>
+      <li>CA marks below 10</li>
+    </ul>
+
+    <button onclick="runWarning()">Run Now</button>
+  </div>
+</div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+
+function goBack(){
+  window.location.href="admin.html";
+}
+
+function runWarning(){
+  post({action:"runEarlyWarningCheck"})
+  .then(()=>alert("Early warning check completed"));
+}
+</script>
+
+</body>
+</html>
