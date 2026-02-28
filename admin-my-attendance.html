@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin – My Attendance</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#e8f5e9;
+}
+
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.container{
+  padding:30px;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  max-width:600px;
+}
+
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:5px;
+  cursor:pointer;
+  margin-right:10px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th,td{
+  border:1px solid #ccc;
+  padding:8px;
+  text-align:left;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("role")!=="admin"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
+</script>
+
+<div class="header">
+  <div>🌱 Admin – My Attendance</div>
+  <div>
+    <button onclick="goBack()">⬅ Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <h3>📌 Mark Attendance</h3>
+
+    <button onclick="startCamera()">Start Camera</button>
+    <button onclick="viewMyAttendance()">View My Attendance</button>
+
+    <div id="cameraSection" style="display:none;margin-top:15px;">
+      <video id="video" width="260" autoplay></video><br>
+      <button onclick="captureAndMark()">Capture & Mark</button>
+    </div>
+
+    <canvas id="canvas" width="260" height="200" style="display:none"></canvas>
+
+    <table id="attendanceTable" style="display:none">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="attendanceBody"></tbody>
+    </table>
+
+  </div>
+
+</div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const email=localStorage.getItem("email");
+let stream=null;
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+
+function goBack(){
+  window.location.href="admin.html";
+}
+
+/* CAMERA */
+function startCamera(){
+  document.getElementById("cameraSection").style.display="block";
+  navigator.mediaDevices.getUserMedia({video:true}).then(s=>{
+    stream=s;
+    document.getElementById("video").srcObject=s;
+  });
+}
+
+function captureAndMark(){
+
+  document.getElementById("canvas")
+    .getContext("2d")
+    .drawImage(document.getElementById("video"),0,0,260,200);
+
+  navigator.geolocation.getCurrentPosition(pos=>{
+    post({
+      action:"markStaffAttendance",
+      email:email,
+      role:"ADMIN",
+      latitude:pos.coords.latitude,
+      longitude:pos.coords.longitude
+    }).then(res=>{
+      alert(res.message);
+      stopCamera();
+    });
+  });
+}
+
+function stopCamera(){
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  document.getElementById("cameraSection").style.display="none";
+}
+
+/* VIEW */
+function viewMyAttendance(){
+  post({action:"getMyAttendance",email:email})
+  .then(r=>{
+    const body=document.getElementById("attendanceBody");
+    body.innerHTML="";
+
+    r.data.forEach(x=>{
+      body.innerHTML+=`
+      <tr>
+        <td>${new Date(x[0]).toLocaleDateString()}</td>
+        <td>${x[6]}</td>
+        <td>${new Date(x[8]).toLocaleTimeString()}</td>
+      </tr>`;
+    });
+
+    document.getElementById("attendanceTable").style.display="table";
+  });
+}
+</script>
+
+</body>
+</html>
