@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin – Users Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  font-family: Arial;
+  margin:0;
+  background:#e8f5e9;
+}
+
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.container{
+  padding:30px;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  margin-bottom:30px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  border:1px solid #ccc;
+  padding:8px;
+  text-align:left;
+}
+
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:6px 12px;
+  border-radius:5px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("role")!=="admin"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
+</script>
+
+<div class="header">
+  <div>
+    🌱 GO GREEN – Users Panel
+  </div>
+  <div>
+    <button onclick="goBack()">⬅ Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- FACULTY PANEL -->
+  <div class="card">
+    <h3>👨‍🏫 Faculty Panel</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="facultyBody"></tbody>
+    </table>
+  </div>
+
+  <!-- STUDENT PANEL -->
+  <div class="card">
+    <h3>🎓 Student Panel</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Roll</th>
+          <th>Name</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody id="studentBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+
+function goBack(){
+  window.location.href="admin.html";
+}
+
+/* Load Faculty */
+post({action:"getFaculty"}).then(r=>{
+  const body=document.getElementById("facultyBody");
+  body.innerHTML="";
+  (r.data||[]).forEach(x=>{
+    body.innerHTML+=`
+    <tr>
+      <td>${x[2]}</td>
+      <td>${x[1]}</td>
+      <td>${x[3]}</td>
+    </tr>`;
+  });
+});
+
+/* Load Students */
+post({action:"getStudents"}).then(r=>{
+  const body=document.getElementById("studentBody");
+  body.innerHTML="";
+  (r.data||[]).forEach(x=>{
+    body.innerHTML+=`
+    <tr>
+      <td>${x[0]}</td>
+      <td>${x[2]}</td>
+      <td>${x[1]}</td>
+    </tr>`;
+  });
+});
+</script>
+
+</body>
+</html>
