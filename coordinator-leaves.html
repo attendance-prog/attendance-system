@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Coordinator – Faculty Leave Approval</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#e8f5e9;
+}
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.container{
+  padding:40px;
+}
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:5px;
+  cursor:pointer;
+  margin-bottom:15px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  border:1px solid #ccc;
+  padding:8px;
+}
+.approve{
+  background:#1b5e20;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("role")!=="coordinator"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
+</script>
+
+<div class="header">
+  <div>🌱 Coordinator – Faculty Leave Approval</div>
+  <div>
+    <button onclick="goBack()">⬅ Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+
+    <h3>📝 Pending Leave Requests</h3>
+
+    <button onclick="loadLeaves()">Load Pending Leaves</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Email</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Reason</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="leaveBody"></tbody>
+    </table>
+
+  </div>
+</div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const approver=localStorage.getItem("email");
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+function goBack(){
+  window.location.href="coordinator.html";
+}
+
+function loadLeaves(){
+  post({action:"getPendingLeaves"})
+  .then(r=>{
+    const body=document.getElementById("leaveBody");
+    body.innerHTML="";
+    (r.data||[]).forEach(l=>{
+      body.innerHTML+=`
+      <tr>
+        <td>${l[0]}</td>
+        <td>${l[1]}</td>
+        <td>${l[2]}</td>
+        <td>${l[3]}</td>
+        <td>${l[4]}</td>
+        <td>
+          <button class="approve" onclick="approveLeave('${l[0]}')">
+            Approve
+          </button>
+        </td>
+      </tr>`;
+    });
+  });
+}
+
+function approveLeave(id){
+  post({
+    action:"approveLeave",
+    leaveId:id,
+    approver:approver
+  }).then(()=>{
+    alert("Leave Approved");
+    loadLeaves();
+  });
+}
+</script>
+
+</body>
+</html>
