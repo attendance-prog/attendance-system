@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Admin – Users Panel</title>
+<title>Admin – Users</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
-  font-family: Arial;
   margin:0;
+  font-family:Arial;
   background:#e8f5e9;
 }
 
@@ -30,12 +30,13 @@ body{
   padding:20px;
   border-radius:10px;
   box-shadow:0 4px 10px rgba(0,0,0,0.1);
-  margin-bottom:30px;
+  margin-bottom:25px;
 }
 
 table{
   width:100%;
   border-collapse:collapse;
+  margin-top:10px;
 }
 
 th,td{
@@ -48,7 +49,7 @@ button{
   background:#2e7d32;
   color:white;
   border:none;
-  padding:6px 12px;
+  padding:8px 14px;
   border-radius:5px;
   cursor:pointer;
 }
@@ -65,9 +66,7 @@ if(localStorage.getItem("role")!=="admin"){
 </script>
 
 <div class="header">
-  <div>
-    🌱 GO GREEN – Users Panel
-  </div>
+  <div>🌱 Admin – Faculty & Students</div>
   <div>
     <button onclick="goBack()">⬅ Dashboard</button>
     <button onclick="logout()">Logout</button>
@@ -76,9 +75,11 @@ if(localStorage.getItem("role")!=="admin"){
 
 <div class="container">
 
-  <!-- FACULTY PANEL -->
+  <!-- Faculty Panel -->
   <div class="card">
     <h3>👨‍🏫 Faculty Panel</h3>
+    <button onclick="loadFaculty()">Refresh Faculty</button>
+
     <table>
       <thead>
         <tr>
@@ -91,13 +92,15 @@ if(localStorage.getItem("role")!=="admin"){
     </table>
   </div>
 
-  <!-- STUDENT PANEL -->
+  <!-- Student Panel -->
   <div class="card">
     <h3>🎓 Student Panel</h3>
+    <button onclick="loadStudents()">Refresh Students</button>
+
     <table>
       <thead>
         <tr>
-          <th>Roll</th>
+          <th>System ID</th>
           <th>Name</th>
           <th>Email</th>
         </tr>
@@ -129,32 +132,42 @@ function goBack(){
 }
 
 /* Load Faculty */
-post({action:"getFaculty"}).then(r=>{
-  const body=document.getElementById("facultyBody");
-  body.innerHTML="";
-  (r.data||[]).forEach(x=>{
-    body.innerHTML+=`
-    <tr>
-      <td>${x[2]}</td>
-      <td>${x[1]}</td>
-      <td>${x[3]}</td>
-    </tr>`;
+function loadFaculty(){
+  post({action:"getFaculty"}).then(r=>{
+    const body=document.getElementById("facultyBody");
+    body.innerHTML="";
+
+    (r.data||[]).forEach(x=>{
+      body.innerHTML+=`
+      <tr>
+        <td>${x[2]}</td>
+        <td>${x[1]}</td>
+        <td>${x[3]}</td>
+      </tr>`;
+    });
   });
-});
+}
 
 /* Load Students */
-post({action:"getStudents"}).then(r=>{
-  const body=document.getElementById("studentBody");
-  body.innerHTML="";
-  (r.data||[]).forEach(x=>{
-    body.innerHTML+=`
-    <tr>
-      <td>${x[0]}</td>
-      <td>${x[2]}</td>
-      <td>${x[1]}</td>
-    </tr>`;
+function loadStudents(){
+  post({action:"getStudents"}).then(r=>{
+    const body=document.getElementById("studentBody");
+    body.innerHTML="";
+
+    (r.data||[]).forEach(x=>{
+      body.innerHTML+=`
+      <tr>
+        <td>${x[0]}</td>
+        <td>${x[2] || x[1]}</td>
+        <td>${x[1]}</td>
+      </tr>`;
+    });
   });
-});
+}
+
+/* Auto load on open */
+loadFaculty();
+loadStudents();
 </script>
 
 </body>
