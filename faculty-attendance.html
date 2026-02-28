@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Faculty – My Attendance</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#e8f5e9;
+}
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.container{
+  padding:40px;
+}
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  margin-bottom:30px;
+}
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:5px;
+  cursor:pointer;
+  margin-right:10px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+th,td{
+  border:1px solid #ccc;
+  padding:8px;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("role")!=="faculty"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
+</script>
+
+<div class="header">
+  <div>🌱 Faculty – My Attendance</div>
+  <div>
+    <button onclick="goBack()">⬅ Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- MARK ATTENDANCE -->
+  <div class="card">
+    <h3>📍 Mark My Attendance</h3>
+    <button onclick="markAttendance()">Mark Attendance</button>
+  </div>
+
+  <!-- VIEW ATTENDANCE -->
+  <div class="card">
+    <h3>📄 View My Attendance</h3>
+    <button onclick="loadAttendance()">Load</button>
+
+    <table id="attTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="attBody"></tbody>
+    </table>
+  </div>
+
+  <!-- TREND -->
+  <div class="card">
+    <h3>📈 My Attendance Trend</h3>
+    <div id="trendChart" style="height:300px;"></div>
+  </div>
+
+  <!-- ANALYTICS -->
+  <div class="card">
+    <h3>📊 My Attendance Analytics</h3>
+    Attendance %: <b id="percent">--</b>
+    <div id="pieChart" style="height:300px;"></div>
+  </div>
+
+</div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const email=localStorage.getItem("email");
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+function goBack(){
+  window.location.href="faculty.html";
+}
+
+/* Mark Attendance */
+function markAttendance(){
+  navigator.geolocation.getCurrentPosition(pos=>{
+    post({
+      action:"markStaffAttendance",
+      email,
+      role:"FACULTY",
+      latitude:pos.coords.latitude,
+      longitude:pos.coords.longitude
+    }).then(res=>{
+      alert(res.message || "Attendance Marked");
+    });
+  });
+}
+
+/* View Attendance */
+function loadAttendance(){
+  post({action:"getMyAttendance",email})
+  .then(r=>{
+    const body=document.getElementById("attBody");
+    body.innerHTML="";
+    (r.data||[]).forEach(x=>{
+      body.innerHTML+=`
+      <tr>
+        <td>${new Date(x[0]).toLocaleDateString()}</td>
+        <td>${x[6]}</td>
+        <td>${new Date(x[8]).toLocaleTimeString()}</td>
+      </tr>`;
+    });
+    document.getElementById("attTable").style.display="table";
+  });
+}
+
+/* Charts */
+google.charts.load('current',{packages:['corechart']});
+google.charts.setOnLoadCallback(loadCharts);
+
+function loadCharts(){
+
+  post({action:"getMyAttendanceAnalytics",email})
+  .then(r=>{
+    if(!r.success) return;
+
+    document.getElementById("percent").innerText=r.percent+"%";
+
+    const pieData=google.visualization.arrayToDataTable([
+      ["Type","Count"],
+      ["Present",r.present],
+      ["Absent",r.absent]
+    ]);
+
+    new google.visualization.PieChart(
+      document.getElementById("pieChart")
+    ).draw(pieData,{title:"Attendance Breakdown"});
+
+    const trendData=google.visualization.arrayToDataTable([
+      ["Status","Count"],
+      ["Present",r.present],
+      ["Absent",r.absent]
+    ]);
+
+    new google.visualization.ColumnChart(
+      document.getElementById("trendChart")
+    ).draw(trendData,{title:"Attendance Trend"});
+  });
+}
+</script>
+
+</body>
+</html>
