@@ -1,18 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Admin – GPS Map</title>
+<title>Admin – Live GPS Map</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet"
- href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <style>
 body{
-  font-family: Arial;
   margin:0;
+  font-family:Arial;
   background:#e8f5e9;
 }
 
@@ -38,7 +37,7 @@ button{
   background:#2e7d32;
   color:white;
   border:none;
-  padding:6px 12px;
+  padding:8px 14px;
   border-radius:5px;
   cursor:pointer;
 }
@@ -55,7 +54,7 @@ if(localStorage.getItem("role")!=="admin"){
 </script>
 
 <div class="header">
-  <div>🌱 GO GREEN – Live GPS Map</div>
+  <div>🌱 Admin – Live GPS Map</div>
   <div>
     <button onclick="goBack()">⬅ Dashboard</button>
     <button onclick="logout()">Logout</button>
@@ -87,24 +86,33 @@ function goBack(){
 }
 
 /* Initialize Map */
-const map = L.map('map').setView([28.47,77.48],10);
+const map = L.map('map').setView([28.47,77.48], 10);
 
-L.tileLayer(
- 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  attribution:'© OpenStreetMap'
+}).addTo(map);
 
-/* Load GPS Points */
-post({action:"getGpsPoints"}).then(r=>{
-  if(!r.success) return;
+let markersLayer = L.layerGroup().addTo(map);
 
-  (r.data||[]).forEach(p=>{
-    if(p.lat && p.lng){
-      L.marker([Number(p.lat),Number(p.lng)])
-        .addTo(map)
-        .bindPopup(p.email);
-    }
+function loadMap(){
+  post({action:"getGpsPoints"}).then(r=>{
+
+    markersLayer.clearLayers();
+
+    (r.data || []).forEach(p=>{
+      if(p.lat && p.lng){
+        L.marker([Number(p.lat), Number(p.lng)])
+          .addTo(markersLayer)
+          .bindPopup(p.email);
+      }
+    });
+
   });
-});
+}
+
+/* Load Initially + Auto Refresh */
+loadMap();
+setInterval(loadMap,20000);
 </script>
 
 </body>
