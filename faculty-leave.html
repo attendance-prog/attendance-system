@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Faculty – Apply Leave</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#e8f5e9;
+}
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.container{
+  padding:40px;
+}
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  margin-bottom:30px;
+}
+input,textarea{
+  width:100%;
+  padding:8px;
+  margin-bottom:10px;
+}
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:5px;
+  cursor:pointer;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
+th,td{
+  border:1px solid #ccc;
+  padding:8px;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("role")!=="faculty"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
+</script>
+
+<div class="header">
+  <div>🌱 Faculty – Leave Management</div>
+  <div>
+    <button onclick="goBack()">⬅ Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- APPLY LEAVE -->
+  <div class="card">
+    <h3>📝 Apply Leave</h3>
+
+    <input type="date" id="fromDate">
+    <input type="date" id="toDate">
+    <textarea id="reason" placeholder="Enter reason"></textarea>
+
+    <button onclick="applyLeave()">Submit Leave</button>
+  </div>
+
+  <!-- VIEW LEAVES -->
+  <div class="card">
+    <h3>📄 My Leave Requests</h3>
+
+    <button onclick="loadLeaves()">Refresh</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Reason</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="leaveBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const email=localStorage.getItem("email");
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+function goBack(){
+  window.location.href="faculty.html";
+}
+
+/* Apply Leave */
+function applyLeave(){
+
+  const from=document.getElementById("fromDate").value;
+  const to=document.getElementById("toDate").value;
+  const reason=document.getElementById("reason").value.trim();
+
+  if(!from || !to){
+    alert("Select leave dates");
+    return;
+  }
+
+  post({
+    action:"applyLeave",
+    email,
+    from,
+    to,
+    reason
+  }).then(res=>{
+    if(res.success){
+      alert("Leave submitted");
+      loadLeaves();
+    }else{
+      alert(res.message || "Error");
+    }
+  });
+}
+
+/* Load My Leaves */
+function loadLeaves(){
+  post({action:"getPendingLeaves"})
+  .then(r=>{
+    const body=document.getElementById("leaveBody");
+    body.innerHTML="";
+
+    (r.data||[]).forEach(l=>{
+      if(l[1]===email){
+        body.innerHTML+=`
+        <tr>
+          <td>${l[0]}</td>
+          <td>${l[2]}</td>
+          <td>${l[3]}</td>
+          <td>${l[4]}</td>
+          <td>${l[5]}</td>
+        </tr>`;
+      }
+    });
+  });
+}
+
+loadLeaves();
+</script>
+
+</body>
+</html>
