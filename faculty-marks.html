@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Faculty – Permanent List & Marks</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#e8f5e9;
+}
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.container{
+  padding:40px;
+}
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  border:1px solid #ccc;
+  padding:8px;
+  text-align:center;
+}
+input{
+  width:60px;
+  padding:5px;
+}
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:5px;
+  cursor:pointer;
+  margin-bottom:15px;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("role")!=="faculty"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
+</script>
+
+<div class="header">
+  <div>🌱 Faculty – Permanent List & Marks</div>
+  <div>
+    <button onclick="goBack()">⬅ Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+
+    <h3>📘 Permanent Student List</h3>
+
+    <button onclick="loadStudents()">Load Permanent List</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>System ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>CA (25)</th>
+          <th>End Term (75)</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="marksBody"></tbody>
+    </table>
+
+  </div>
+</div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const facultyEmail=localStorage.getItem("email");
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+function goBack(){
+  window.location.href="faculty.html";
+}
+
+/* Load Permanent Students */
+function loadStudents(){
+
+  post({
+    action:"getPermanentStudentsForFaculty",
+    facultyEmail
+  }).then(r=>{
+
+    const body=document.getElementById("marksBody");
+    body.innerHTML="";
+
+    (r.data||[]).forEach(s=>{
+
+      body.innerHTML+=`
+      <tr>
+        <td>${s.systemId}</td>
+        <td>${s.name}</td>
+        <td>${s.email}</td>
+        <td><input type="number" min="0" max="25" id="ca_${s.email}"></td>
+        <td><input type="number" min="0" max="75" id="end_${s.email}"></td>
+        <td>
+          <button onclick="saveMarks('${s.email}')">Save</button>
+        </td>
+      </tr>`;
+
+    });
+
+  });
+}
+
+/* Save Marks */
+function saveMarks(studentEmail){
+
+  const ca=document.getElementById("ca_"+studentEmail).value;
+  const end=document.getElementById("end_"+studentEmail).value;
+
+  if(ca==="" || end===""){
+    alert("Enter marks");
+    return;
+  }
+
+  if(ca>25 || end>75){
+    alert("Marks exceed limit");
+    return;
+  }
+
+  post({
+    action:"saveStudentMarks",
+    studentEmail,
+    facultyEmail,
+    caMarks:ca,
+    endMarks:end
+  }).then(r=>{
+    alert(r.message || "Marks Saved");
+  });
+}
+</script>
+
+</body>
+</html>
