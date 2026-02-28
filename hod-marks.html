@@ -3,26 +3,168 @@
 <head>
 <meta charset="UTF-8">
 <title>HOD – Marks Approval</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#e8f5e9;
+}
+
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.container{
+  padding:30px;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:6px 12px;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+th,td{
+  border:1px solid #ccc;
+  padding:8px;
+  text-align:left;
+}
+
+.locked{
+  color:#d32f2f;
+  font-weight:bold;
+}
+</style>
 </head>
+
 <body>
 
-<script src="js/api.js"></script>
-<script src="js/common.js"></script>
 <script>
-protectPage("hod");
+if(localStorage.getItem("role")!=="hod"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
 </script>
 
-<h2>📘 Marks Approval Panel</h2>
+<div class="header">
+  <div>🌱 HOD – Marks Approval Panel</div>
+  <div>
+    <button onclick="goBack()">⬅ Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
 
-<button onclick="window.location.href='hod.html'">⬅ Back</button>
+<div class="container">
 
-<div id="marksContent"></div>
+  <div class="card">
+    <h3>📊 Draft Marks</h3>
+    <button onclick="loadMarks()">Load Draft Marks</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Faculty</th>
+          <th>Student</th>
+          <th>CA</th>
+          <th>End</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="marksBody"></tbody>
+    </table>
+  </div>
+
+</div>
 
 <script>
-post({action:"getAllMarks"}).then(r=>{
-  document.getElementById("marksContent").innerText =
-  JSON.stringify(r.data,null,2);
-});
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+
+function goBack(){
+  window.location.href="hod.html";
+}
+
+/* Load Draft Marks */
+function loadMarks(){
+  post({action:"getAllMarks"}).then(r=>{
+    const body=document.getElementById("marksBody");
+    body.innerHTML="";
+
+    (r.data||[]).forEach(row=>{
+
+      const status=row.status||"DRAFT";
+
+      body.innerHTML+=`
+      <tr>
+        <td>${new Date(row.date).toLocaleDateString()}</td>
+        <td>${row.faculty}</td>
+        <td>${row.student}</td>
+        <td>${row.ca}</td>
+        <td>${row.end}</td>
+        <td>${row.total}</td>
+        <td class="${status==='LOCKED'?'locked':''}">
+          ${status}
+        </td>
+        <td>
+          ${
+            status!=="LOCKED"
+            ? `<button onclick="lockMarks('${row.student}')">Approve</button>`
+            : '—'
+          }
+        </td>
+      </tr>`;
+    });
+  });
+}
+
+/* Lock Marks */
+function lockMarks(studentEmail){
+  post({
+    action:"lockMarks",
+    studentEmail:studentEmail
+  }).then(res=>{
+    alert(res.message);
+    loadMarks();
+  });
+}
 </script>
 
 </body>
