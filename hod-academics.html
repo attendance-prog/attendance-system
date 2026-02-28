@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>HOD – Academics Management</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#e8f5e9;
+}
+
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.container{
+  padding:30px;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  margin-bottom:25px;
+}
+
+input,select{
+  padding:8px;
+  margin:5px;
+}
+
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+th,td{
+  border:1px solid #ccc;
+  padding:8px;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("role")!=="hod"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
+</script>
+
+<div class="header">
+  <div>🌱 HOD – Academics Management</div>
+  <div>
+    <button onclick="goBack()">⬅ Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Add Subject -->
+  <div class="card">
+    <h3>📘 Add Subject</h3>
+    <input id="subId" placeholder="Subject ID">
+    <input id="subName" placeholder="Subject Name">
+    <input id="semester" placeholder="Semester">
+    <button onclick="addSubject()">Add</button>
+  </div>
+
+  <!-- Add Timetable -->
+  <div class="card">
+    <h3>🗓 Add Timetable</h3>
+    <select id="day">
+      <option>Monday</option>
+      <option>Tuesday</option>
+      <option>Wednesday</option>
+      <option>Thursday</option>
+      <option>Friday</option>
+      <option>Saturday</option>
+    </select>
+    <input id="ttSubject" placeholder="Subject ID">
+    <input id="start" placeholder="Start (HH.MM)">
+    <input id="end" placeholder="End (HH.MM)">
+    <input id="room" placeholder="Room">
+    <button onclick="addTimetable()">Add</button>
+  </div>
+
+  <!-- Add GPS Location -->
+  <div class="card">
+    <h3>📍 Add GPS Location</h3>
+    <input id="gpsRoom" placeholder="Room">
+    <input id="lat" placeholder="Latitude">
+    <input id="lng" placeholder="Longitude">
+    <input id="radius" placeholder="Radius (meters)">
+    <button onclick="addLocation()">Add</button>
+  </div>
+
+  <!-- Department Attendance Overview -->
+  <div class="card">
+    <h3>📊 Department Attendance Overview</h3>
+    <button onclick="loadDeptAttendance()">Load Overview</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Present</th>
+          <th>Late</th>
+          <th>Absent</th>
+          <th>Percent</th>
+        </tr>
+      </thead>
+      <tbody id="deptBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+
+function goBack(){
+  window.location.href="hod.html";
+}
+
+/* Add Subject */
+function addSubject(){
+  post({
+    action:"addSubject",
+    id:document.getElementById("subId").value,
+    name:document.getElementById("subName").value,
+    semester:document.getElementById("semester").value
+  }).then(()=>alert("Subject Added"));
+}
+
+/* Add Timetable */
+function addTimetable(){
+  post({
+    action:"addTimetable",
+    day:document.getElementById("day").value,
+    subject:document.getElementById("ttSubject").value,
+    start:document.getElementById("start").value,
+    end:document.getElementById("end").value,
+    room:document.getElementById("room").value
+  }).then(()=>alert("Timetable Added"));
+}
+
+/* Add GPS Location */
+function addLocation(){
+  post({
+    action:"addLocation",
+    room:document.getElementById("gpsRoom").value,
+    latitude:document.getElementById("lat").value,
+    longitude:document.getElementById("lng").value,
+    radius:document.getElementById("radius").value
+  }).then(()=>alert("Location Added"));
+}
+
+/* Department Attendance */
+function loadDeptAttendance(){
+  post({action:"getStaffAttendance"}).then(r=>{
+    const body=document.getElementById("deptBody");
+    body.innerHTML="";
+
+    const map={};
+
+    (r.data||[]).forEach(row=>{
+      const email=row[1];
+      const status=row[6];
+
+      if(!map[email]) map[email]={p:0,l:0,a:0,t:0};
+
+      map[email].t++;
+      if(status==="PRESENT") map[email].p++;
+      if(status==="LATE") map[email].l++;
+      if(status==="ABSENT") map[email].a++;
+    });
+
+    Object.keys(map).forEach(email=>{
+      const d=map[email];
+      const percent=Math.round((d.p/d.t)*100);
+
+      body.innerHTML+=`
+      <tr>
+        <td>${email}</td>
+        <td>${d.p}</td>
+        <td>${d.l}</td>
+        <td>${d.a}</td>
+        <td>${percent}%</td>
+      </tr>`;
+    });
+  });
+}
+</script>
+
+</body>
+</html>
