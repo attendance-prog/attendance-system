@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>HOD – My Attendance</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#e8f5e9;
+}
+
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.container{
+  padding:30px;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  margin-bottom:25px;
+}
+
+button{
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:5px;
+  cursor:pointer;
+  margin-right:10px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+th,td{
+  border:1px solid #ccc;
+  padding:8px;
+}
+
+#map{
+  height:350px;
+  border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("role")!=="hod"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
+</script>
+
+<div class="header">
+  <div>🌱 HOD – My Attendance</div>
+  <div>
+    <button onclick="goBack()">⬅ Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Attendance -->
+  <div class="card">
+    <h3>📌 Mark My Attendance</h3>
+    <button onclick="startCamera()">Mark Attendance</button>
+    <button onclick="viewMyAttendance()">View My Attendance</button>
+
+    <div id="cameraSection" style="display:none;margin-top:15px;">
+      <video id="video" width="260" autoplay></video><br>
+      <button onclick="captureAndMark()">Capture & Mark</button>
+    </div>
+
+    <canvas id="canvas" width="260" height="200" style="display:none"></canvas>
+
+    <table id="attendanceTable" style="display:none">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="attendanceBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Analytics -->
+  <div class="card">
+    <h3>📊 My Attendance Analytics</h3>
+    <p>Attendance %: <b id="percentText">--%</b></p>
+    <div id="chartDiv" style="height:300px"></div>
+  </div>
+
+  <!-- Map -->
+  <div class="card">
+    <h3>🗺 Attendance Map</h3>
+    <div id="map"></div>
+  </div>
+
+</div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const email=localStorage.getItem("email");
+let stream=null;
+
+function post(data){
+  return fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+
+function goBack(){
+  window.location.href="hod.html";
+}
+
+/* CAMERA */
+function startCamera(){
+  document.getElementById("cameraSection").style.display="block";
+  navigator.mediaDevices.getUserMedia({video:true}).then(s=>{
+    stream=s;
+    document.getElementById("video").srcObject=s;
+  });
+}
+
+function captureAndMark(){
+  document.getElementById("canvas")
+    .getContext("2d")
+    .drawImage(document.getElementById("video"),0,0,260,200);
+
+  navigator.geolocation.getCurrentPosition(pos=>{
+    post({
+      action:"markHodAttendance",
+      email:email,
+      latitude:pos.coords.latitude,
+      longitude:pos.coords.longitude
+    }).then(res=>{
+      alert(res.message);
+      stopCamera();
+      loadAnalytics();
+    });
+  });
+}
+
+function stopCamera(){
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  document.getElementById("cameraSection").style.display="none";
+}
+
+/* VIEW */
+function viewMyAttendance(){
+  post({action:"getMyAttendance",email:email})
+  .then(r=>{
+    const body=document.getElementById("attendanceBody");
+    body.innerHTML="";
+
+    (r.data||[]).forEach(x=>{
+      body.innerHTML+=`
+      <tr>
+        <td>${new Date(x[0]).toLocaleDateString()}</td>
+        <td>${x[6]}</td>
+        <td>${new Date(x[8]).toLocaleTimeString()}</td>
+      </tr>`;
+    });
+
+    document.getElementById("attendanceTable").style.display="table";
+  });
+}
+
+/* Analytics */
+google.charts.load('current',{'packages':['corechart']});
+google.charts.setOnLoadCallback(loadAnalytics);
+
+function loadAnalytics(){
+  post({action:"getMyAttendanceAnalytics",email:email})
+  .then(r=>{
+    if(!r.success) return;
+
+    document.getElementById("percentText").innerText =
+      (r.percent||0)+"%";
+
+    const data=google.visualization.arrayToDataTable([
+      ['Type','Count'],
+      ['Present',r.present||0],
+      ['Late',r.late||0],
+      ['Absent',r.absent||0]
+    ]);
+
+    new google.visualization.PieChart(
+      document.getElementById("chartDiv")
+    ).draw(data,{title:"My Attendance Breakdown"});
+  });
+}
+
+/* Map */
+const map=L.map('map').setView([28.47,77.48],10);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+  .addTo(map);
+
+post({action:"getGpsPoints"}).then(r=>{
+  (r.data||[]).forEach(p=>{
+    if(p.email===email){
+      L.marker([Number(p.lat),Number(p.lng)])
+        .addTo(map)
+        .bindPopup("You marked here");
+    }
+  });
+});
+</script>
+
+</body>
+</html>
