@@ -73,17 +73,14 @@ function sendOtp() {
     return;
   }
 
-  fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8"
-    },
-    body: JSON.stringify({
-      action: "sendOtp",
-      email: email,
-      role: role
-    })
+fetch(API_URL, {
+  method: "POST",
+  body: JSON.stringify({
+    action: "sendOtp",
+    email: email,
+    role: role
   })
+})
   .then(r => r.json())
   .then(res => alert(res.message))
   .catch(err => {
@@ -105,7 +102,6 @@ function verifyOtp() {
 
   fetch(API_URL, {
     method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({
       action: "verifyOtp",
       email,
