@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>GO GREEN – Secure Attendance</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Segoe UI,Arial;
+  background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+  text-align:center;
+}
+
+.header{
+  padding:20px;
+  font-size:20px;
+  font-weight:bold;
+  color:#1b5e20;
+}
+
+#reader{
+  width:90%;
+  margin:20px auto;
+}
+
+video{
+  width:90%;
+  border-radius:15px;
+  margin-top:15px;
+}
+
+button{
+  padding:10px 15px;
+  background:#2e7d32;
+  color:white;
+  border:none;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+.status{
+  margin-top:15px;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">Secure Attendance</div>
+
+<div id="reader"></div>
+
+<div id="faceSection" style="display:none;">
+  <video id="video" autoplay></video>
+  <br>
+  <button onclick="captureFace()">Capture Face</button>
+</div>
+
+<canvas id="canvas" style="display:none;"></canvas>
+
+<div class="status" id="statusMsg">
+  Step 1: Scan QR
+</div>
+
+<script>
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const email=localStorage.getItem("email");
+
+let sessionId="";
+let stream;
+
+const html5QrCode = new Html5Qrcode("reader");
+
+html5QrCode.start(
+  { facingMode: "environment" },
+  { fps: 10, qrbox: 250 },
+  qrMessage => {
+    sessionId = qrMessage;
+    html5QrCode.stop();
+    document.getElementById("statusMsg").innerText="Step 2: Capture Face";
+    startFaceCamera();
+  }
+);
+
+function startFaceCamera(){
+  document.getElementById("faceSection").style.display="block";
+  navigator.mediaDevices.getUserMedia({video:true})
+  .then(s=>{
+    stream=s;
+    document.getElementById("video").srcObject=s;
+  });
+}
+
+function captureFace(){
+  const video=document.getElementById("video");
+  const canvas=document.getElementById("canvas");
+  canvas.width=video.videoWidth;
+  canvas.height=video.videoHeight;
+  canvas.getContext("2d").drawImage(video,0,0);
+
+  const faceImage=canvas.toDataURL("image/png");
+
+  stream.getTracks().forEach(track=>track.stop());
+
+  document.getElementById("statusMsg").innerText="Processing Attendance...";
+
+  navigator.geolocation.getCurrentPosition(pos=>{
+    fetch(API,{
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify({
+        action:"secureMarkAttendance",
+        email:email,
+        sessionId:sessionId,
+        faceImage:faceImage,
+        latitude:pos.coords.latitude,
+        longitude:pos.coords.longitude
+      })
+    })
+    .then(r=>r.json())
+    .then(res=>{
+      document.getElementById("statusMsg").innerText=res.message;
+    });
+  });
+}
+</script>
+
+</body>
+</html>
