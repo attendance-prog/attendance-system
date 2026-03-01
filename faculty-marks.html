@@ -97,7 +97,7 @@ if(localStorage.getItem("role")!=="faculty"){
 
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-const facultyEmail=localStorage.getItem("facultyEmail");
+const facultyEmail=localStorage.getItem("email");
 
 function post(data){
   return fetch(API_URL,{
