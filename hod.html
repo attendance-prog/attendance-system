@@ -2,53 +2,61 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HOD Dashboard</title>
+<title>GO GREEN – HOD Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#e8f5e9;
-}
+body{margin:0;font-family:Segoe UI,Arial;background:#f4f7f6;display:flex}
 
+/* Sidebar */
+.sidebar{
+  width:230px;background:#1b5e20;color:#fff;
+  height:100vh;position:fixed;padding:20px 0;
+  transition:.3s
+}
+.sidebar h2{text-align:center;margin-bottom:30px}
+.sidebar a{
+  display:block;color:#fff;text-decoration:none;
+  padding:12px 20px;transition:.3s
+}
+.sidebar a:hover{background:#2e7d32}
+.sidebar.collapsed{width:70px}
+.sidebar.collapsed a span{display:none}
+.nav-link.active{background:#2e7d32}
+
+/* Main */
+.main{margin-left:230px;width:100%;transition:.3s;animation:fadeIn .4s}
+.main.expanded{margin-left:70px}
+
+/* Header */
 .header{
-  background:#1b5e20;
-  color:white;
-  padding:15px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+  background:#fff;padding:15px 30px;
+  display:flex;justify-content:space-between;
+  align-items:center;box-shadow:0 2px 6px rgba(0,0,0,.1)
+}
+.menu-btn{background:none;border:none;font-size:22px;cursor:pointer}
+.logout-btn{
+  background:#2e7d32;color:#fff;border:none;
+  padding:8px 14px;border-radius:6px;cursor:pointer
 }
 
-.container{
-  padding:40px;
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
-  gap:20px;
+/* Content */
+.content{padding:30px}
+.grid{
+  display:grid;gap:20px;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr))
 }
-
 .card{
-  background:white;
-  padding:25px;
-  border-radius:10px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.1);
-  cursor:pointer;
-  text-align:center;
-  font-weight:bold;
+  background:#fff;padding:25px;border-radius:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
+  cursor:pointer;text-align:center;font-weight:bold;
+  transition:.3s
 }
+.card:hover{transform:translateY(-5px)}
 
-.card:hover{
-  background:#c8e6c9;
-}
-
-button{
-  background:#2e7d32;
-  color:white;
-  border:none;
-  padding:8px 14px;
-  border-radius:5px;
-  cursor:pointer;
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
 }
 </style>
 </head>
@@ -57,53 +65,55 @@ button{
 
 <script>
 if(localStorage.getItem("role")!=="hod"){
-  alert("Unauthorized");
-  location.href="index.html";
+  alert("Unauthorized");location.href="index.html";
 }
 </script>
 
-<div class="header">
-  <div>🌱 GO GREEN – HOD Dashboard</div>
-  <button onclick="logout()">Logout</button>
+<div class="sidebar">
+  <h2>🌱 GO GREEN</h2>
+  <a href="hod.html" class="nav-link">🏠 <span>Dashboard</span></a>
+  <a href="hod-my-attendance.html" class="nav-link">📌 <span>My Attendance</span></a>
+  <a href="hod-academics.html" class="nav-link">📚 <span>Academics</span></a>
+  <a href="hod-leaves.html" class="nav-link">📝 <span>Leave & Substitute</span></a>
+  <a href="hod-marks.html" class="nav-link">📊 <span>Marks Approval</span></a>
+  <a href="hod-live.html" class="nav-link">📡 <span>Live Classes</span></a>
+  <a href="hod-warning.html" class="nav-link">🚨 <span>Early Warning</span></a>
 </div>
 
-<div class="container">
+<div class="main">
 
-  <div class="card" onclick="go('hod-my-attendance.html')">
-    📌 My Attendance
+  <div class="header">
+    <div>
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <strong>HOD Dashboard</strong>
+    </div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
-  <div class="card" onclick="go('hod-academics.html')">
-    📚 Academics Management
-  </div>
+  <div class="content">
+    <div class="grid">
 
-  <div class="card" onclick="go('hod-leaves.html')">
-    📝 Leave & Substitute
-  </div>
+      <div class="card" onclick="go('hod-my-attendance.html')">📌 My Attendance</div>
+      <div class="card" onclick="go('hod-academics.html')">📚 Academics Management</div>
+      <div class="card" onclick="go('hod-leaves.html')">📝 Leave & Substitute</div>
+      <div class="card" onclick="go('hod-marks.html')">📊 Marks Approval</div>
+      <div class="card" onclick="go('hod-live.html')">📡 Live Classes</div>
+      <div class="card" onclick="go('hod-warning.html')">🚨 Early Warning</div>
 
-  <div class="card" onclick="go('hod-marks.html')">
-    📊 Marks Approval
+    </div>
   </div>
-
-  <div class="card" onclick="go('hod-live.html')">
-    📡 Live Classes
-  </div>
-
-  <div class="card" onclick="go('hod-warning.html')">
-    🚨 Early Warning
-  </div>
-
 </div>
 
 <script>
-function logout(){
-  localStorage.clear();
-  location.href="index.html";
+function logout(){localStorage.clear();location.href="index.html"}
+function go(p){window.location.href=p}
+function toggleSidebar(){
+  document.querySelector(".sidebar").classList.toggle("collapsed");
+  document.querySelector(".main").classList.toggle("expanded");
 }
-
-function go(page){
-  window.location.href = page;
-}
+document.querySelectorAll(".nav-link").forEach(l=>{
+  if(l.href===window.location.href){l.classList.add("active")}
+});
 </script>
 
 </body>
