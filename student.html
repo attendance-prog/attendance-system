@@ -2,51 +2,104 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>GO GREEN – Student</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://unpkg.com/html5-qrcode"></script>
+<title>GO GREEN – Student App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
- font-family:Arial;
- padding:20px;
- background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
- user-select:none;
-}
-h2{color:#2e7d32}
-button{background:#2e7d32;color:white;border:none;padding:10px;margin:6px}
-
-#welcomeBar{
- background:#1b5e20;
- color:white;
- padding:12px;
- border-radius:8px;
- margin-bottom:15px;
- display:flex;
- justify-content:space-between;
- align-items:center;
+  margin:0;
+  font-family:Segoe UI,Arial;
+  background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+  overflow-x:hidden;
 }
 
-.badge{
- padding:4px 10px;
- border-radius:20px;
- color:white;
- font-size:12px;
+/* Header */
+.header{
+  padding:20px;
+  font-size:20px;
+  font-weight:bold;
+  color:#1b5e20;
 }
 
-#scanner,#faceCam{display:none;margin-top:12px}
+/* Card */
+.card{
+  background:rgba(255,255,255,0.9);
+  margin:15px;
+  padding:20px;
+  border-radius:16px;
+  box-shadow:0 6px 15px rgba(0,0,0,0.1);
+  backdrop-filter:blur(10px);
+  animation:fadeIn .6s ease-in-out;
+}
 
-#toast{
- position:fixed;
- bottom:20px;
- right:20px;
- background:#1b5e20;
- color:white;
- padding:10px 16px;
- border-radius:6px;
- display:none;
+/* Attendance Circle */
+.progress-container{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin-top:15px;
+}
+
+.circle{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background:conic-gradient(#2e7d32 0%, #c8e6c9 0%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  font-weight:bold;
+  color:#1b5e20;
+}
+
+/* Floating Button */
+.fab{
+  position:fixed;
+  bottom:70px;
+  left:50%;
+  transform:translateX(-50%);
+  width:65px;
+  height:65px;
+  border-radius:50%;
+  background:#2e7d32;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  box-shadow:0 6px 15px rgba(0,0,0,0.3);
+  cursor:pointer;
+}
+
+/* Bottom Nav */
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:white;
+  display:flex;
+  justify-content:space-around;
+  padding:10px 0;
+  box-shadow:0 -3px 10px rgba(0,0,0,0.1);
+}
+
+.bottom-nav div{
+  text-align:center;
+  font-size:12px;
+  color:#555;
+  cursor:pointer;
+}
+
+.bottom-nav .active{
+  color:#2e7d32;
+  font-weight:bold;
+}
+
+/* Animation */
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
 }
 </style>
 </head>
@@ -54,287 +107,96 @@ button{background:#2e7d32;color:white;border:none;padding:10px;margin:6px}
 <body>
 
 <script>
-if(!/Android|iPhone/i.test(navigator.userAgent)){
- alert("Attendance allowed only from mobile");
- location.href="index.html";
+if(localStorage.getItem("role")!=="student"){
+  alert("Unauthorized");
+  location.href="index.html";
 }
 </script>
 
-<div id="welcomeBar">
-  <div id="welcomeText"></div>
-  <button onclick="logout()">Logout</button>
+<div class="header">
+  Welcome, <span id="studentName"></span>
 </div>
 
-<h2>🌱 GO GREEN – Student Dashboard</h2>
-
-<button onclick="startQrScan()">📷 Scan QR & Mark Attendance</button>
-<span id="scanStatus" class="badge" style="background:#888">Idle</span>
-
-<div id="scanner">
- <div id="qr-reader" style="width:300px"></div>
+<div class="card">
+  <h3>Attendance Overview</h3>
+  <div class="progress-container">
+    <div class="circle" id="attendanceCircle">0%</div>
+  </div>
 </div>
 
-<div id="faceCam">
- <video id="video" autoplay playsinline width="260"></video><br>
- <button onclick="captureFace()">Capture Face & Submit</button>
+<div class="card">
+  <h3>Today's Status</h3>
+  <p id="todayStatus">Checking...</p>
 </div>
 
-<canvas id="canvas" width="260" height="200" style="display:none"></canvas>
+<!-- Floating Scan -->
+<div class="fab" onclick="goQR()">📷</div>
 
-<hr>
-
-<h3>My Attendance</h3>
-<button onclick="viewMyAttendance()">View My Attendance</button>
-<button onclick="viewMyAttendance()">🔄 Refresh</button>
-
-<div id="percentBox"></div>
-<div id="lastScan"></div>
-
-<table id="attTable" style="display:none" border="1">
-<thead>
-<tr><th>Date</th><th>Status</th><th>Time</th></tr>
-</thead>
-<tbody id="attBody"></tbody>
-</table>
-
-<h3>📊 Attendance Trend</h3>
-<canvas id="attChart"></canvas>
-
-<h3>📍 Last Attendance Location</h3>
-<iframe id="mapBox" width="100%" height="200"></iframe>
-
-<div id="toast"></div>
-<hr>
-
-<h3>📅 My Timetable</h3>
-
-<table id="stuTT" border="1" style="width:100%;font-size:12px">
-<thead id="stuTTHead"></thead>
-<tbody id="stuTTBody"></tbody>
-</table>
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <div class="active" onclick="go('student.html')">🏠<br>Home</div>
+  <div onclick="go('student-attendance.html')">📊<br>Attendance</div>
+  <div onclick="go('student-marks.html')">📘<br>Marks</div>
+  <div onclick="go('student-timetable.html')">📅<br>Timetable</div>
+  <div onclick="go('student-profile.html')">👤<br>Profile</div>
+</div>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 const email=localStorage.getItem("email");
 
-let qrScanner=null,stream=null;
-let sessionId="",subjectId="",signature="";
-let lastScanTime=0;
+document.getElementById("studentName").innerText=
+localStorage.getItem("name");
 
-const video=document.getElementById("video");
-const canvas=document.getElementById("canvas");
-const toastBox=document.getElementById("toast");
-
-/* ===== greeting ===== */
-const name=email.split("@")[0];
-const hr=new Date().getHours();
-const g=hr<12?"Good Morning":hr<18?"Good Afternoon":"Good Evening";
-document.getElementById("welcomeText").innerHTML=
-`${g}, ${name} 👋 | Student Portal`;
-
-/* ===== logout ===== */
-function logout(){
- localStorage.clear();
- location.href="index.html";
-}
-
-/* ===== toast ===== */
-function toast(m){
- toastBox.innerText=m;
- toastBox.style.display="block";
- setTimeout(()=>toastBox.style.display="none",2500);
-}
-
-/* ===== post ===== */
-function post(d){
- return fetch(API,{
+/* Load Attendance */
+fetch(API,{
   method:"POST",
-  headers:{"Content-Type":"text/plain"},
-  body:JSON.stringify(d)
- })
- .then(r=>r.json())
- .catch(()=>toast("Network error"));
-}
-
-/* ===== QR scan ===== */
-function startQrScan(){
-
- if(Date.now()-lastScanTime < 15000){
-   toast("Wait before scanning again");
-   return;
- }
-
- scanStatus.innerText="Scanning...";
- scanStatus.style.background="#ff9800";
-
- scanner.style.display="block";
- qrScanner=new Html5Qrcode("qr-reader");
-
- qrScanner.start(
-  {facingMode:"environment"},
-  {fps:10,qrbox:250},
-  txt=>{
-   const p=txt.split("|");
-   sessionId=p[0];
-   signature=p[1]||"";
-   subjectId=p[2]||"";
-
-   qrScanner.stop();
-   scanner.style.display="none";
-
-   scanStatus.innerText="QR OK";
-   scanStatus.style.background="#2e7d32";
-
-   openFaceCamera();
+  headers:{"Content-Type":"text/plain;charset=utf-8"},
+  body:JSON.stringify({
+    action:"getMyAttendanceAnalytics",
+    email:email
+  })
+})
+.then(r=>r.json())
+.then(res=>{
+  if(res.success){
+    animateCircle(res.percent);
   }
- );
-}
-
-/* ===== face camera ===== */
-function openFaceCamera(){
- faceCam.style.display="block";
- navigator.mediaDevices.getUserMedia({video:true})
- .then(s=>{
-   stream=s;
-   video.srcObject=s;
- });
-}
-
-/* ===== capture ===== */
-function captureFace(){
-
- canvas.getContext("2d").drawImage(video,0,0,260,200);
- const faceImage=canvas.toDataURL();
-
- navigator.geolocation.getCurrentPosition(pos=>{
-   post({
-     action:"markStudentAttendance",
-     email,
-     sessionId,
-     subjectId,
-     signature,
-     deviceId:getDeviceId(),
-     faceImage,
-     latitude:pos.coords.latitude,
-     longitude:pos.coords.longitude
-   }).then(r=>{
-     toast(r.message);
-     lastScanTime=Date.now();
-     document.getElementById("lastScan").innerText=
-       "Last Scan: "+new Date().toLocaleTimeString();
-     stopCam();
-   });
- });
-}
-
-function stopCam(){
- if(stream) stream.getTracks().forEach(t=>t.stop());
- faceCam.style.display="none";
-}
-
-/* ===== attendance view ===== */
-function viewMyAttendance(){
- post({action:"getMyStudentAttendance",email})
- .then(r=>{
-   attBody.innerHTML="";
-   if(!r.data || !r.data.length){
-     toast("No attendance");
-     return;
-   }
-
-   let present=0;
-
-   r.data.forEach(x=>{
-     if(x[4]==="PRESENT") present++;
-     attBody.innerHTML+=`
-      <tr>
-       <td>${new Date(x[0]).toLocaleDateString()}</td>
-       <td>${x[4]}</td>
-       <td>${new Date(x[5]).toLocaleTimeString()}</td>
-      </tr>`;
-   });
-
-   const pct=Math.round(present/r.data.length*100);
-
-   const color=pct>=75?"#2e7d32":"#c62828";
-   percentBox.innerHTML=
-   `Attendance %: <span class="badge" style="background:${color}">${pct}%</span>`;
-
-   drawChart(r.data);
-   showMap(r.data.at(-1));
-
-   attTable.style.display="table";
- });
-}
-
-/* ===== chart ===== */
-function drawChart(rows){
- new Chart(attChart,{
-  type:"bar",
-  data:{
-   labels:rows.map(r=>new Date(r[0]).toLocaleDateString()),
-   datasets:[{label:"Present",data:rows.map(r=>r[4]==="PRESENT"?1:0)}]
-  }
- });
-}
-
-/* ===== map ===== */
-function showMap(last){
- if(!last) return;
- const lat=last[6],lng=last[7];
- if(!lat) return;
- mapBox.src=`https://maps.google.com/maps?q=${lat},${lng}&z=16&output=embed`;
-}
-
-/* ===== device id ===== */
-function getDeviceId(){
- return btoa(navigator.userAgent+screen.width+screen.height);
-}
-
-/* ===== anti screenshot ===== */
-document.addEventListener("visibilitychange",()=>{
- if(document.hidden)
-   document.body.innerHTML="<h2>⚠️ Screenshot blocked</h2>";
 });
- /* ===== STUDENT TIMETABLE VIEW ===== */
 
-function loadStudentTimetable(){
-
- post({action:"getStudentTimetableView"})
- .then(r=>{
-
-   if(!r.success || !r.data.length){
-     return;
-   }
-
-   const head = document.getElementById("stuTTHead");
-   const body = document.getElementById("stuTTBody");
-
-   head.innerHTML="";
-   body.innerHTML="";
-
-   const cols = Object.keys(r.data[0]);
-
-   // header row
-   let h = "<tr>";
-   cols.forEach(c=> h += `<th>${c}</th>`);
-   h += "</tr>";
-   head.innerHTML = h;
-
-   // rows
-   r.data.forEach(row=>{
-     let tr = "<tr>";
-     cols.forEach(c=>{
-       tr += `<td>${row[c]||""}</td>`;
-     });
-     tr += "</tr>";
-     body.innerHTML += tr;
-   });
-
- });
+/* Animate Circle */
+function animateCircle(percent){
+  const circle=document.getElementById("attendanceCircle");
+  let start=0;
+  const interval=setInterval(()=>{
+    if(start>=percent){
+      clearInterval(interval);
+    }else{
+      start++;
+      circle.innerText=start+"%";
+      circle.style.background=
+      `conic-gradient(#2e7d32 ${start}%, #c8e6c9 ${start}%)`;
+    }
+  },15);
 }
-loadStudentTimetable();
 
+/* Today's Status */
+fetch(API,{
+  method:"POST",
+  headers:{"Content-Type":"text/plain;charset=utf-8"},
+  body:JSON.stringify({
+    action:"getTodayAttendance",
+    email:email
+  })
+})
+.then(r=>r.json())
+.then(res=>{
+  document.getElementById("todayStatus").innerText=
+  res.status || "Not Marked";
+});
+
+function go(p){window.location.href=p}
+function goQR(){window.location.href="student-qr.html"}
 </script>
 
 </body>
