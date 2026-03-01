@@ -21,6 +21,7 @@ body{
   height:100vh;
   padding:20px 0;
   position:fixed;
+  transition:0.3s;
 }
 
 .sidebar h2{
@@ -40,10 +41,28 @@ body{
   background:#2e7d32;
 }
 
+.sidebar.collapsed{
+  width:70px;
+}
+
+.sidebar.collapsed a span{
+  display:none;
+}
+
+.nav-link.active{
+  background:#2e7d32;
+}
+
 /* ===== Main Area ===== */
 .main{
   margin-left:230px;
   width:100%;
+  transition:0.3s;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.main.expanded{
+  margin-left:70px;
 }
 
 /* ===== Header ===== */
@@ -54,6 +73,13 @@ body{
   justify-content:space-between;
   align-items:center;
   box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.menu-btn{
+  background:none;
+  border:none;
+  font-size:22px;
+  cursor:pointer;
 }
 
 .logout-btn{
@@ -105,8 +131,15 @@ body{
 }
 
 .stat-card p{
-  font-size:20px;
+  font-size:22px;
   margin-top:8px;
+  font-weight:bold;
+}
+
+/* Animation */
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
 }
 
 /* Responsive */
@@ -117,14 +150,6 @@ body{
   .main{
     margin-left:0;
   }
-}
-    .main {
-  animation: fadeIn 0.6s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from { opacity:0; transform:translateY(10px); }
-  to { opacity:1; transform:translateY(0); }
 }
 </style>
 </head>
@@ -142,51 +167,45 @@ if(localStorage.getItem("role")!=="faculty"){
 <div class="sidebar">
   <h2>🌱 GO GREEN</h2>
 
-  <a href="faculty.html">🏠 Dashboard</a>
-  <a href="faculty-attendance.html">📊 My Attendance</a>
-  <a href="faculty-qr.html">📷 Generate QR</a>
-  <a href="faculty-timetable.html">📅 My Timetable</a>
-  <a href="faculty-leave.html">📝 Apply Leave</a>
-  <a href="faculty-students.html">🎓 My Class Students</a>
-  <a href="faculty-marks.html">📘 Permanent List & Marks</a>
-  <a href="faculty-questionbank.html">📂 Question Bank</a>
+  <a href="faculty.html" class="nav-link">🏠 <span>Dashboard</span></a>
+  <a href="faculty-attendance.html" class="nav-link">📊 <span>My Attendance</span></a>
+  <a href="faculty-qr.html" class="nav-link">📷 <span>Generate QR</span></a>
+  <a href="faculty-timetable.html" class="nav-link">📅 <span>My Timetable</span></a>
+  <a href="faculty-leave.html" class="nav-link">📝 <span>Apply Leave</span></a>
+  <a href="faculty-students.html" class="nav-link">🎓 <span>My Class Students</span></a>
+  <a href="faculty-marks.html" class="nav-link">📘 <span>Permanent List & Marks</span></a>
+  <a href="faculty-questionbank.html" class="nav-link">📂 <span>Question Bank</span></a>
 </div>
 
 <!-- ===== Main ===== -->
 <div class="main">
 
   <div class="header">
-    <div>
-  <strong>Faculty Dashboard</strong>
-  <span id="liveIndicator" style="margin-left:10px;"></span>
-</div>
+    <div style="display:flex;align-items:center;gap:15px;">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <strong>Faculty Dashboard</strong>
+      <span id="liveIndicator" style="margin-left:10px;"></span>
+    </div>
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
   <div class="content">
 
-    <!-- Welcome -->
     <div class="welcome-card">
       <h2 id="welcomeName">Welcome</h2>
       <p id="facultyEmail"></p>
     </div>
 
-    <!-- Stats -->
     <div class="stats">
 
       <div class="stat-card">
-        <h3>Today's Status</h3>
-        <p id="todayStatus">Loading...</p>
-      </div>
-
-      <div class="stat-card">
         <h3>Attendance %</h3>
-        <p id="attendancePercent">--</p>
+        <p id="attendancePercent">0</p>
       </div>
 
       <div class="stat-card">
         <h3>Live Classes</h3>
-        <p id="liveClasses">--</p>
+        <p id="liveClasses">0</p>
       </div>
 
     </div>
@@ -197,19 +216,49 @@ if(localStorage.getItem("role")!=="faculty"){
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 
+/* Logout */
 function logout(){
   localStorage.clear();
   location.href="index.html";
 }
 
-/* Fill welcome info */
+/* Sidebar Toggle */
+function toggleSidebar(){
+  document.querySelector(".sidebar").classList.toggle("collapsed");
+  document.querySelector(".main").classList.toggle("expanded");
+}
+
+/* Active Link Highlight */
+document.querySelectorAll(".nav-link").forEach(link=>{
+  if(link.href === window.location.href){
+    link.classList.add("active");
+  }
+});
+
+/* Welcome Info */
 document.getElementById("welcomeName").innerText =
   "Welcome, " + localStorage.getItem("name");
 
 document.getElementById("facultyEmail").innerText =
   localStorage.getItem("email");
 
-/* Load Attendance Analytics */
+/* Animated Counter */
+function animateCounter(id, endValue){
+  let start=0;
+  const duration=800;
+  const increment=endValue/(duration/20);
+
+  const counter=setInterval(()=>{
+    start+=increment;
+    if(start>=endValue){
+      start=endValue;
+      clearInterval(counter);
+    }
+    document.getElementById(id).innerText=Math.floor(start);
+  },20);
+}
+
+/* Load Attendance % */
 fetch(API_URL,{
   method:"POST",
   headers:{ "Content-Type":"text/plain;charset=utf-8" },
@@ -221,8 +270,7 @@ fetch(API_URL,{
 .then(r=>r.json())
 .then(res=>{
   if(res.success){
-    document.getElementById("attendancePercent").innerText =
-      res.percent + "%";
+    animateCounter("attendancePercent", res.percent);
   }
 });
 
@@ -230,29 +278,25 @@ fetch(API_URL,{
 fetch(API_URL,{
   method:"POST",
   headers:{ "Content-Type":"text/plain;charset=utf-8" },
-  body:JSON.stringify({
-    action:"getLiveClasses"
-  })
+  body:JSON.stringify({ action:"getLiveClasses" })
 })
 .then(r=>r.json())
 .then(res=>{
   if(res.success){
-    document.getElementById("liveClasses").innerText =
-      res.data.length;
+    animateCounter("liveClasses", res.data.length);
   }
 });
-  function checkLiveStatus(){
+
+/* Live Status Indicator */
+function checkLiveStatus(){
   fetch(API_URL,{
     method:"POST",
     headers:{ "Content-Type":"text/plain;charset=utf-8" },
-    body:JSON.stringify({
-      action:"getCurrentSlot"
-    })
+    body:JSON.stringify({ action:"getCurrentSlot" })
   })
   .then(r=>r.json())
   .then(res=>{
     const indicator=document.getElementById("liveIndicator");
-
     if(res.success && res.data){
       indicator.innerHTML="🟢 Live Class";
       indicator.style.color="green";
@@ -264,7 +308,7 @@ fetch(API_URL,{
 }
 
 checkLiveStatus();
-setInterval(checkLiveStatus, 30000); // refresh every 30 sec
+setInterval(checkLiveStatus,30000);
 </script>
 
 </body>
