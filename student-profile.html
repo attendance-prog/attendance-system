@@ -128,6 +128,8 @@ body.dark .header{
   from{opacity:0; transform:translateY(10px);}
   to{opacity:1; transform:translateY(0);}
 }
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2e7d32">
 </style>
 </head>
 
@@ -202,6 +204,11 @@ function logout(){
 function go(p){window.location.href=p}
 function goQR(){window.location.href="student-qr.html"}
 </script>
-
+<script>
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js")
+  .then(()=>console.log("Service Worker Registered"));
+}
+</script>
 </body>
 </html>
