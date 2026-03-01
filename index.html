@@ -58,11 +58,9 @@ button {
 
   <button onclick="verifyOtp()">Verify OTP</button>
 </div>
-
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-/* Clear session */
-localStorage.clear();
+
 /* Send OTP */
 function sendOtp() {
   const email = document.getElementById("email").value.trim();
@@ -73,22 +71,22 @@ function sendOtp() {
     return;
   }
 
-fetch(API_URL, {
-  method: "POST",
-  mode: "no-cors",
-  body: JSON.stringify({
-    action: "sendOtp",
-    email: email,
-    role: role
+  fetch(API_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({
+      action: "sendOtp",
+      email: email,
+      role: role
+    })
   })
-})
-.then(() => {
-  alert("OTP request sent. Check your email.");
-})
-.catch(err => {
-  console.error(err);
-  alert("Send OTP failed");
-});
+  .then(() => {
+    alert("OTP request sent. Please check your email.");
+  })
+  .catch(() => {
+    alert("Send OTP failed");
+  });
+}
 
 /* Verify OTP */
 function verifyOtp() {
@@ -101,22 +99,25 @@ function verifyOtp() {
     return;
   }
 
-fetch(API_URL, {
-  method: "POST",
-  mode: "no-cors",
-  body: JSON.stringify({
-    action: "verifyOtp",
-    email,
-    otp
+  fetch(API_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({
+      action: "verifyOtp",
+      email: email,
+      otp: otp
+    })
   })
-})
-.then(() => {
-  localStorage.setItem("email", email);
-  localStorage.setItem("role", role);
-  localStorage.setItem("name", email.split("@")[0]);
-  window.location.href = role + ".html";
-})
-.catch(() => alert("Verification error"));
+  .then(() => {
+    localStorage.setItem("email", email);
+    localStorage.setItem("role", role);
+    localStorage.setItem("name", email.split("@")[0]);
+    window.location.href = role + ".html";
+  })
+  .catch(() => {
+    alert("Verification error");
+  });
+}
 </script>
 </body>
 </html>
