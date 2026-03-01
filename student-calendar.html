@@ -93,6 +93,8 @@ body{
   color:#2e7d32;
   font-weight:bold;
 }
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2e7d32">
 </style>
 </head>
 
@@ -168,6 +170,11 @@ function buildCalendar(data){
 function go(p){window.location.href=p}
 function goQR(){window.location.href="student-qr.html"}
 </script>
-
+<script>
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js")
+  .then(()=>console.log("Service Worker Registered"));
+}
+</script>
 </body>
 </html>
