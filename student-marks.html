@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>GO GREEN – My Marks</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Segoe UI,Arial;
+  background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+}
+
+/* Header */
+.header{
+  padding:20px;
+  font-size:20px;
+  font-weight:bold;
+  color:#1b5e20;
+}
+
+/* Card */
+.card{
+  background:rgba(255,255,255,0.9);
+  margin:15px;
+  padding:20px;
+  border-radius:16px;
+  box-shadow:0 6px 15px rgba(0,0,0,0.1);
+  backdrop-filter:blur(10px);
+  animation:fadeIn .6s ease-in-out;
+}
+
+/* Table */
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+
+th{
+  background:#2e7d32;
+  color:white;
+  padding:8px;
+  border-radius:6px;
+}
+
+td{
+  padding:10px;
+  text-align:center;
+  border-bottom:1px solid #eee;
+}
+
+.total{
+  font-weight:bold;
+  color:#1b5e20;
+}
+
+/* Floating Button */
+.fab{
+  position:fixed;
+  bottom:70px;
+  left:50%;
+  transform:translateX(-50%);
+  width:65px;
+  height:65px;
+  border-radius:50%;
+  background:#2e7d32;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  box-shadow:0 6px 15px rgba(0,0,0,0.3);
+  cursor:pointer;
+}
+
+/* Bottom Nav */
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:white;
+  display:flex;
+  justify-content:space-around;
+  padding:10px 0;
+  box-shadow:0 -3px 10px rgba(0,0,0,0.1);
+}
+
+.bottom-nav div{
+  text-align:center;
+  font-size:12px;
+  color:#555;
+  cursor:pointer;
+}
+
+.bottom-nav .active{
+  color:#2e7d32;
+  font-weight:bold;
+}
+
+/* Animation */
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("role")!=="student"){
+  alert("Unauthorized");
+  location.href="index.html";
+}
+</script>
+
+<div class="header">
+  📘 My Marks
+</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Subject</th>
+        <th>CA (25)</th>
+        <th>End (75)</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody id="marksBody">
+      <tr>
+        <td colspan="4">Loading...</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Floating Scan -->
+<div class="fab" onclick="goQR()">📷</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <div onclick="go('student.html')">🏠<br>Home</div>
+  <div onclick="go('student-attendance.html')">📊<br>Attendance</div>
+  <div class="active">📘<br>Marks</div>
+  <div onclick="go('student-timetable.html')">📅<br>Timetable</div>
+  <div onclick="go('student-profile.html')">👤<br>Profile</div>
+</div>
+
+<script>
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const email=localStorage.getItem("email");
+
+/* Load Marks */
+fetch(API,{
+  method:"POST",
+  headers:{"Content-Type":"text/plain;charset=utf-8"},
+  body:JSON.stringify({
+    action:"getMyMarks",
+    email:email
+  })
+})
+.then(r=>r.json())
+.then(res=>{
+  const body=document.getElementById("marksBody");
+  body.innerHTML="";
+
+  if(!res.success || res.data.length===0){
+    body.innerHTML="<tr><td colspan='4'>No Marks Available</td></tr>";
+    return;
+  }
+
+  res.data.forEach(m=>{
+    body.innerHTML+=`
+      <tr>
+        <td>${m.subject}</td>
+        <td>${m.ca}</td>
+        <td>${m.end}</td>
+        <td class="total">${m.total}</td>
+      </tr>
+    `;
+  });
+});
+
+function go(p){window.location.href=p}
+function goQR(){window.location.href="student-qr.html"}
+</script>
+
+</body>
+</html>
