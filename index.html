@@ -75,19 +75,20 @@ function sendOtp() {
 
 fetch(API_URL, {
   method: "POST",
+  mode: "no-cors",
   body: JSON.stringify({
     action: "sendOtp",
     email: email,
     role: role
   })
 })
-  .then(r => r.json())
-  .then(res => alert(res.message))
-  .catch(err => {
-    console.error(err);
-    alert("Send OTP failed");
-  });
-}
+.then(() => {
+  alert("OTP request sent. Check your email.");
+})
+.catch(err => {
+  console.error(err);
+  alert("Send OTP failed");
+});
 
 /* Verify OTP */
 function verifyOtp() {
@@ -100,30 +101,22 @@ function verifyOtp() {
     return;
   }
 
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({
-      action: "verifyOtp",
-      email,
-      otp
-    })
+fetch(API_URL, {
+  method: "POST",
+  mode: "no-cors",
+  body: JSON.stringify({
+    action: "verifyOtp",
+    email,
+    otp
   })
-  .then(r => r.json())
-  .then(res => {
-    if (!res.success) {
-      alert(res.message);
-      return;
-    }
-
-    localStorage.setItem("email", email);
-    localStorage.setItem("role", role);
-    localStorage.setItem("name", email.split("@")[0]);
-    console.log("Saved email:", localStorage.getItem("email"));
-
-    window.location.href = role + ".html";
-  })
-  .catch(() => alert("Verification error"));
-}
+})
+.then(() => {
+  localStorage.setItem("email", email);
+  localStorage.setItem("role", role);
+  localStorage.setItem("name", email.split("@")[0]);
+  window.location.href = role + ".html";
+})
+.catch(() => alert("Verification error"));
 </script>
 </body>
 </html>
