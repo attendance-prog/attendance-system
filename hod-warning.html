@@ -42,22 +42,7 @@ button{
   cursor:pointer;
   font-weight:bold;
 }
-  <script src="api.js"></script>
-
-<script>
-async function loadRiskStudents() {
-  const data = await callAPI("getRiskStudents");
-
-  let html = "";
-  data.forEach(r => {
-    html += `<li>${r[0]} - ${r[3]} Risk</li>`;
-  });
-
-  document.getElementById("riskList").innerHTML = html;
-}
-
-loadRiskStudents();
-</script>
+  
 </style>
 </head>
 
