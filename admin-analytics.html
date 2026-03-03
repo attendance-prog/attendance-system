@@ -42,18 +42,7 @@ button{
   border-radius:5px;
   cursor:pointer;
 }
-  <script src="api.js"></script>
-
-<script>
-async function loadAnalytics() {
-  const data = await callAPI("getResultAnalytics");
-
-  document.getElementById("passCount").innerText = data.pass;
-  document.getElementById("failCount").innerText = data.fail;
-}
-
-loadAnalytics();
-</script>
+  
 </style>
 </head>
 
