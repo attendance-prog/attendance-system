@@ -228,7 +228,22 @@ document.querySelectorAll(".nav-link").forEach(l=>{
     l.classList.add("active");
   }
 });
+<script src="api.js"></script>
 
+<script>
+async function loadDefaulters() {
+  const data = await callAPI("getDefaulters");
+
+  let html = "";
+  data.forEach(row => {
+    html += `<li>${row[0]} - Pending: ${row[4]}</li>`;
+  });
+
+  document.getElementById("defaulterList").innerHTML = html;
+}
+
+loadDefaulters();
+</script>
 </script>
 
 </body>
