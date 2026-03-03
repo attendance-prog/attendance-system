@@ -204,6 +204,24 @@ if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js")
   .then(()=>console.log("Service Worker Registered"));
 }
+  <script src="api.js"></script>
+
+<script>
+async function loadNotices() {
+  const role = "Student"; // change accordingly
+
+  const notices = await callAPI("getNotices", { role });
+
+  let html = "";
+  notices.forEach(n => {
+    html += `<div><h4>${n[1]}</h4><p>${n[2]}</p></div>`;
+  });
+
+  document.getElementById("noticeArea").innerHTML = html;
+}
+
+loadNotices();
+</script>
 </script>
 </body>
 </html>
