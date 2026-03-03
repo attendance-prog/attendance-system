@@ -140,40 +140,7 @@ body.dark{
   from{opacity:0;transform:translateY(10px)}
   to{opacity:1;transform:translateY(0)}
 }
-<script src="api.js"></script>
 
-<script>
-async function loadDefaulters() {
-  const data = await callAPI("getDefaulters");
-
-  let html = "";
-  data.forEach(row => {
-    html += `<li>${row[0]} - Pending: ${row[4]}</li>`;
-  });
-
-  document.getElementById("defaulterList").innerHTML = html;
-}
-
-loadDefaulters();
-</script>
-  <script src="api.js"></script>
-
-<script>
-async function loadNotices() {
-  const role = "Admin"; // change accordingly
-
-  const notices = await callAPI("getNotices", { role });
-
-  let html = "";
-  notices.forEach(n => {
-    html += `<div><h4>${n[1]}</h4><p>${n[2]}</p></div>`;
-  });
-
-  document.getElementById("noticeArea").innerHTML = html;
-}
-
-loadNotices();
-</script>
 </style>
 </head>
 
