@@ -50,6 +50,26 @@ button{
   cursor:pointer;
   margin-bottom:15px;
 }
+   <script src="api.js"></script>
+
+<script>
+async function submitMarks() {
+  const studentID = document.getElementById("studentID").value;
+  const subjectID = document.getElementById("subjectID").value;
+  const total = parseInt(document.getElementById("total").value);
+
+  const result = total >= 40 ? "Pass" : "Fail";
+
+  await callAPI("addMarks", {
+    studentID,
+    subjectID,
+    total,
+    result
+  });
+
+  alert("Marks Added Successfully");
+}
+</script>
 </style>
 </head>
 
@@ -176,26 +196,7 @@ function saveMarks(studentEmail){
     alert(r.message || "Marks Saved");
   });
 }
-  <script src="api.js"></script>
 
-<script>
-async function submitMarks() {
-  const studentID = document.getElementById("studentID").value;
-  const subjectID = document.getElementById("subjectID").value;
-  const total = parseInt(document.getElementById("total").value);
-
-  const result = total >= 40 ? "Pass" : "Fail";
-
-  await callAPI("addMarks", {
-    studentID,
-    subjectID,
-    total,
-    result
-  });
-
-  alert("Marks Added Successfully");
-}
-</script>
 </script>
 
 </body>
