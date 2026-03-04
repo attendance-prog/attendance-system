@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<title>Document Vault</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#f4f7f6;
+margin:0;
+}
+
+.header{
+background:#1b5e20;
+color:white;
+padding:18px;
+font-size:20px;
+}
+
+.container{
+padding:25px;
+}
+
+select,input,button{
+width:100%;
+padding:10px;
+margin:10px 0;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+background:#2e7d32;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+📂 Upload Document
+</div>
+
+<div class="container">
+
+<select id="type">
+<option>Aadhar</option>
+<option>10th Marksheet</option>
+<option>12th Marksheet</option>
+<option>Migration Certificate</option>
+</select>
+
+<input type="file" id="file">
+
+<button onclick="upload()">Upload</button>
+
+<p id="msg"></p>
+
+</div>
+
+
+<script>
+
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+const studentId=localStorage.getItem("studentId");
+
+function upload(){
+
+const file=document.getElementById("file").files[0];
+
+const reader=new FileReader();
+
+reader.onload=function(){
+
+fetch(API,{
+method:"POST",
+headers:{ "Content-Type":"text/plain;charset=utf-8" },
+
+body:JSON.stringify({
+
+action:"uploadDocument",
+studentId:studentId,
+documentType:document.getElementById("type").value,
+fileName:file.name,
+fileData:reader.result
+
+})
+
+})
+.then(r=>r.json())
+.then(res=>{
+document.getElementById("msg").innerText=res.message;
+});
+
+};
+
+reader.readAsDataURL(file);
+
+}
+
+</script>
+
+</body>
+</html>
