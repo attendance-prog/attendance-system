@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<title>GO GREEN – Academic Calendar</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#f4f7f6;
+margin:0;
+}
+
+.header{
+background:#1b5e20;
+color:white;
+padding:15px;
+font-size:20px;
+}
+
+.container{
+padding:20px;
+}
+
+input,select,button,textarea{
+width:100%;
+padding:10px;
+margin:8px 0;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+background:#2e7d32;
+color:white;
+border:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+📅 Add Academic Event
+</div>
+
+<div class="container">
+
+<input id="date" type="date">
+
+<select id="type">
+<option>Holiday</option>
+<option>Exam</option>
+<option>Event</option>
+</select>
+
+<input id="title" placeholder="Event Title">
+
+<textarea id="description" placeholder="Description"></textarea>
+
+<select id="role">
+<option>All</option>
+<option>Student</option>
+<option>Faculty</option>
+</select>
+
+<button onclick="addEvent()">Add Event</button>
+
+<p id="msg"></p>
+
+</div>
+
+<script>
+
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+function addEvent(){
+
+fetch(API,{
+method:"POST",
+headers:{ "Content-Type":"text/plain;charset=utf-8" },
+
+body:JSON.stringify({
+
+action:"addEvent",
+date:document.getElementById("date").value,
+type:document.getElementById("type").value,
+title:document.getElementById("title").value,
+description:document.getElementById("description").value,
+targetRole:document.getElementById("role").value
+
+})
+
+})
+.then(r=>r.json())
+.then(res=>{
+document.getElementById("msg").innerText=res.message;
+})
+
+}
+
+</script>
+
+</body>
+</html>
