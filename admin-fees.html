@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>GO GREEN – Fee Entry</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+margin:0;
+font-family:Segoe UI,Arial;
+background:#f4f7f6;
+}
+
+.header{
+background:#1b5e20;
+color:white;
+padding:15px;
+font-size:20px;
+}
+
+.container{
+padding:20px;
+}
+
+input,button{
+width:100%;
+padding:10px;
+margin:8px 0;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+background:#2e7d32;
+color:white;
+border:none;
+cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+💰 Fee Entry
+</div>
+
+<div class="container">
+
+<input id="studentId" placeholder="Student ID">
+
+<input id="semester" placeholder="Semester">
+
+<input id="totalFee" placeholder="Total Fee">
+
+<input id="paidAmount" placeholder="Paid Amount">
+
+<input id="dueDate" type="date">
+
+<button onclick="saveFee()">Save Fee Record</button>
+
+<p id="msg"></p>
+
+</div>
+
+<script>
+
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+function saveFee(){
+
+fetch(API,{
+method:"POST",
+headers:{ "Content-Type":"text/plain;charset=utf-8" },
+
+body:JSON.stringify({
+
+action:"saveFeeRecord",
+studentId:document.getElementById("studentId").value,
+semester:document.getElementById("semester").value,
+totalFee:document.getElementById("totalFee").value,
+paidAmount:document.getElementById("paidAmount").value,
+dueDate:document.getElementById("dueDate").value
+
+})
+
+})
+.then(r=>r.json())
+.then(res=>{
+document.getElementById("msg").innerText=res.message;
+})
+
+}
+
+</script>
+
+</body>
+</html>
