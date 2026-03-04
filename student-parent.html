@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<title>Parent Details</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#f4f7f6;
+margin:0;
+}
+
+.header{
+background:#1b5e20;
+color:white;
+padding:18px;
+font-size:20px;
+}
+
+.container{
+padding:25px;
+}
+
+input,button{
+width:100%;
+padding:10px;
+margin:10px 0;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+background:#2e7d32;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+👨‍👩‍👦 Parent Information Required
+</div>
+
+<div class="container">
+
+<input id="pemail" placeholder="Parent Email">
+
+<input id="pphone" placeholder="Parent Phone Number">
+
+<button onclick="save()">Save & Continue</button>
+
+</div>
+
+<script>
+
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+const email=localStorage.getItem("email");
+
+function save(){
+
+fetch(API,{
+method:"POST",
+headers:{ "Content-Type":"text/plain;charset=utf-8" },
+
+body:JSON.stringify({
+
+action:"saveParentInfo",
+email:email,
+parentEmail:document.getElementById("pemail").value,
+parentPhone:document.getElementById("pphone").value
+
+})
+
+})
+.then(r=>r.json())
+.then(res=>{
+
+alert(res.message);
+
+window.location.href="student.html";
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
