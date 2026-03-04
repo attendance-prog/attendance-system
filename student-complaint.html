@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<title>Submit Complaint</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#f4f7f6;
+margin:0;
+}
+
+.header{
+background:#1b5e20;
+color:white;
+padding:15px;
+font-size:20px;
+}
+
+.container{
+padding:20px;
+}
+
+textarea,select,button{
+width:100%;
+padding:10px;
+margin:8px 0;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+background:#2e7d32;
+color:white;
+border:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+🚨 Submit Complaint
+</div>
+
+<div class="container">
+
+<select id="type">
+
+<option>Infrastructure</option>
+<option>Faculty</option>
+<option>Ragging</option>
+<option>Hostel</option>
+
+</select>
+
+<textarea id="desc" placeholder="Describe issue"></textarea>
+
+<button onclick="submitComplaint()">Submit</button>
+
+<p id="msg"></p>
+
+</div>
+
+<script>
+
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+const email=localStorage.getItem("email");
+const role=localStorage.getItem("role");
+
+function submitComplaint(){
+
+fetch(API,{
+method:"POST",
+headers:{ "Content-Type":"text/plain;charset=utf-8" },
+
+body:JSON.stringify({
+
+action:"submitComplaint",
+email:email,
+role:role,
+type:document.getElementById("type").value,
+description:document.getElementById("desc").value
+
+})
+
+})
+.then(r=>r.json())
+.then(res=>{
+document.getElementById("msg").innerText=res.message;
+})
+
+}
+
+</script>
+
+</body>
+</html>
