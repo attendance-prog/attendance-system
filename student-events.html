@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<title>Academic Calendar</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#f4f7f6;
+margin:0;
+}
+
+.header{
+background:#1b5e20;
+color:white;
+padding:15px;
+font-size:20px;
+}
+
+.card{
+background:white;
+padding:15px;
+margin:10px;
+border-radius:10px;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+📅 Academic Calendar
+</div>
+
+<div id="events"></div>
+
+<script>
+
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+fetch(API,{
+method:"POST",
+headers:{ "Content-Type":"text/plain;charset=utf-8" },
+
+body:JSON.stringify({
+action:"getEvents"
+})
+
+})
+.then(r=>r.json())
+.then(res=>{
+
+const div=document.getElementById("events");
+
+res.data.forEach(e=>{
+
+div.innerHTML+=`
+<div class="card">
+<h3>${e[3]}</h3>
+<p>${e[1]} | ${e[2]}</p>
+<p>${e[4]}</p>
+</div>
+`;
+
+})
+
+})
+
+</script>
+
+</body>
+</html>
