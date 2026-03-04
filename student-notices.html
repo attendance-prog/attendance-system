@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<title>Notices</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#f4f7f6;
+margin:0;
+}
+
+.header{
+background:#1b5e20;
+color:white;
+padding:18px;
+font-size:20px;
+}
+
+.notice{
+background:white;
+margin:15px;
+padding:15px;
+border-radius:10px;
+box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+📢 Notices
+</div>
+
+<div id="list"></div>
+
+<script>
+
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+fetch(API,{
+method:"POST",
+headers:{ "Content-Type":"text/plain;charset=utf-8" },
+
+body:JSON.stringify({
+action:"getNotices",
+role:"student"
+})
+
+})
+.then(r=>r.json())
+.then(res=>{
+
+const div=document.getElementById("list");
+
+res.data.forEach(n=>{
+
+div.innerHTML+=`
+<div class="notice">
+<h3>${n[1]}</h3>
+<p>${n[2]}</p>
+<small>${n[5]}</small>
+</div>
+`;
+
+});
+
+});
+
+</script>
+
+</body>
+</html>
