@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<title>Post Notice</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#f4f7f6;
+margin:0;
+}
+
+.header{
+background:#1b5e20;
+color:white;
+padding:18px;
+font-size:20px;
+}
+
+.container{
+padding:25px;
+}
+
+input,textarea,select{
+width:100%;
+padding:10px;
+margin:8px 0;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+background:#2e7d32;
+color:white;
+border:none;
+padding:10px;
+border-radius:6px;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+📢 Post Notice
+</div>
+
+<div class="container">
+
+<input id="title" placeholder="Notice Title">
+
+<textarea id="desc" placeholder="Notice Description"></textarea>
+
+<select id="role">
+<option>All</option>
+<option>student</option>
+<option>faculty</option>
+</select>
+
+<input id="expiry" type="date">
+
+<button onclick="post()">Post Notice</button>
+
+<p id="msg"></p>
+
+</div>
+
+
+<script>
+
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+function post(){
+
+fetch(API,{
+method:"POST",
+headers:{ "Content-Type":"text/plain;charset=utf-8" },
+
+body:JSON.stringify({
+
+action:"postNotice",
+title:document.getElementById("title").value,
+description:document.getElementById("desc").value,
+targetRole:document.getElementById("role").value,
+expiry:document.getElementById("expiry").value,
+postedBy:"admin"
+
+})
+
+})
+.then(r=>r.json())
+.then(res=>{
+document.getElementById("msg").innerText=res.message;
+});
+
+}
+
+</script>
+
+</body>
+</html>
