@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<title>NAAC Report</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#f4f7f6;
+margin:0;
+}
+
+.header{
+background:#1b5e20;
+color:white;
+padding:15px;
+font-size:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+margin:20px;
+border-radius:10px;
+box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+🎓 NAAC Academic Report
+</div>
+
+<div class="card">
+<h3>Attendance Percentage</h3>
+<p id="attendance"></p>
+</div>
+
+<div class="card">
+<h3>Average Marks</h3>
+<p id="marks"></p>
+</div>
+
+<div class="card">
+<h3>Total Lectures</h3>
+<p id="lectures"></p>
+</div>
+
+<div class="card">
+<h3>High Risk Students</h3>
+<p id="risk"></p>
+</div>
+
+<script>
+
+const API="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+fetch(API,{
+method:"POST",
+headers:{ "Content-Type":"text/plain;charset=utf-8" },
+
+body:JSON.stringify({
+action:"generateNAACReport"
+})
+
+})
+.then(r=>r.json())
+.then(res=>{
+
+document.getElementById("attendance").innerText=res.report.attendancePercent+" %";
+
+document.getElementById("marks").innerText=res.report.averageMarks;
+
+document.getElementById("lectures").innerText=res.report.totalLectures;
+
+document.getElementById("risk").innerText=res.report.highRiskStudents;
+
+});
+
+</script>
+
+</body>
+</html>
