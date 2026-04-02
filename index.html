@@ -52,12 +52,13 @@ button {
     <option value="student">Student</option>
   </select>
 
-  <button onclick="sendOtp()">Send OTP</button>
+  <button onclick="sendOTP()">Send OTP</button>
 
   <input type="number" id="otp" placeholder="Enter OTP">
 
   <button onclick="verifyOtp()">Verify OTP</button>
 </div>
+
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 
@@ -77,9 +78,9 @@ function sendOTP() {
 
   fetch(API_URL, {
     method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    headers: { "Content-Type":"text/plain;charset=utf-8" },
     body: JSON.stringify({
-      action: "sendOTP",
+      action:"sendOTP",
       email: email,
       role: role
     })
@@ -90,12 +91,38 @@ function sendOTP() {
     if (data.success) {
       localStorage.setItem("email", email);
       localStorage.setItem("role", role);
-      document.getElementById("otpSection").style.display = "block";
     }
+  });
+}
+
+function verifyOtp() {
+  const email = localStorage.getItem("email");
+  const role = localStorage.getItem("role");
+  const otp = document.getElementById("otp").value.trim();
+
+  fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type":"text/plain;charset=utf-8" },
+    body: JSON.stringify({
+      action:"verifyOTP",
+      email: email,
+      otp: otp
+    })
   })
-  .catch(err => {
-    alert("Error sending OTP");
-    console.log(err);
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      if (role === "admin") location.href = "dashboard.html";
+      else if (role === "hod") location.href = "dashboard.html";
+      else if (role === "coordinator") location.href = "dashboard.html";
+      else if (role === "faculty") location.href = "faculty.html";
+      else if (role === "student") location.href = "student.html";
+    } else {
+      alert(data.message);
+    }
   });
 }
 </script>
+
+</body>
+</html>
