@@ -169,19 +169,33 @@ function generateQR(){
       notesLink: notes
     })
     .then(r=>{
-      if(!r.success){
-        alert(r.message);
-        return;
-      }
+  if(!r.success){
+    alert(r.message);
+    return;
+  }
 
-      document.getElementById("qrBox").innerHTML =
-      `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}" />`;
+  const qrBox = document.getElementById("qrBox");
 
-    });
+  qrBox.innerHTML =
+  `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}" />
+   <p id="timer">QR expires in 05:00</p>`;
 
-  });
-}
+  startQrTimer(5 * 60, r.sessionId);
+});
+.then(r=>{
+  if(!r.success){
+    alert(r.message);
+    return;
+  }
 
+  const qrBox = document.getElementById("qrBox");
+
+  qrBox.innerHTML =
+  `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}" />
+   <p id="timer">QR expires in 05:00</p>`;
+
+  startQrTimer(5 * 60, r.sessionId);
+});
 checkSlot();
   function testSlot(){
   post({action:"getCurrentSlot", email: email})
