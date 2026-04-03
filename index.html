@@ -84,8 +84,6 @@ function sendOTP() {
     }
   });
 }
-
-<script>
 function verifyOtp() {
   const email = localStorage.getItem("email");
   let role = localStorage.getItem("role");
@@ -104,43 +102,25 @@ function verifyOtp() {
   })
   .then(res => res.json())
   .then(data => {
-    if (data.success) {
+    console.log(data);
 
-      alert("Login success. Role = " + role);
+    if (data.success === true) {
 
-      if (role === "admin") {
-        window.location.href = "admin.html";
-        return;
-      }
-
-      if (role === "hod") {
-        window.location.href = "hod.html";
-        return;
-      }
-
-      if (role === "coordinator") {
-        window.location.href = "coordinator.html";
-        return;
-      }
-
-      if (role === "faculty") {
-        window.location.href = "faculty.html";
-        return;
-      }
-
-      if (role === "student") {
-        window.location.href = "student.html";
-        return;
-      }
+      if (role === "admin") window.location.href = "admin.html";
+      else if (role === "hod") window.location.href = "hod.html";
+      else if (role === "coordinator") window.location.href = "coordinator.html";
+      else if (role === "faculty") window.location.href = "faculty.html";
+      else if (role === "student") window.location.href = "student.html";
 
     } else {
-      alert(data.message);
+      alert(data.message || "Login failed");
     }
+  })
+  .catch(err => {
+    alert("Server error");
+    console.log(err);
   });
 }
 </script>
-}
-</script>
-
 </body>
 </html>
