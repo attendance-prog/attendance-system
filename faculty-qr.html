@@ -126,19 +126,19 @@ setInterval(checkSlot, 30000);
 /* Generate QR */
 function generateQR(){
 
-  const topic=document.getElementById("topic").value.trim();
-  const notes=document.getElementById("notes").value.trim();
+  const topic = document.getElementById("topic").value.trim();
+  const notes = document.getElementById("notes").value.trim();
 
   if(!topic){
     alert("Enter topic");
     return;
   }
 
-  // Step 1: Check attendance + slot
   post({
     action:"validateQRGeneration",
-    email
-  }).then(validation=>{
+    email: email
+  })
+  .then(validation=>{
 
     if(!validation.success){
 
@@ -152,23 +152,29 @@ function generateQR(){
         return;
       }
 
+      if(validation.reason==="email"){
+        alert("⚠ Session expired. Login again.");
+        return;
+      }
+
       alert("Validation failed");
       return;
     }
 
-    // Step 2: Generate QR if validation passed
+    // CREATE QR SESSION
     post({
-      action:"generateQRSession",
-      email,
-      topic,
-      notes
-    }).then(r=>{
+      action:"createFacultySession",
+      facultyEmail: email,
+      topic: topic,
+      notesLink: notes
+    })
+    .then(r=>{
       if(!r.success){
         alert(r.message);
         return;
       }
 
-      document.getElementById("qrBox").innerHTML=
+      document.getElementById("qrBox").innerHTML =
       `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}" />`;
 
     });
