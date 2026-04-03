@@ -78,6 +78,7 @@ if(localStorage.getItem("role")!=="faculty"){
 
     <button onclick="generateQR()">Generate QR</button>
 <button onclick="testSlot()">Test Slot</button>
+    <button onclick="debugTime()">Debug Time</button>
     <div id="qrBox"></div>
 
   </div>
@@ -230,6 +231,12 @@ function testSlot(){
   post({action:"getCurrentSlot", email: email})
   .then(r=>{
     console.log(r);
+    alert(JSON.stringify(r));
+  });
+}
+  function debugTime(){
+  post({action:"debugTime"})
+  .then(r=>{
     alert(JSON.stringify(r));
   });
 }
