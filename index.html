@@ -103,11 +103,11 @@ function verifyOtp() {
   .then(data => {
     if (data.success) {
 
-      if (role === "admin") window.location.href = "admin.html";
-      else if (role === "hod") window.location.href = "hod.html";
-      else if (role === "coordinator") window.location.href = "coordinator.html";
-      else if (role === "faculty") window.location.href = "faculty.html";
-      else if (role === "student") window.location.href = "student.html";
+      if (role === "admin") window.location.href = "/attendance-system/admin.html";
+else if (role === "hod") window.location.href = "/attendance-system/hod.html";
+else if (role === "coordinator") window.location.href = "/attendance-system/coordinator.html";
+else if (role === "faculty") window.location.href = "/attendance-system/faculty.html";
+else if (role === "student") window.location.href = "/attendance-system/student.html";
 
     } else {
       alert(data.message);
