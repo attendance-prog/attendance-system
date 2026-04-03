@@ -87,8 +87,10 @@ function sendOTP() {
 
 function verifyOtp() {
   const email = localStorage.getItem("email");
-  const role = localStorage.getItem("role");
+  let role = localStorage.getItem("role");
   const otp = document.getElementById("otp").value.trim();
+
+  role = role.toLowerCase().trim();   // VERY IMPORTANT LINE
 
   fetch(API_URL, {
     method: "POST",
@@ -104,10 +106,10 @@ function verifyOtp() {
     if (data.success) {
 
       if (role === "admin") window.location.href = "/attendance-system/admin.html";
-else if (role === "hod") window.location.href = "/attendance-system/hod.html";
-else if (role === "coordinator") window.location.href = "/attendance-system/coordinator.html";
-else if (role === "faculty") window.location.href = "/attendance-system/faculty.html";
-else if (role === "student") window.location.href = "/attendance-system/student.html";
+      else if (role === "hod") window.location.href = "/attendance-system/hod.html";
+      else if (role === "coordinator") window.location.href = "/attendance-system/coordinator.html";
+      else if (role === "faculty") window.location.href = "/attendance-system/faculty.html";
+      else if (role === "student") window.location.href = "/attendance-system/student.html";
 
     } else {
       alert(data.message);
