@@ -94,7 +94,6 @@ function sendOTP() {
     }
   });
 }
-
 function verifyOtp() {
   const email = localStorage.getItem("email");
   const role = localStorage.getItem("role");
@@ -112,17 +111,19 @@ function verifyOtp() {
   .then(res => res.json())
   .then(data => {
     if (data.success) {
+
       if (role === "admin") location.href = "admin.html";
       else if (role === "hod") location.href = "hod.html";
       else if (role === "coordinator") location.href = "coordinator.html";
       else if (role === "faculty") location.href = "faculty.html";
       else if (role === "student") location.href = "student.html";
+      else if (role === "parent") location.href = "parent.html";
+
     } else {
       alert(data.message);
     }
   });
 }
 </script>
-
 </body>
 </html>
