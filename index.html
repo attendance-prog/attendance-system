@@ -85,12 +85,13 @@ function sendOTP() {
   });
 }
 
+<script>
 function verifyOtp() {
   const email = localStorage.getItem("email");
   let role = localStorage.getItem("role");
   const otp = document.getElementById("otp").value.trim();
 
-  role = role.toLowerCase().trim();   // VERY IMPORTANT LINE
+  role = role.toLowerCase().trim();
 
   fetch(API_URL, {
     method: "POST",
@@ -101,31 +102,43 @@ function verifyOtp() {
       otp: otp
     })
   })
+  .then(res => res.json())
   .then(data => {
-  if (data.success) {
+    if (data.success) {
 
-    let role = localStorage.getItem("role");
-    role = role.toLowerCase().trim();
+      alert("Login success. Role = " + role);
 
-    if (role === "admin")
-      window.location.replace("https://attendance-prog.github.io/attendance-system/admin.html");
+      if (role === "admin") {
+        window.location.href = "admin.html";
+        return;
+      }
 
-    else if (role === "hod")
-      window.location.replace("https://attendance-prog.github.io/attendance-system/hod.html");
+      if (role === "hod") {
+        window.location.href = "hod.html";
+        return;
+      }
 
-    else if (role === "coordinator")
-      window.location.replace("https://attendance-prog.github.io/attendance-system/coordinator.html");
+      if (role === "coordinator") {
+        window.location.href = "coordinator.html";
+        return;
+      }
 
-    else if (role === "faculty")
-      window.location.replace("https://attendance-prog.github.io/attendance-system/faculty.html");
+      if (role === "faculty") {
+        window.location.href = "faculty.html";
+        return;
+      }
 
-    else if (role === "student")
-      window.location.replace("https://attendance-prog.github.io/attendance-system/student.html");
+      if (role === "student") {
+        window.location.href = "student.html";
+        return;
+      }
 
-  } else {
-    alert(data.message);
-  }
-});
+    } else {
+      alert(data.message);
+    }
+  });
+}
+</script>
 }
 </script>
 
