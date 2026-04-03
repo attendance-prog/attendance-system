@@ -91,6 +91,7 @@ if(!email){
   alert("Session expired. Login again.");
   window.location.href = "index.html";
 }
+
 function post(data){
   return fetch(API_URL,{
     method:"POST",
@@ -103,6 +104,7 @@ function logout(){
   localStorage.clear();
   location.href="index.html";
 }
+
 function goBack(){
   window.location.href="faculty.html";
 }
@@ -169,19 +171,24 @@ function generateQR(){
       notesLink: notes
     })
     .then(r=>{
-  if(!r.success){
-    alert(r.message);
-    return;
-  }
+      if(!r.success){
+        alert(r.message);
+        return;
+      }
 
-  const qrBox = document.getElementById("qrBox");
+      const qrBox = document.getElementById("qrBox");
 
-  qrBox.innerHTML =
-  `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}" />
-   <p id="timer">QR expires in 05:00</p>`;
+      qrBox.innerHTML =
+      `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}" />
+       <p id="timer">QR expires in 05:00</p>`;
 
-  startQrTimer(5 * 60, r.sessionId);
-});
+      startQrTimer(5 * 60, r.sessionId);
+    });
+
+  });
+}
+
+/* QR Timer */
 function startQrTimer(duration, sessionId){
 
   let timer = duration;
@@ -209,14 +216,17 @@ function startQrTimer(duration, sessionId){
 
   },1000);
 }
-    function expireSession(sessionId){
+
+/* Expire session */
+function expireSession(sessionId){
   post({
     action:"expireSessionNow",
     sessionId: sessionId
   });
 }
-checkSlot();
-  function testSlot(){
+
+/* Test slot */
+function testSlot(){
   post({action:"getCurrentSlot", email: email})
   .then(r=>{
     console.log(r);
