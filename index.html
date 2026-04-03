@@ -101,20 +101,31 @@ function verifyOtp() {
       otp: otp
     })
   })
-  .then(res => res.json())
   .then(data => {
-    if (data.success) {
+  if (data.success) {
 
-      if (role === "admin") window.location.href = "/attendance-system/admin.html";
-      else if (role === "hod") window.location.href = "/attendance-system/hod.html";
-      else if (role === "coordinator") window.location.href = "/attendance-system/coordinator.html";
-      else if (role === "faculty") window.location.href = "/attendance-system/faculty.html";
-      else if (role === "student") window.location.href = "/attendance-system/student.html";
+    let role = localStorage.getItem("role");
+    role = role.toLowerCase().trim();
 
-    } else {
-      alert(data.message);
-    }
-  });
+    if (role === "admin")
+      window.location.replace("https://attendance-prog.github.io/attendance-system/admin.html");
+
+    else if (role === "hod")
+      window.location.replace("https://attendance-prog.github.io/attendance-system/hod.html");
+
+    else if (role === "coordinator")
+      window.location.replace("https://attendance-prog.github.io/attendance-system/coordinator.html");
+
+    else if (role === "faculty")
+      window.location.replace("https://attendance-prog.github.io/attendance-system/faculty.html");
+
+    else if (role === "student")
+      window.location.replace("https://attendance-prog.github.io/attendance-system/student.html");
+
+  } else {
+    alert(data.message);
+  }
+});
 }
 </script>
 
