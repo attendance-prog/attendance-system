@@ -182,20 +182,39 @@ function generateQR(){
 
   startQrTimer(5 * 60, r.sessionId);
 });
-.then(r=>{
-  if(!r.success){
-    alert(r.message);
-    return;
-  }
+function startQrTimer(duration, sessionId){
 
-  const qrBox = document.getElementById("qrBox");
+  let timer = duration;
+  const timerDisplay = document.getElementById("timer");
 
-  qrBox.innerHTML =
-  `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${r.sessionId}" />
-   <p id="timer">QR expires in 05:00</p>`;
+  const interval = setInterval(()=>{
 
-  startQrTimer(5 * 60, r.sessionId);
-});
+    const minutes = Math.floor(timer / 60);
+    const seconds = timer % 60;
+
+    timerDisplay.innerText =
+      "QR expires in " +
+      String(minutes).padStart(2,'0') + ":" +
+      String(seconds).padStart(2,'0');
+
+    timer--;
+
+    if(timer < 0){
+      clearInterval(interval);
+      document.getElementById("qrBox").innerHTML =
+        "<h3 style='color:red;'>QR Expired</h3>";
+
+      expireSession(sessionId);
+    }
+
+  },1000);
+}
+    function expireSession(sessionId){
+  post({
+    action:"expireSessionNow",
+    sessionId: sessionId
+  });
+}
 checkSlot();
   function testSlot(){
   post({action:"getCurrentSlot", email: email})
