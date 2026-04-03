@@ -109,16 +109,19 @@ function goBack(){
 
 /* Check active slot */
 function checkSlot(){
-  post({action:"getActiveSlot",email})
+  post({action:"getCurrentSlot", email: email})
   .then(r=>{
-    if(!r.success || !r.subject){
+    if(!r.success || !r.data){
       document.getElementById("slotStatus").innerText="No active slot";
     }else{
-      document.getElementById("slotStatus").innerText=
-        r.subject + " (" + r.room + ")";
+      document.getElementById("slotStatus").innerText =
+        r.data.subject + " (" + r.data.room + ")";
     }
   });
 }
+
+checkSlot();
+setInterval(checkSlot, 30000);
 
 /* Generate QR */
 function generateQR(){
