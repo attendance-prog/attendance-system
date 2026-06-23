@@ -229,6 +229,23 @@ fetch(API,{
 
 function go(p){window.location.href=p}
 function goQR(){window.location.href="student-qr.html"}
+  setInterval(()=>{
+
+post({
+action:"getSubstituteNotice",
+subject:currentSubject
+})
+.then(r=>{
+
+if(r.success){
+
+alert(r.message);
+
+}
+
+});
+
+},60000);
 </script>
 </body>
 </html>
