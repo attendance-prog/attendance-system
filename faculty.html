@@ -338,6 +338,15 @@ loadLiveStudents();
 }
 
 loadCurrentSession();
+  function stillTeaching(){
+
+post({
+action:"confirmAttendance",
+sessionId:currentSession
+})
+.then(r=>alert("Attendance finalized"));
+
+}
 /* Live Status Indicator */
 function checkLiveStatus(){
   fetch(API_URL,{
