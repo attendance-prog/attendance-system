@@ -204,8 +204,25 @@ if(localStorage.getItem("role")!=="faculty"){
       </div>
 
       <div class="stat-card">
-        <h3>Live Classes</h3>
-        <p id="liveClasses">0</p>
+        <<h3>Live Students</h3>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>System ID</th>
+<th>Name</th>
+<th>Status</th>
+
+</tr>
+
+</thead>
+
+<tbody id="liveBody"></tbody>
+
+</table>
       </div>
 
     </div>
@@ -310,7 +327,38 @@ function checkLiveStatus(){
 checkLiveStatus();
 setInterval(checkLiveStatus,30000);
   <script src="api.js"></script>
+function loadLiveStudents(){
 
+post({
+
+action:"getLiveStudents",
+sessionId:currentSession
+
+})
+
+.then(r=>{
+
+liveBody.innerHTML="";
+
+r.data.forEach(x=>{
+
+liveBody.innerHTML+=`
+
+<tr>
+
+<td>${x[1]}</td>
+
+<td>${x[2]}</td>
+
+<td>🟢 Present</td>
+
+</tr>`;
+
+});
+
+});
+
+}
 </script>
 
 </body>
