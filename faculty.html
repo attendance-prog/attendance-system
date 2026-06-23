@@ -188,7 +188,10 @@ if(localStorage.getItem("role")!=="faculty"){
     </div>
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
-
+<button class="logout-btn"
+onclick="stillTeaching()">
+✔ Still Teaching
+</button>
   <div class="content">
 
     <div class="welcome-card">
@@ -204,7 +207,7 @@ if(localStorage.getItem("role")!=="faculty"){
       </div>
 
       <div class="stat-card">
-        <<h3>Live Students</h3>
+        <h3>Live Students</h3>
 
 <table>
 
@@ -232,7 +235,7 @@ if(localStorage.getItem("role")!=="faculty"){
 
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-
+let currentSession="";
 /* Logout */
 function logout(){
   localStorage.clear();
@@ -327,38 +330,7 @@ function checkLiveStatus(){
 checkLiveStatus();
 setInterval(checkLiveStatus,30000);
   <script src="api.js"></script>
-function loadLiveStudents(){
-
-post({
-
-action:"getLiveStudents",
-sessionId:currentSession
-
-})
-
-.then(r=>{
-
-liveBody.innerHTML="";
-
-r.data.forEach(x=>{
-
-liveBody.innerHTML+=`
-
-<tr>
-
-<td>${x[1]}</td>
-
-<td>${x[2]}</td>
-
-<td>🟢 Present</td>
-
-</tr>`;
-
-});
-
-});
-
-}
+ 
 </script>
 
 </body>
