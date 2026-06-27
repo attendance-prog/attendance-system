@@ -1,35 +1,10 @@
-/* ===================================================
-   GO GREEN V2.0
-   Global Theme
-===================================================*/
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
-:root{
-
---primary:#0f6a52;
---primary-dark:#0a5945;
---secondary:#22c55e;
-
---bg:#f5fbf8;
---card:#ffffff;
-
---border:#e7ece9;
-
---text:#17362d;
---text-light:#5d716b;
-
---shadow:0 15px 35px rgba(0,0,0,.08);
-
---radius:18px;
-
-}
+/* ================= GOOGLE FONT ================= */
 
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:'Inter',sans-serif;
+font-family:'Outfit',sans-serif;
 }
 
 html{
@@ -39,297 +14,340 @@ scroll-behavior:smooth;
 body{
 
 background:
-radial-gradient(circle at top left,#dff7ee 0%,transparent 45%),
-radial-gradient(circle at top right,#e7fff6 0%,transparent 35%),
-#f7fbf8;
+radial-gradient(circle at 15% 15%,#dffaf0 0%,transparent 30%),
+radial-gradient(circle at 90% 80%,#e4fff5 0%,transparent 25%),
+linear-gradient(180deg,#ffffff 0%,#f6fff9 100%);
 
-color:var(--text);
+color:#12352d;
 
-}
-
-a{
-text-decoration:none;
-color:inherit;
-}
-
-button{
-
-background:var(--primary);
-
-color:white;
-
-border:none;
-
-border-radius:12px;
-
-padding:12px 18px;
-
-font-weight:600;
-
-cursor:pointer;
-
-transition:.25s;
+overflow-x:hidden;
 
 }
 
-button:hover{
+/* ================= NAVBAR ================= */
 
-background:var(--primary-dark);
-
-transform:translateY(-2px);
-
-}
-
-input,
-select,
-textarea{
+.navbar{
 
 width:100%;
 
-padding:12px 14px;
+padding:22px 8%;
 
-border-radius:12px;
+display:flex;
 
-border:1px solid var(--border);
+justify-content:space-between;
 
-outline:none;
-
-background:white;
-
-font-size:15px;
-
-transition:.25s;
-
-}
-
-input:focus,
-select:focus{
-
-border-color:var(--primary);
-
-box-shadow:0 0 0 4px rgba(15,106,82,.08);
-
-}
-
-table{
-
-width:100%;
-
-border-collapse:collapse;
-
-background:white;
-
-border-radius:16px;
-
-overflow:hidden;
-
-box-shadow:var(--shadow);
-
-}
-
-th{
-
-background:#f2faf6;
-
-padding:14px;
-
-text-align:left;
-
-}
-
-td{
-
-padding:14px;
-
-border-top:1px solid #eef3f1;
-
-}
-
-.card{
-
-background:white;
-
-border-radius:20px;
-
-padding:24px;
-
-box-shadow:var(--shadow);
-
-margin-bottom:20px;
-
-}
-
-.section-title{
-
-font-size:26px;
-
-font-weight:700;
-
-margin-bottom:18px;
-
-}
-
-.badge{
-
-display:inline-block;
-
-padding:6px 12px;
-
-border-radius:50px;
-
-background:#dff8e9;
-
-color:#0f6a52;
-
-font-size:13px;
-
-font-weight:600;
-
-}
-
-.stat-card{
-
-background:white;
-
-padding:25px;
-
-border-radius:20px;
-
-box-shadow:var(--shadow);
-
-transition:.25s;
-
-}
-
-.stat-card:hover{
-
-transform:translateY(-5px);
-
-}
-
-.grid{
-
-display:grid;
-
-gap:20px;
-
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-
-}
-/* =======================================
-SIDEBAR
-=======================================*/
-
-.sidebar{
+align-items:center;
 
 position:fixed;
 
-left:0;
-
 top:0;
 
-width:260px;
+left:0;
 
-height:100vh;
+z-index:999;
 
-background:white;
+background:rgba(255,255,255,.72);
 
-border-right:1px solid #edf1ef;
+backdrop-filter:blur(18px);
 
-padding:30px 20px;
+-webkit-backdrop-filter:blur(18px);
 
-overflow:auto;
+border-bottom:1px solid rgba(255,255,255,.45);
 
 }
 
 .logo{
 
-display:flex;
+font-size:28px;
 
-align-items:center;
-
-gap:15px;
-
-margin-bottom:35px;
-
-}
-
-.logo-icon{
-
-width:48px;
-
-height:48px;
-
-border-radius:14px;
-
-background:#0f6a52;
-
-color:white;
+font-weight:800;
 
 display:flex;
 
 align-items:center;
 
-justify-content:center;
+gap:10px;
 
-font-size:22px;
-
-}
-
-.logo h2{
-
-font-size:20px;
-
-margin:0;
+color:#0d6045;
 
 }
 
-.logo p{
+.navbar nav{
 
-margin:0;
+display:flex;
+
+align-items:center;
+
+gap:28px;
+
+}
+
+.navbar nav a{
+
+text-decoration:none;
+
+color:#24483f;
+
+font-weight:500;
+
+transition:.3s;
+
+}
+
+.navbar nav a:hover{
+
+color:#0d7b58;
+
+}
+
+.signin{
+
+background:#0d6d52;
+
+padding:12px 28px;
+
+border-radius:40px;
+
+color:white!important;
+
+font-weight:700;
+
+box-shadow:0 8px 20px rgba(0,120,80,.20);
+
+}
+
+.signin:hover{
+
+transform:translateY(-2px);
+
+}
+
+/* ================= HERO ================= */
+
+.hero{
+
+padding:160px 8% 90px;
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:60px;
+
+align-items:center;
+
+}
+
+.tag{
+
+letter-spacing:3px;
 
 font-size:13px;
 
-color:#6c7a74;
+font-weight:700;
+
+color:#3b7f69;
+
+margin-bottom:20px;
 
 }
 
-.sidebar nav{
+.hero h1{
+
+font-size:72px;
+
+line-height:82px;
+
+font-weight:800;
+
+margin-bottom:25px;
+
+}
+
+.hero h1 span{
+
+font-style:italic;
+
+color:#0d6045;
+
+}
+
+.desc{
+
+font-size:20px;
+
+line-height:34px;
+
+color:#55766d;
+
+margin-bottom:40px;
+
+max-width:640px;
+
+}
+
+.hero-buttons{
 
 display:flex;
 
-flex-direction:column;
+gap:18px;
 
-gap:8px;
-
-}
-
-.nav-link{
-
-padding:14px 18px;
-
-border-radius:14px;
-
-font-weight:600;
-
-color:#234;
-
-transition:.25s;
+margin-bottom:45px;
 
 }
 
-.nav-link:hover{
+.btn{
 
-background:#edf8f4;
-
-color:#0f6a52;
-
-}
-
-.nav-link.active{
-
-background:#0f6a52;
+background:#0d6d52;
 
 color:white;
+
+padding:16px 36px;
+
+border-radius:45px;
+
+text-decoration:none;
+
+font-weight:700;
+
+transition:.3s;
+
+}
+
+.btn:hover{
+
+transform:translateY(-4px);
+
+}
+
+.btn2{
+
+padding:16px 36px;
+
+border-radius:45px;
+
+text-decoration:none;
+
+font-weight:700;
+
+background:white;
+
+border:1px solid #d9ebe4;
+
+color:#18463d;
+
+}
+
+/* ================= STATS ================= */
+
+.stats{
+
+display:flex;
+
+gap:55px;
+
+}
+
+.stats h2{
+
+font-size:38px;
+
+color:#0d6045;
+
+}
+
+.stats p{
+
+color:#55766d;
+
+}
+
+/* ================= HERO IMAGE ================= */
+
+.hero-right{
+
+position:relative;
+
+}
+
+.hero-right img{
+
+width:100%;
+
+border-radius:34px;
+
+box-shadow:0 40px 70px rgba(0,0,0,.12);
+
+display:block;
+
+}
+
+.live-card{
+
+position:absolute;
+
+bottom:30px;
+
+left:30px;
+
+background:rgba(255,255,255,.90);
+
+backdrop-filter:blur(18px);
+
+padding:20px;
+
+border-radius:22px;
+
+box-shadow:0 20px 40px rgba(0,0,0,.12);
+
+width:250px;
+
+}
+
+.live-card h3{
+
+margin:10px 0;
+
+font-size:18px;
+
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:900px){
+
+.hero{
+
+grid-template-columns:1fr;
+
+padding-top:130px;
+
+}
+
+.hero h1{
+
+font-size:48px;
+
+line-height:58px;
+
+}
+
+.navbar{
+
+padding:18px 5%;
+
+}
+
+.navbar nav{
+
+gap:14px;
+
+}
+
+.stats{
+
+justify-content:space-between;
+
+}
 
 }
