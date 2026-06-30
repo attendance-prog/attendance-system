@@ -539,6 +539,62 @@ margin-top:15px;
 
 }
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    .welcome-banner{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:30px;
+
+border-radius:24px;
+
+background:linear-gradient(135deg,#0f766e,#22c55e);
+
+color:white;
+
+margin-bottom:30px;
+
+box-shadow:0 20px 40px rgba(15,118,110,.25);
+
+}
+
+.weather-card{
+
+background:rgba(255,255,255,.18);
+
+padding:18px 30px;
+
+border-radius:18px;
+
+backdrop-filter:blur(18px);
+
+font-weight:700;
+
+font-size:20px;
+
+}
+    .gps-box{
+
+padding:18px;
+
+background:#f4fffb;
+
+margin-bottom:15px;
+
+border-radius:14px;
+
+font-weight:600;
+
+}
+
+.chart-panel canvas{
+
+margin-top:20px;
+
+}
 </style>
 </head>
 
@@ -1046,7 +1102,85 @@ No new notification
 </div>
 
 </div>
+<!-- ================= ANALYTICS ================= -->
 
+<div class="dashboard-bottom">
+
+<div class="chart-panel">
+
+<h2>
+
+🏢 Department Comparison
+
+</h2>
+
+<canvas id="departmentChart"></canvas>
+
+</div>
+
+<div class="chart-panel">
+
+<h2>
+
+📍 Campus GPS
+
+</h2>
+
+<div id="gpsPreview">
+
+<div class="gps-box">
+
+🟢 GPS Monitoring Active
+
+</div>
+
+<div class="gps-box">
+
+📡 8 Locations Registered
+
+</div>
+
+<div class="gps-box">
+
+🏫 12 Rooms Active
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<br>
+
+<div class="dashboard-bottom">
+
+<div class="chart-panel">
+
+<h2>
+
+👨‍🏫 Faculty Attendance
+
+</h2>
+
+<canvas id="facultyChart"></canvas>
+
+</div>
+
+<div class="chart-panel">
+
+<h2>
+
+🎓 Student Attendance
+
+</h2>
+
+<canvas id="studentChart"></canvas>
+
+</div>
+
+</div>
 </div>
 <script>
 
