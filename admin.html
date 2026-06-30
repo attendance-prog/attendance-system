@@ -1310,6 +1310,44 @@ maintainAspectRatio:false
 }
 
 });
+   const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+async function loadDashboard(){
+
+  try{
+
+    const res = await fetch(API_URL,{
+      method:"POST",
+      headers:{
+        "Content-Type":"text/plain"
+      },
+      body:JSON.stringify({
+        action:"getDashboardSummary"
+      })
+    });
+
+    const data = await res.json();
+
+    console.log(data);
+
+    document.getElementById("studentCount").textContent = data.students || 0;
+    document.getElementById("facultyCount").textContent = data.faculty || 0;
+    document.getElementById("liveClasses").textContent = data.live || 0;
+    document.getElementById("attendancePercent").textContent =
+      (data.attendance || 0) + "%";
+
+  }catch(e){
+    console.log(e);
+    alert("Unable to load dashboard.");
+  }
+
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+
+  loadDashboard();
+
+});
 </script>
 
 </div>
