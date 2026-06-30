@@ -333,7 +333,121 @@ body.dark .sidebar{
 background:#111827;
 
 }
+/* Dashboard Layout */
 
+.dashboard-row{
+
+display:flex;
+
+gap:25px;
+
+margin-bottom:35px;
+
+flex-wrap:wrap;
+
+}
+
+.dashboard-left{
+
+flex:3;
+
+}
+
+.dashboard-right{
+
+flex:1;
+
+}
+
+/* Titles */
+
+.section-title{
+
+font-size:22px;
+
+font-weight:700;
+
+margin-bottom:18px;
+
+}
+
+/* Quick Grid */
+
+.quick-grid{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+
+gap:18px;
+
+}
+
+/* Quick Cards */
+
+.quick-card{
+
+background:rgba(255,255,255,.85);
+
+backdrop-filter:blur(15px);
+
+padding:25px;
+
+border-radius:20px;
+
+cursor:pointer;
+
+transition:.3s;
+
+text-align:center;
+
+box-shadow:0 10px 30px rgba(0,0,0,.08);
+
+}
+
+.quick-card:hover{
+
+transform:translateY(-8px);
+
+}
+
+.quick-card h4{
+
+margin:15px 0 8px;
+
+font-size:18px;
+
+}
+
+.quick-card p{
+
+font-size:13px;
+
+color:#777;
+
+}
+
+/* AI Insights */
+
+.insight-box{
+
+background:rgba(255,255,255,.85);
+
+padding:25px;
+
+border-radius:20px;
+
+box-shadow:0 10px 30px rgba(0,0,0,.08);
+
+display:flex;
+
+flex-direction:column;
+
+gap:18px;
+
+font-size:15px;
+
+}
 </style>
 </head>
 
@@ -532,7 +646,131 @@ margin-bottom:30px;
 </div>
 
 </div>
+<!-- ================= QUICK ACTIONS ================= -->
 
+<div class="dashboard-row">
+
+<div class="dashboard-left">
+
+<div class="section-title">
+
+⚡ Quick Actions
+
+</div>
+
+<div class="quick-grid">
+
+<div class="quick-card" onclick="go('admin-users.html')">
+
+👥
+
+<h4>Users</h4>
+
+<p>Students & Faculty</p>
+
+</div>
+
+<div class="quick-card" onclick="go('admin-live.html')">
+
+📡
+
+<h4>Live Classes</h4>
+
+<p>Monitor Live Sessions</p>
+
+</div>
+
+<div class="quick-card" onclick="go('admin-event.html')">
+
+📅
+
+<h4>Events</h4>
+
+<p>Create Event</p>
+
+</div>
+
+<div class="quick-card" onclick="go('admin-notice.html')">
+
+📢
+
+<h4>Notice</h4>
+
+<p>Broadcast Notice</p>
+
+</div>
+
+<div class="quick-card" onclick="go('admin-fees.html')">
+
+💰
+
+<h4>Fees</h4>
+
+<p>Fee Management</p>
+
+</div>
+
+<div class="quick-card" onclick="go('admin-naac-report.html')">
+
+📄
+
+<h4>NAAC</h4>
+
+<p>Generate Report</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="dashboard-right">
+
+<div class="section-title">
+
+🤖 AI Insights
+
+</div>
+
+<div class="insight-box">
+
+<div>
+
+🟢 Attendance improving this week
+
+</div>
+
+<div>
+
+🟡 5 Students below 75%
+
+</div>
+
+<div>
+
+🔵 2 Faculty on Leave
+
+</div>
+
+<div>
+
+🔴 1 Complaint Pending
+
+</div>
+
+<div>
+
+🟣 Next QR expires in 3 min
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<br><br>
 <div class="grid">
     <div class="grid">
 
@@ -614,6 +852,35 @@ document.querySelectorAll(".nav-link").forEach(l=>{
     l.classList.add("active");
   }
 });
+    /* AI Demo */
+
+setInterval(()=>{
+
+const tips=[
+
+"🟢 Attendance improving this week",
+
+"🟡 Faculty Leave Tomorrow",
+
+"🔴 Complaint Pending",
+
+"🔵 QR Session Expiring",
+
+"🟣 Fee Collection Increased"
+
+];
+
+const box=document.querySelector(".insight-box");
+
+if(box){
+
+box.firstElementChild.innerHTML=
+
+tips[Math.floor(Math.random()*tips.length)];
+
+}
+
+},6000);
 </script>
 
 </body>
