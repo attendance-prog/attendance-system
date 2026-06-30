@@ -448,6 +448,97 @@ gap:18px;
 font-size:15px;
 
 }
+    .dashboard-bottom{
+
+display:grid;
+
+grid-template-columns:2fr 1fr;
+
+gap:25px;
+
+margin-top:30px;
+
+}
+
+.chart-panel,
+.activity-panel,
+.gps-panel,
+.notify-panel{
+
+background:rgba(255,255,255,.85);
+
+padding:28px;
+
+border-radius:22px;
+
+box-shadow:0 12px 30px rgba(0,0,0,.08);
+
+backdrop-filter:blur(20px);
+
+}
+
+.chart-panel{
+
+min-height:350px;
+
+}
+
+.feed-item{
+
+padding:14px;
+
+margin-bottom:12px;
+
+background:#f6fffb;
+
+border-radius:12px;
+
+transition:.3s;
+
+}
+
+.feed-item:hover{
+
+transform:translateX(8px);
+
+}
+
+.status-grid{
+
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:15px;
+
+margin-top:20px;
+
+}
+
+.status-card{
+
+background:#f6fffb;
+
+padding:20px;
+
+border-radius:16px;
+
+text-align:center;
+
+}
+
+.notify{
+
+padding:15px;
+
+background:#f6fffb;
+
+border-radius:12px;
+
+margin-top:15px;
+
+}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </style>
 </head>
 
@@ -822,6 +913,141 @@ Fee Defaulters
       <div class="card" onclick="go('admin-risk-analysis.html')">
 🧠 Risk Analysis
 </div>
+        <!-- ================= DASHBOARD WIDGETS ================= -->
+
+<div class="dashboard-bottom">
+
+<div class="chart-panel">
+
+<h2>📈 Attendance Analytics</h2>
+
+<canvas id="attendanceChart"></canvas>
+
+</div>
+
+<div class="activity-panel">
+
+<h2>📅 Recent Activity</h2>
+
+<div id="activityFeed">
+
+<div class="feed-item">
+
+🟢 System Started
+
+</div>
+
+<div class="feed-item">
+
+👨‍🏫 Faculty Login
+
+</div>
+
+<div class="feed-item">
+
+🎓 Student Attendance
+
+</div>
+
+<div class="feed-item">
+
+📡 Live QR Generated
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<br>
+
+<div class="dashboard-bottom">
+
+<div class="gps-panel">
+
+<h2>🌍 Live Campus Status</h2>
+
+<div class="status-grid">
+
+<div class="status-card">
+
+🏫
+
+<h3 id="roomsActive">
+
+0
+
+</h3>
+
+<p>Active Rooms</p>
+
+</div>
+
+<div class="status-card">
+
+📡
+
+<h3 id="qrActive">
+
+0
+
+</h3>
+
+<p>Live QR</p>
+
+</div>
+
+<div class="status-card">
+
+👨‍🏫
+
+<h3 id="facultyOnline">
+
+0
+
+</h3>
+
+<p>Faculty Online</p>
+
+</div>
+
+<div class="status-card">
+
+🎓
+
+<h3 id="studentsOnline">
+
+0
+
+</h3>
+
+<p>Students Active</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="notify-panel">
+
+<h2>🔔 Notifications</h2>
+
+<div id="notificationList">
+
+<div class="notify">
+
+No new notification
+
+</div>
+
+</div>
+
+</div>
+
+</div>
 <script>
 
 /* ===== Sidebar Toggle ===== */
@@ -882,6 +1108,5 @@ tips[Math.floor(Math.random()*tips.length)];
 
 },6000);
 </script>
-
 </body>
 </html>
