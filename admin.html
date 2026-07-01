@@ -1435,23 +1435,27 @@ async function loadFacultyAttendance(){
 
     body.innerHTML = "";
 
-    if(!data.success){
+    if(!data.success || !data.data.length){
 
-      body.innerHTML = "<tr><td colspan='2'>No Data</td></tr>";
+      body.innerHTML = "<tr><td colspan='2'>No Faculty Found</td></tr>";
       return;
 
     }
 
+    let html = "";
+
     data.data.forEach(f=>{
 
-      body.innerHTML += `
+      html += `
       <tr>
-        <td>${f[1]}</td>
-<td>${f[2]}</td>
+        <td>${f.name}</td>
+        <td>${f.status}</td>
       </tr>
       `;
 
     });
+
+    body.innerHTML = html;
 
   }catch(err){
 
