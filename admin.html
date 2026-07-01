@@ -1255,7 +1255,9 @@ async function loadAttendanceChart(){
 
   const ctx=document.getElementById("attendanceChart");
 
-  new Chart(ctx,{
+  if(attendanceChart) attendanceChart.destroy();
+
+attendanceChart = new Chart(ctx,{
     type:"bar",
     data:{
       labels:data.labels,
@@ -1296,39 +1298,34 @@ const data=await res.json();
 
 const ctx=document.getElementById("systemChart");
 
-if(systemChart)
-systemChart.destroy();
+if(systemChart) systemChart.destroy();
 
 systemChart=new Chart(ctx,{
-
 type:"bar",
-
 data:{
-
-labels:data.labels,
-
+labels:[
+"Students",
+"Faculty",
+"Present",
+"Active Classes"
+],
 datasets:[{
-
 label:"Today's Activity",
-
-data:data.values
-
+data:[
+data.students,
+data.faculty,
+data.present,
+data.active
+]
 }]
-
 },
-
 options:{
-
 responsive:true,
-
 maintainAspectRatio:false
-
 }
-
 });
 
 }
-
    const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 
 async function loadDashboard(){
@@ -1397,13 +1394,13 @@ const data=await res.json();
 
 if(data.success){
 
-document.getElementById("onlineStudents").innerHTML=data.studentsOnline||0;
+document.getElementById("onlineStudents").textContent = data.students;
 
-document.getElementById("onlineFaculty").innerHTML=data.facultyOnline||0;
+document.getElementById("onlineFaculty").textContent = data.faculty;
 
-document.getElementById("activeQR").innerHTML=data.qrSessions||0;
+document.getElementById("activeQR").textContent = data.sessions;
 
-document.getElementById("gpsUsers").innerHTML=data.gpsActive||0;
+document.getElementById("gpsUsers").textContent = data.gps;
 
 }
 
