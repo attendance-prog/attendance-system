@@ -1239,52 +1239,42 @@ let attendanceChart;
 
 async function loadAttendanceChart(){
 
-  try{
+  const res = await fetch(API_URL,{
+    method:"POST",
+    headers:{
+      "Content-Type":"text/plain"
+    },
+    body:JSON.stringify({
+      action:"getAttendanceAnalytics"
+    })
+  });
 
-    const res = await fetch(API_URL,{
-      method:"POST",
-      headers:{
-        "Content-Type":"text/plain"
-      },
-      body:JSON.stringify({
-        action:"getAttendanceAnalytics"
-      })
-    });
+  const data = await res.json();
 
-    const data = await res.json();
+  if(!data.success) return;
 
-    const ctx=document.getElementById("attendanceChart");
+  const ctx=document.getElementById("attendanceChart");
 
-    if(attendanceChart){
-      attendanceChart.destroy();
-    }
-
-    attendanceChart = new Chart(ctx,{
-      type:"bar",
-      data:{
-        labels:data.labels,
-        datasets:[{
-          label:"Attendance %",
-          data:data.values
-        }]
-      },
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        scales:{
-          y:{
-            beginAtZero:true,
-            max:100
-          }
+  new Chart(ctx,{
+    type:"bar",
+    data:{
+      labels:data.labels,
+      datasets:[{
+        label:"Attendance %",
+        data:data.values
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:{
+        y:{
+          beginAtZero:true,
+          max:100
         }
       }
-    });
-
-  }catch(err){
-
-    console.log(err);
-
-  }
+    }
+  });
 
 }
 
