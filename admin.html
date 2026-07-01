@@ -1325,7 +1325,6 @@ maintainAspectRatio:false
 
 }
 
-});
    const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 
 async function loadDashboard(){
@@ -1447,8 +1446,8 @@ async function loadFacultyAttendance(){
 
       body.innerHTML += `
       <tr>
-        <td>${f.name}</td>
-        <td>${f.status}</td>
+        <td>${f[1]}</td>
+<td>${f[2]}</td>
       </tr>
       `;
 
