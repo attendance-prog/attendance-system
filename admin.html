@@ -1205,7 +1205,7 @@ location.href="login.html";
 
 <tr>
 
-<th>Department</th>
+<th>Section</th>
 
 <th>Attendance</th>
 
@@ -1445,48 +1445,50 @@ async function loadFacultyAttendance(){
 }
    async function loadStudentAttendance(){
 
-try{
+  try{
 
-const res = await fetch(API_URL,{
-method:"POST",
-headers:{
-"Content-Type":"text/plain"
-},
-body:JSON.stringify({
-action:"getStudentAttendanceSummary"
-})
-});
+    const res = await fetch(API_URL,{
+      method:"POST",
+      headers:{
+        "Content-Type":"text/plain"
+      },
+      body:JSON.stringify({
+        action:"getStudentAttendanceSummary"
+      })
+    });
 
-const data = await res.json();
+    const data = await res.json();
 
-const body = document.getElementById("studentAttendanceBody");
+    const body = document.getElementById("studentAttendanceBody");
 
-body.innerHTML = "";
+    body.innerHTML = "";
 
-if(!data.success){
+    if(!data.success || !data.data.length){
 
-body.innerHTML="<tr><td colspan='2'>No Data</td></tr>";
+      body.innerHTML = "<tr><td colspan='2'>No Data</td></tr>";
+      return;
 
-return;
+    }
 
-}
+    data.data.forEach(r=>{
 
-data.data.forEach(r=>{
+      body.innerHTML += `
+      <tr>
+        <td>${r.section}</td>
+        <td>${r.attendance}</td>
+      </tr>
+      `;
 
-body.innerHTML += `
-<tr>
-<td>${r.Section}</td>
-<td>${r.attendance}</td>
-</tr>
-`;
+    });
 
-});
+  }catch(err){
 
-}catch(err){
+    console.log(err);
 
-console.log(err);
+    document.getElementById("studentAttendanceBody").innerHTML =
+    "<tr><td colspan='2'>Error Loading</td></tr>";
 
-}
+  }
 
 }
 </script>
