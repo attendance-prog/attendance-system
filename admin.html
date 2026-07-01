@@ -1416,28 +1416,18 @@ body.innerHTML="";
 
 if(!data.success){
 
-body.innerHTML="<tr><td colspan='2'>No Data</td></tr>";
+body.innerHTML = "";
 
-return;
+data.data.forEach(f => {
 
-}
-
-data.data.forEach(f=>{
-
-body.innerHTML+=`
-
+body.innerHTML += `
 <tr>
-
 <td>${f.name}</td>
-
 <td>${f.status}</td>
-
 </tr>
-
 `;
 
 });
-
 }catch(err){
 
 console.log(err);
