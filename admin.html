@@ -1458,16 +1458,17 @@ async function loadFacultyAttendance(){
 
     let html = "";
 
-    data.data.forEach(f=>{
+  data.data.forEach(f=>{
 
   html += `
   <tr>
-      <td>${f[1]}</td>
-      <td>${f[2]}</td>
+    <td>${f[1]}</td>
+    <td>${f[2]}</td>
   </tr>
   `;
 
-});
+}
+);
 
     body.innerHTML = html;
 
