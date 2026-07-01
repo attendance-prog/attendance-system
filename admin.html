@@ -961,27 +961,13 @@ location.href="login.html";
 
         </div>
 
-        <div class="ai-box">
+       <div class="ai-box" id="aiInsights">
 
-            <div class="ai-item">
-                🟢 Attendance improving this week
-            </div>
+<div class="ai-item">
+Loading...
+</div>
 
-            <div class="ai-item">
-                🟡 15 Students below 75%
-            </div>
-
-            <div class="ai-item">
-                🔴 2 Faculty on leave
-            </div>
-
-            <div class="ai-item">
-                🔵 4 Live Classes
-            </div>
-
-            <div class="ai-item">
-                🟣 Today's Attendance 94%
-            </div>
+</div>
 
         </div>
 
@@ -1110,17 +1096,9 @@ location.href="login.html";
 
 </div>
 
-<ul class="notification-list">
+<ul class="notification-list" id="notificationList">
 
-<li>📢 New Notice Uploaded</li>
-
-<li>🎓 Attendance Updated</li>
-
-<li>📅 Event Tomorrow</li>
-
-<li>👨‍🏫 Faculty Leave Approved</li>
-
-<li>🚨 Complaint Received</li>
+<li>Loading...</li>
 
 </ul>
 
@@ -1134,17 +1112,9 @@ location.href="login.html";
 
 </div>
 
-<ul class="notification-list">
+<ul class="notification-list" id="recentActivity">
 
-<li>🟢 Student Logged In</li>
-
-<li>📡 QR Generated</li>
-
-<li>👨‍🏫 Faculty Started Class</li>
-
-<li>📍 GPS Verified</li>
-
-<li>✅ Attendance Marked</li>
+<li>Loading...</li>
 
 </ul>
 
@@ -1265,46 +1235,92 @@ function toggleSidebar(){
 document.getElementById("sidebar").classList.toggle("collapse");
 }
 
-document.addEventListener("DOMContentLoaded",()=>{
+dlet attendanceChart;
 
-const ctx=document.getElementById("attendanceChart");
+async function loadAttendanceChart(){
 
-if(ctx){
+  const res = await fetch(API_URL,{
+    method:"POST",
+    headers:{
+      "Content-Type":"text/plain"
+    },
+    body:JSON.stringify({
+      action:"getAttendanceAnalytics"
+    })
+  });
 
-new Chart(ctx,{
-type:"bar",
-data:{
-labels:["Mon","Tue","Wed","Thu","Fri","Sat"],
-datasets:[{
-label:"Attendance %",
-data:[88,92,90,95,91,93]
-}]
-},
-options:{
-responsive:true,
-maintainAspectRatio:false
+  const data = await res.json();
+
+  const ctx = document.getElementById("attendanceChart");
+
+  if(attendanceChart){
+    attendanceChart.destroy();
+  }
+
+  attendanceChart = new Chart(ctx,{
+    type:"bar",
+    data:{
+      labels:data.labels,
+      datasets:[{
+        label:"Attendance %",
+        data:data.values
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false
+    }
+  });
+
 }
+
+let systemChart;
+
+async function loadSystemChart(){
+
+const res=await fetch(API_URL,{
+method:"POST",
+headers:{
+"Content-Type":"text/plain"
+},
+body:JSON.stringify({
+action:"getSystemActivity"
+})
 });
 
-}
+const data=await res.json();
 
-const system=document.getElementById("systemChart");
+const ctx=document.getElementById("systemChart");
 
-if(system){
+if(systemChart)
+systemChart.destroy();
 
-new Chart(system,{
-type:"line",
+systemChart=new Chart(ctx,{
+
+type:"bar",
+
 data:{
-labels:["8 AM","10 AM","12 PM","2 PM","4 PM"],
+
+labels:data.labels,
+
 datasets:[{
-label:"Users Online",
-data:[35,60,110,90,55]
+
+label:"Today's Activity",
+
+data:data.values
+
 }]
+
 },
+
 options:{
+
 responsive:true,
+
 maintainAspectRatio:false
+
 }
+
 });
 
 }
@@ -1349,6 +1365,11 @@ loadDashboard();
 loadLiveCampus();
 loadFacultyAttendance();
 loadStudentAttendance();
+loadAIInsights();
+loadNotifications();
+loadRecentActivity();
+loadAttendanceChart();
+loadSystemChart();
 
 });
    /* ===========================
@@ -1489,6 +1510,131 @@ async function loadFacultyAttendance(){
     "<tr><td colspan='2'>Error Loading</td></tr>";
 
   }
+
+}
+   async function loadAIInsights(){
+
+try{
+
+const res = await fetch(API_URL,{
+method:"POST",
+headers:{
+"Content-Type":"text/plain"
+},
+body:JSON.stringify({
+action:"getAIInsights"
+})
+});
+
+const data = await res.json();
+
+const box = document.getElementById("aiInsights");
+
+box.innerHTML = "";
+
+if(!data.success){
+
+box.innerHTML="<div class='ai-item'>No Data</div>";
+
+return;
+
+}
+
+data.data.forEach(x=>{
+
+box.innerHTML += `
+<div class="ai-item">${x}</div>
+`;
+
+});
+
+}catch(err){
+
+console.log(err);
+
+}
+
+}
+   async function loadNotifications(){
+
+try{
+
+const res=await fetch(API_URL,{
+method:"POST",
+headers:{
+"Content-Type":"text/plain"
+},
+body:JSON.stringify({
+action:"getNotifications"
+})
+});
+
+const data=await res.json();
+
+const list=document.getElementById("notificationList");
+
+list.innerHTML="";
+
+if(!data.success || data.data.length==0){
+
+list.innerHTML="<li>No Notifications</li>";
+
+return;
+
+}
+
+data.data.forEach(n=>{
+
+list.innerHTML+=`<li>${n}</li>`;
+
+});
+
+}catch(err){
+
+console.log(err);
+
+}
+
+}
+   async function loadRecentActivity(){
+
+try{
+
+const res=await fetch(API_URL,{
+method:"POST",
+headers:{
+"Content-Type":"text/plain"
+},
+body:JSON.stringify({
+action:"getRecentActivity"
+})
+});
+
+const data=await res.json();
+
+const box=document.getElementById("recentActivity");
+
+box.innerHTML="";
+
+if(!data.success){
+
+box.innerHTML="<li>No Activity</li>";
+
+return;
+
+}
+
+data.data.forEach(item=>{
+
+box.innerHTML+=`<li>${item}</li>`;
+
+});
+
+}catch(err){
+
+console.log(err);
+
+}
 
 }
 </script>
