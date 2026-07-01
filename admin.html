@@ -1239,47 +1239,53 @@ let attendanceChart;
 
 async function loadAttendanceChart(){
 
-  const res = await fetch(API_URL,{
-    method:"POST",
-    headers:{
-      "Content-Type":"text/plain"
-    },
-    body:JSON.stringify({
-      action:"getAttendanceAnalytics"
-    })
-  });
+  try{
 
-  const data = await res.json();
+    const res = await fetch(API_URL,{
+      method:"POST",
+      headers:{
+        "Content-Type":"text/plain"
+      },
+      body:JSON.stringify({
+        action:"getDashboardSummary"
+      })
+    });
 
-  if(!data.success) return;
+    const data = await res.json();
 
-  const ctx=document.getElementById("attendanceChart");
+    if(!data.success) return;
 
-  if(attendanceChart) attendanceChart.destroy();
+    const ctx=document.getElementById("attendanceChart");
 
-attendanceChart = new Chart(ctx,{
-    type:"bar",
-    data:{
-      labels:data.labels,
-      datasets:[{
-        label:"Attendance %",
-        data:data.values
-      }]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      scales:{
-        y:{
-          beginAtZero:true,
-          max:100
+    if(attendanceChart) attendanceChart.destroy();
+
+    attendanceChart=new Chart(ctx,{
+      type:"bar",
+      data:{
+        labels:data.labels,
+        datasets:[{
+          label:"Attendance %",
+          data:data.values,
+          backgroundColor:"#7ec3f7"
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        scales:{
+          y:{
+            beginAtZero:true,
+            max:100
+          }
         }
       }
-    }
-  });
+    });
+
+  }catch(err){
+    console.log(err);
+  }
 
 }
-
 let systemChart;
 
 async function loadSystemChart(){
