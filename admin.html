@@ -1462,13 +1462,12 @@ async function loadFacultyAttendance(){
 
   html += `
   <tr>
-    <td>${f[1]}</td>
-    <td>${f[2]}</td>
+    <td>${f.name}</td>
+    <td>${f.status}</td>
   </tr>
   `;
 
-}
-);
+});
 
     body.innerHTML = html;
 
