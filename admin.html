@@ -1460,14 +1460,14 @@ async function loadFacultyAttendance(){
 
     data.data.forEach(f=>{
 
-      html += `
-      <tr>
-        <td>${f.name}</td>
-        <td>${f.status}</td>
-      </tr>
-      `;
+  html += `
+  <tr>
+      <td>${f[1]}</td>
+      <td>${f[2]}</td>
+  </tr>
+  `;
 
-    });
+});
 
     body.innerHTML = html;
 
