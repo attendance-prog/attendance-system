@@ -1252,6 +1252,8 @@ async function loadAttendanceChart(){
     });
 
     const data = await res.json();
+     console.log(data.labels);
+console.log(data.values);
 
     if(!data.success) return;
 
