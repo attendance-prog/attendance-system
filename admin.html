@@ -1246,9 +1246,9 @@ async function loadAttendanceChart(){
       headers:{
         "Content-Type":"text/plain"
       },
-      body:JSON.stringify({
-        action:"getDashboardSummary"
-      })
+     body:JSON.stringify({
+    action:"getAttendanceAnalytics"
+})
     });
 
     const data = await res.json();
