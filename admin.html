@@ -829,13 +829,14 @@ location.href="login.html";
 
     <div class="right">
 
-        <div class="search">
+       <div class="search">
 
-            <input
-                type="text"
-                placeholder="Search students, faculty, classes...">
+    <input
+        type="text"
+        placeholder="Search students, faculty, classes..."
+        onkeyup="searchDashboard()">
 
-        </div>
+</div>
 
         <button class="icon-btn">
             🔔
@@ -1429,39 +1430,24 @@ loadSystemChart();
 
 async function loadLiveCampus(){
 
-    try{
+    const res=await fetch(API_URL,{
+        method:"POST",
+        headers:{
+            "Content-Type":"text/plain"
+        },
+        body:JSON.stringify({
+            action:"getLiveCampus"
+        })
+    });
 
-        const res = await fetch(API_URL,{
-            method:"POST",
-            headers:{
-                "Content-Type":"text/plain"
-            },
-            body:JSON.stringify({
-                action:"getLiveCampus"
-            })
-        });
+    const d=await res.json();
 
-        const data = await res.json();
+    if(!d.success) return;
 
-        if(!data.success) return;
-
-        document.getElementById("onlineStudents").textContent =
-            data.studentsOnline;
-
-        document.getElementById("onlineFaculty").textContent =
-            data.facultyOnline;
-
-        document.getElementById("activeQR").textContent =
-            data.qrSessions;
-
-        document.getElementById("gpsUsers").textContent =
-            data.gpsActive;
-
-    }catch(err){
-
-        console.log(err);
-
-    }
+    document.getElementById("onlineStudents").innerText=d.studentsOnline;
+document.getElementById("onlineFaculty").innerText=d.facultyOnline;
+document.getElementById("activeQR").innerText=d.qrSessions;
+document.getElementById("gpsUsers").innerText=d.gpsActive;
 
 }
 /* ===========================
@@ -1470,7 +1456,7 @@ FACULTY ATTENDANCE
 
 async function loadFacultyAttendance(){
 
-    const res = await fetch(API_URL,{
+    const res=await fetch(API_URL,{
         method:"POST",
         headers:{
             "Content-Type":"text/plain"
@@ -1480,26 +1466,22 @@ async function loadFacultyAttendance(){
         })
     });
 
-    const data = await res.json();
+    const data=await res.json();
 
-    if(!data.success) return;
+    const body=document.getElementById("facultyAttendanceBody");
 
-    const tbody=document.getElementById("facultyAttendanceBody");
-
-    tbody.innerHTML="";
+    body.innerHTML="";
 
     data.faculty.forEach(f=>{
 
-        tbody.innerHTML += `
+        body.innerHTML+=`
         <tr>
             <td>${f.name}</td>
-            <td>${f.role}</td>
-            <td>
-                <span class="${f.status=="Present"?"status-present":"status-absent"}">
-                    ${f.status}
-                </span>
+            <td class="${f.status=="Present"?"status-present":"status-absent"}">
+                ${f.status}
             </td>
         </tr>`;
+
     });
 
 }
@@ -1592,16 +1574,15 @@ console.log(err);
 
     const data=await res.json();
 
-    const box=document.getElementById("notificationBox");
+    const box=document.getElementById("notificationList");
 
     box.innerHTML="";
 
     data.notifications.forEach(n=>{
 
         box.innerHTML+=`
-        <div class="notification-item">
-            🔔 ${n}
-        </div>`;
+<li>${n}</li>`;
+
     });
 
 }
@@ -1628,10 +1609,10 @@ console.log(err);
     data.activities.forEach(a=>{
 
         box.innerHTML+=`
-        <div class="activity-item">
-            ✅ ${a.email}<br>
-            ${a.subject} • ${a.status}
-        </div>`;
+<li>
+✅ ${a.email}<br>
+${a.subject} • ${a.status}
+</li>`;
     });
 
 }
