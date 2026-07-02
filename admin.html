@@ -1580,84 +1580,59 @@ console.log(err);
 }
    async function loadNotifications(){
 
-try{
+    const res=await fetch(API_URL,{
+        method:"POST",
+        headers:{
+            "Content-Type":"text/plain"
+        },
+        body:JSON.stringify({
+            action:"getNotifications"
+        })
+    });
 
-const res=await fetch(API_URL,{
-method:"POST",
-headers:{
-"Content-Type":"text/plain"
-},
-body:JSON.stringify({
-action:"getNotifications"
-})
-});
+    const data=await res.json();
 
-const data=await res.json();
+    const box=document.getElementById("notificationBox");
 
-const list=document.getElementById("notificationList");
+    box.innerHTML="";
 
-list.innerHTML="";
+    data.notifications.forEach(n=>{
 
-if(!data.success || data.data.length==0){
-
-list.innerHTML="<li>No Notifications</li>";
-
-return;
-
-}
-
-data.data.forEach(n=>{
-
-list.innerHTML+=`<li>${n}</li>`;
-
-});
-
-}catch(err){
-
-console.log(err);
-
-}
+        box.innerHTML+=`
+        <div class="notification-item">
+            🔔 ${n}
+        </div>`;
+    });
 
 }
    async function loadRecentActivity(){
 
-try{
+    const res=await fetch(API_URL,{
+        method:"POST",
+        headers:{
+            "Content-Type":"text/plain"
+        },
+        body:JSON.stringify({
+            action:"getRecentActivity"
+        })
+    });
 
-const res=await fetch(API_URL,{
-method:"POST",
-headers:{
-"Content-Type":"text/plain"
-},
-body:JSON.stringify({
-action:"getRecentActivity"
-})
-});
+    const data=await res.json();
 
-const data=await res.json();
+    if(!data.success)return;
 
-const box=document.getElementById("recentActivity");
+    const box=document.getElementById("recentActivity");
 
-box.innerHTML="";
+    box.innerHTML="";
 
-if(!data.success){
+    data.activities.forEach(a=>{
 
-box.innerHTML="<li>No Activity</li>";
-
-return;
-
-}
-
-data.data.forEach(item=>{
-
-box.innerHTML+=`<li>${item}</li>`;
-
-});
-
-}catch(err){
-
-console.log(err);
-
-}
+        box.innerHTML+=`
+        <div class="activity-item">
+            ✅ ${a.email}<br>
+            ${a.subject} • ${a.status}
+        </div>`;
+    });
 
 }
 </script>
