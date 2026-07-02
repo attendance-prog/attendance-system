@@ -1461,54 +1461,37 @@ FACULTY ATTENDANCE
 
 async function loadFacultyAttendance(){
 
-  try{
-
     const res = await fetch(API_URL,{
-      method:"POST",
-      headers:{
-        "Content-Type":"text/plain"
-      },
-      body:JSON.stringify({
-        action:"getStaffAttendance"
-      })
+        method:"POST",
+        headers:{
+            "Content-Type":"text/plain"
+        },
+        body:JSON.stringify({
+            action:"getFacultyAttendance"
+        })
     });
 
     const data = await res.json();
 
-    const body = document.getElementById("facultyAttendanceBody");
+    if(!data.success) return;
 
-    body.innerHTML = "";
+    const tbody=document.getElementById("facultyAttendanceBody");
 
-    if(!data.success || !data.data.length){
+    tbody.innerHTML="";
 
-      body.innerHTML = "<tr><td colspan='2'>No Faculty Found</td></tr>";
-      return;
+    data.faculty.forEach(f=>{
 
-    }
-
-    let html = "";
-
-  data.data.forEach(f=>{
-
-  html += `
-  <tr>
-    <td>${f.name}</td>
-    <td>${f.status}</td>
-  </tr>
-  `;
-
-});
-
-    body.innerHTML = html;
-
-  }catch(err){
-
-    console.log(err);
-
-    document.getElementById("facultyAttendanceBody").innerHTML =
-      "<tr><td colspan='2'>Error Loading</td></tr>";
-
-  }
+        tbody.innerHTML += `
+        <tr>
+            <td>${f.name}</td>
+            <td>${f.role}</td>
+            <td>
+                <span class="${f.status=="Present"?"status-present":"status-absent"}">
+                    ${f.status}
+                </span>
+            </td>
+        </tr>`;
+    });
 
 }
  async function loadStudentAttendance(){
