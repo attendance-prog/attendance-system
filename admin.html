@@ -1261,7 +1261,7 @@ async function loadAttendanceChart(){
 
     attendanceChart = new Chart(ctx,{
 
-    type:"line",
+    type:"bar",
 
     data:{
 
@@ -1269,21 +1269,15 @@ async function loadAttendanceChart(){
 
         datasets:[{
 
-            label:"Attendance %",
+            label:"Students Present",
 
             data:data.values,
 
-            borderColor:"#1abc9c",
+            backgroundColor:"#1abc9c",
 
-            backgroundColor:"rgba(26,188,156,0.15)",
+            borderRadius:10,
 
-            borderWidth:3,
-
-            fill:true,
-
-            tension:0.35,
-
-            pointRadius:5
+            borderSkipped:false
 
         }]
 
@@ -1295,13 +1289,23 @@ async function loadAttendanceChart(){
 
         maintainAspectRatio:false,
 
+        plugins:{
+
+            legend:{
+                display:true
+            }
+
+        },
+
         scales:{
 
             y:{
 
                 beginAtZero:true,
 
-                max:100
+                ticks:{
+                    precision:0
+                }
 
             }
 
@@ -1310,7 +1314,6 @@ async function loadAttendanceChart(){
     }
 
 });
-
   }catch(err){
     console.log(err);
   }
