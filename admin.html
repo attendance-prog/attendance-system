@@ -1512,54 +1512,34 @@ async function loadFacultyAttendance(){
 }
  async function loadStudentAttendance(){
 
-  try{
-
-    const res=await fetch(API_URL,{
-      method:"POST",
-      headers:{
-        "Content-Type":"text/plain"
-      },
-      body:JSON.stringify({
-        action:"getStudentAttendanceSummary"
-      })
+    const res = await fetch(API_URL,{
+        method:"POST",
+        headers:{
+            "Content-Type":"text/plain"
+        },
+        body:JSON.stringify({
+            action:"getStudentAttendanceSummary"
+        })
     });
 
-    const data=await res.json();
+    const data = await res.json();
 
-    const body=document.getElementById("studentAttendanceBody");
-
-    body.innerHTML="";
-
-    if(!data.success || !data.data.length){
-
-      body.innerHTML="<tr><td colspan='2'>No Data</td></tr>";
-      return;
-
-    }
+    if(!data.success) return;
 
     let html="";
 
     data.data.forEach(r=>{
 
-      html+=`
-      <tr>
-        <td>${r.section}</td>
-        <td>${r.attendance}%</td>
-      </tr>
-      `;
+        html+=`
+        <tr>
+            <td>${r.section}</td>
+            <td>${r.attendance}</td>
+        </tr>
+        `;
 
     });
 
-    body.innerHTML=html;
-
-  }catch(err){
-
-    console.log(err);
-
-    document.getElementById("studentAttendanceBody").innerHTML=
-      "<tr><td colspan='2'>Error Loading</td></tr>";
-
-  }
+    document.getElementById("studentAttendanceBody").innerHTML=html;
 
 }
    async function loadAIInsights(){
