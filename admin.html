@@ -1420,40 +1420,41 @@ loadSystemChart();
 
 async function loadLiveCampus(){
 
-try{
+    try{
 
-const res=await fetch(API_URL,{
-method:"POST",
-headers:{
-"Content-Type":"text/plain"
-},
-body:JSON.stringify({
-action:"getLiveCampus"
-})
-});
+        const res = await fetch(API_URL,{
+            method:"POST",
+            headers:{
+                "Content-Type":"text/plain"
+            },
+            body:JSON.stringify({
+                action:"getLiveCampus"
+            })
+        });
 
-const data=await res.json();
+        const data = await res.json();
 
-if(data.success){
+        if(!data.success) return;
 
-document.getElementById("onlineStudents").textContent = data.students;
+        document.getElementById("onlineStudents").textContent =
+            data.studentsOnline;
 
-document.getElementById("onlineFaculty").textContent = data.faculty;
+        document.getElementById("onlineFaculty").textContent =
+            data.facultyOnline;
 
-document.getElementById("activeQR").textContent = data.sessions;
+        document.getElementById("activeQR").textContent =
+            data.qrSessions;
 
-document.getElementById("gpsUsers").textContent = data.gps;
+        document.getElementById("gpsUsers").textContent =
+            data.gpsActive;
+
+    }catch(err){
+
+        console.log(err);
+
+    }
 
 }
-
-}catch(err){
-
-console.log(err);
-
-}
-
-}
-
 /* ===========================
 FACULTY ATTENDANCE
 ===========================*/
