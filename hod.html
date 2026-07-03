@@ -5,6 +5,7 @@
 <title>GO GREEN – HOD Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 
 /* ================= ROOT THEME ================= */
@@ -183,16 +184,142 @@ if(localStorage.getItem("role")!=="hod"){
   </div>
 
   <div class="content">
-    <div class="grid">
+   <div class="grid">
 
-      <div class="card" onclick="go('hod-my-attendance.html')">📌 My Attendance</div>
-      <div class="card" onclick="go('hod-academics.html')">📚 Academics Management</div>
-      <div class="card" onclick="go('hod-leaves.html')">📝 Leave & Substitute</div>
-      <div class="card" onclick="go('hod-marks.html')">📊 Marks Approval</div>
-      <div class="card" onclick="go('hod-live.html')">📡 Live Classes</div>
-      <div class="card" onclick="go('hod-warning.html')">🚨 Early Warning</div>
+<div class="card">
+<h3>👨‍🏫 Faculty</h3>
+<h1 id="totalFaculty">0</h1>
+<p>Department Faculty</p>
+</div>
 
-    </div>
+<div class="card">
+<h3>🎓 Students</h3>
+<h1 id="totalStudents">0</h1>
+<p>Total Students</p>
+</div>
+
+<div class="card">
+<h3>📚 Subjects</h3>
+<h1 id="totalSubjects">0</h1>
+<p>Allocated Subjects</p>
+</div>
+
+<div class="card">
+<h3>🟢 Live Classes</h3>
+<h1 id="liveClasses">0</h1>
+<p>Currently Running</p>
+</div>
+
+<div class="card">
+<h3>📝 Pending Leaves</h3>
+<h1 id="pendingLeaves">0</h1>
+<p>Need Approval</p>
+</div>
+
+<div class="card">
+<h3>📊 Marks Approval</h3>
+<h1 id="pendingMarks">0</h1>
+<p>Waiting Approval</p>
+</div>
+
+</div>
+    <br><br>
+
+<div class="grid">
+
+<div class="card">
+
+<h2>📈 Department Attendance</h2>
+
+<canvas id="attendanceChart" height="130"></canvas>
+
+</div>
+
+<div class="card">
+
+<h2>🤖 AI Insights</h2>
+
+<div id="aiInsights">
+
+Loading...
+
+</div>
+
+</div>
+  <br>
+
+<div class="grid">
+
+<div class="card">
+
+<h2>📢 Notifications</h2>
+
+<div id="notifications">
+
+Loading...
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>📝 Recent Activity</h2>
+
+<div id="recentActivity">
+
+Loading...
+
+</div>
+
+</div>
+
+</div>
+  <br>
+
+<div class="grid">
+
+<div class="card">
+
+<h2>📊 Department Performance</h2>
+
+<table width="100%" id="performanceTable">
+
+<thead>
+
+<tr>
+
+<th>Section</th>
+
+<th>Attendance</th>
+
+<th>Marks</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td colspan="3">
+
+Loading...
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
   </div>
 </div>
 
