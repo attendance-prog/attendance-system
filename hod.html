@@ -829,6 +829,33 @@ document.querySelectorAll(".nav-link").forEach(l=>{
     l.classList.add("active");
   }
 });
+  function loadDashboard(){
+
+fetch(API_URL,{
+    method:"POST",
+    headers:{
+        "Content-Type":"text/plain"
+    },
+    body:JSON.stringify({
+        action:"getHodDashboardSummary"
+    })
+})
+.then(r=>r.json())
+.then(data=>{
+
+    if(!data.success) return;
+
+    document.getElementById("totalFaculty").innerHTML=data.faculty;
+    document.getElementById("totalStudents").innerHTML=data.students;
+    document.getElementById("totalSubjects").innerHTML=data.subjects;
+    document.getElementById("liveClasses").innerHTML=data.live;
+    document.getElementById("pendingLeaves").innerHTML=data.pendingLeaves;
+    document.getElementById("pendingMarks").innerHTML=data.pendingMarks;
+
+})
+.catch(console.error);
+
+}
 window.onload=function(){
 
     loadDashboard();
