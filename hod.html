@@ -556,23 +556,23 @@ if(localStorage.getItem("role")!=="hod"){
         <table>
 
             <tr>
-                <td>Faculty Present</td>
-                <td id="facultyPresent">0</td>
+                <<td>Faculty Present</td>
+<td id="facultyPresent">0</td>
             </tr>
 
             <tr>
                 <td>Students Present</td>
-                <td id="studentsPresent">0</td>
+<td id="studentsPresent">0</td>
             </tr>
 
             <tr>
                 <td>Running Classes</td>
-                <td id="runningClasses">0</td>
+<td id="runningClasses">0</td>
             </tr>
 
             <tr>
-                <td>Attendance Today</td>
-                <td id="attendanceToday">0%</td>
+               <td>Attendance Today</td>
+<td id="attendanceToday">0%</td>
             </tr>
 
         </table>
@@ -854,6 +854,109 @@ fetch(API_URL,{
 
 })
 .catch(console.error);
+
+}
+  function loadAI(){
+
+fetch(API_URL,{
+    method:"POST",
+    headers:{
+        "Content-Type":"text/plain"
+    },
+    body:JSON.stringify({
+        action:"getHodAIInsights"
+    })
+})
+.then(r=>r.json())
+.then(data=>{
+
+    if(!data.success) return;
+
+    // Department Status
+    document.getElementById("facultyPresent").innerHTML=data.facultyPresent;
+    document.getElementById("studentsPresent").innerHTML=data.studentsPresent;
+    document.getElementById("runningClasses").innerHTML=data.liveClasses;
+    document.getElementById("attendanceToday").innerHTML=data.attendancePercent+"%";
+
+    // AI Insights
+    document.getElementById("aiInsights").innerHTML=`
+
+        <p>👨‍🏫 Faculty Present : <b>${data.facultyPresent}</b></p>
+        <p>🎓 Students Present : <b>${data.studentsPresent}</b></p>
+        <p>📡 Running Classes : <b>${data.liveClasses}</b></p>
+        <p>📈 Attendance Today : <b>${data.attendancePercent}%</b></p>
+        <hr>
+        <p style="color:green">
+        ✔ Department running normally
+        </p>
+
+    `;
+
+});
+}
+  let hodChart;
+
+function loadChart(){
+
+fetch(API_URL,{
+method:"POST",
+headers:{
+"Content-Type":"text/plain"
+},
+body:JSON.stringify({
+action:"getAttendanceAnalytics"
+})
+})
+.then(r=>r.json())
+.then(data=>{
+
+if(!data.success) return;
+
+const ctx=document.getElementById("attendanceChart");
+
+if(hodChart) hodChart.destroy();
+
+hodChart=new Chart(ctx,{
+
+type:"bar",
+
+data:{
+
+labels:data.labels,
+
+datasets:[{
+
+label:"Attendance",
+
+data:data.values,
+
+backgroundColor:"#1abc9c"
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+maintainAspectRatio:false,
+
+scales:{
+
+y:{
+
+beginAtZero:true
+
+}
+
+}
+
+}
+
+});
+
+});
 
 }
 window.onload=function(){
