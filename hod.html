@@ -894,11 +894,13 @@ fetch(API_URL,{
 
 });
 }
-  let hodChart;
+ let hodChart;
 
-function loadChart(){
+async function loadChart(){
 
-fetch(API_URL,{
+try{
+
+const res=await fetch(API_URL,{
 method:"POST",
 headers:{
 "Content-Type":"text/plain"
@@ -906,9 +908,11 @@ headers:{
 body:JSON.stringify({
 action:"getAttendanceAnalytics"
 })
-})
-.then(r=>r.json())
-.then(data=>{
+});
+
+const data=await res.json();
+
+console.log(data);
 
 if(!data.success) return;
 
@@ -917,57 +921,51 @@ const ctx=document.getElementById("attendanceChart");
 if(hodChart) hodChart.destroy();
 
 hodChart=new Chart(ctx,{
-
 type:"bar",
-
 data:{
-
 labels:data.labels,
-
 datasets:[{
-
-label:"Attendance",
-
+label:"Attendance %",
 data:data.values,
-
-backgroundColor:"#1abc9c"
-
+backgroundColor:"#1abc9c",
+borderRadius:8
 }]
-
 },
-
 options:{
-
 responsive:true,
-
 maintainAspectRatio:false,
-
+plugins:{
+legend:{display:true}
+},
 scales:{
-
 y:{
-
 beginAtZero:true
-
 }
-
 }
-
 }
-
 });
 
-});
+}catch(e){
+
+console.log(e);
 
 }
-window.onload=function(){
 
-    loadDashboard();
+}
+window.onload=async function(){
 
-    loadChart();
+await loadDashboard();
 
-    loadAI();
+await loadChart();
 
+await loadAI();
 
+loadPerformance();
+loadNotifications();
+loadRecentActivity();
+loadFacultyStatus();
+loadTodayTimetable();
+loadWarnings();
 
 }
 </script>
