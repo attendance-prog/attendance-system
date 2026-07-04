@@ -959,22 +959,225 @@ console.log(e);
 }
 
 }
-window.onload=async function(){
+    /* ===========================================
+   DEPARTMENT PERFORMANCE
+=========================================== */
 
-await loadDashboard();
+async function loadPerformance(){
 
-await loadChart();
+  const res = await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"text/plain"},
+    body:JSON.stringify({
+      action:"getHodPerformance"
+    })
+  });
 
-await loadAI();
+  const data = await res.json();
 
-loadPerformance();
-loadNotifications();
-loadRecentActivity();
-loadFacultyStatus();
-loadTodayTimetable();
-loadWarnings();
+  let html="";
+
+  data.data.forEach(r=>{
+
+    html += `
+    <tr>
+      <td>${r.section}</td>
+      <td>${r.attendance}%</td>
+      <td>${r.average}</td>
+    </tr>`;
+
+  });
+
+  document.querySelector("#performanceTable tbody").innerHTML = html;
 
 }
+
+
+
+/* ===========================================
+   NOTIFICATIONS
+=========================================== */
+
+async function loadNotifications(){
+
+  const res=await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"text/plain"},
+    body:JSON.stringify({
+      action:"getHodNotifications"
+    })
+  });
+
+  const data=await res.json();
+
+  document.getElementById("notifications").innerHTML =
+    data.data.map(x=>`<div style="padding:8px 0">${x}</div>`).join("");
+
+}
+
+
+
+/* ===========================================
+   RECENT ACTIVITY
+=========================================== */
+
+async function loadRecentActivity(){
+
+  const res=await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"text/plain"},
+    body:JSON.stringify({
+      action:"getHodRecentActivity"
+    })
+  });
+
+  const data=await res.json();
+
+  document.getElementById("recentActivity").innerHTML =
+    data.data.map(x=>`<div style="padding:8px 0">✅ ${x.text}</div>`).join("");
+
+}
+
+
+
+/* ===========================================
+   TODAY TIMETABLE
+=========================================== */
+
+async function loadTodayTimetable(){
+
+  const res=await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"text/plain"},
+    body:JSON.stringify({
+      action:"getHodTimetable"
+    })
+  });
+
+  const data=await res.json();
+
+  let html="";
+
+  if(data.data.length===0){
+
+    html="<tr><td colspan='3'>No timetable today</td></tr>";
+
+  }else{
+
+    data.data.forEach(r=>{
+
+      html+=`
+      <tr>
+        <td>${r.time}</td>
+        <td>${r.subject}</td>
+        <td>${r.faculty}</td>
+      </tr>`;
+
+    });
+
+  }
+
+  document.querySelector("#todayTimetable tbody").innerHTML=html;
+
+}
+
+
+
+/* ===========================================
+   FACULTY STATUS
+=========================================== */
+
+async function loadFacultyStatus(){
+
+  const res=await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"text/plain"},
+    body:JSON.stringify({
+      action:"getHodFacultyStatus"
+    })
+  });
+
+  const data=await res.json();
+
+  let html="";
+
+  data.data.forEach(r=>{
+
+    html+=`
+    <tr>
+      <td>${r.name}</td>
+      <td>${r.status}</td>
+    </tr>`;
+
+  });
+
+  document.querySelector("#facultyStatus tbody").innerHTML=html;
+
+}
+
+
+
+/* ===========================================
+   EARLY WARNING
+=========================================== */
+
+async function loadWarnings(){
+
+  const res=await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"text/plain"},
+    body:JSON.stringify({
+      action:"getHodWarnings"
+    })
+  });
+
+  const data=await res.json();
+
+  let html="";
+
+  if(data.data.length===0){
+
+    html="<tr><td colspan='3'>No warnings</td></tr>";
+
+  }else{
+
+    data.data.forEach(r=>{
+
+      html+=`
+      <tr>
+        <td>${r.student}</td>
+        <td>${r.attendance}</td>
+        <td style="color:red;font-weight:bold">${r.status}</td>
+      </tr>`;
+
+    });
+
+  }
+
+  document.querySelector("#warningTable tbody").innerHTML=html;
+
+}
+window.onload=function(){
+
+  loadDashboard();
+
+  loadChart();
+
+  loadAI();
+
+  loadPerformance();
+
+  loadNotifications();
+
+  loadRecentActivity();
+
+  loadTodayTimetable();
+
+  loadFacultyStatus();
+
+  loadWarnings();
+
+};
 </script>
 
 </body>
