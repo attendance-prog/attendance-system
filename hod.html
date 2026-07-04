@@ -600,7 +600,9 @@ if(localStorage.getItem("role")!=="hod"){
 
         <h2>📈 Attendance Analytics</h2>
 
-        <canvas id="attendanceChart" height="130"></canvas>
+        <<div style="height:320px;">
+    <canvas id="attendanceChart"></canvas>
+</div>
 
     </div>
 
@@ -933,7 +935,8 @@ borderRadius:8
 },
 options:{
 responsive:true,
-maintainAspectRatio:false,
+maintainAspectRatio:true,
+aspectRatio:2.5,
 plugins:{
 legend:{display:true}
 },
