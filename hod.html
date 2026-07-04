@@ -348,10 +348,14 @@ border-radius:8px;
 
 /* Chart */
 
-canvas{
+.chart-box{
+    height:320px;
+    position:relative;
+}
 
-width:100%!important;
-
+.chart-box canvas{
+    width:100% !important;
+    height:100% !important;
 }
 
 /* Dark Mode */
@@ -600,7 +604,7 @@ if(localStorage.getItem("role")!=="hod"){
 
         <h2>📈 Attendance Analytics</h2>
 
-        <<div style="height:320px;">
+        <div style="height:320px;">
     <canvas id="attendanceChart"></canvas>
 </div>
 
