@@ -4,9 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>GO GREEN | HOD Dashboard</title>
 
@@ -24,11 +22,11 @@ content="width=device-width, initial-scale=1.0">
 --danger:#d32f2f;
 --warning:#ff9800;
 
---background:#f4f7fb;
+--bg:#f4f7fb;
 --card:#ffffff;
---text:#202124;
+--text:#222;
 
---shadow:0 10px 30px rgba(0,0,0,.08);
+--shadow:0 8px 20px rgba(0,0,0,.08);
 
 }
 
@@ -37,29 +35,27 @@ content="width=device-width, initial-scale=1.0">
 margin:0;
 padding:0;
 box-sizing:border-box;
-
-font-family:
-Segoe UI,
-Arial,
-sans-serif;
+font-family:Segoe UI,Arial,sans-serif;
 
 }
 
 body{
 
-background:var(--background);
-
+background:var(--bg);
 color:var(--text);
-
 display:flex;
-
 overflow-x:hidden;
-
 transition:.3s;
 
 }
 
-/* Sidebar */
+body.dark{
+
+--bg:#111827;
+--card:#1f2937;
+--text:#ffffff;
+
+}
 
 .sidebar{
 
@@ -79,13 +75,19 @@ background:linear-gradient(
 #1565c0
 );
 
-color:#fff;
+color:white;
 
 overflow:auto;
 
 transition:.3s;
 
 z-index:1000;
+
+}
+
+.sidebar.collapsed{
+
+width:70px;
 
 }
 
@@ -119,13 +121,7 @@ font-size:15px;
 
 .sidebar a:hover{
 
-background:rgba(255,255,255,.12);
-
-}
-
-.sidebar.collapsed{
-
-width:70px;
+background:rgba(255,255,255,.15);
 
 }
 
@@ -134,8 +130,6 @@ width:70px;
 display:none;
 
 }
-
-/* Main */
 
 .main{
 
@@ -153,11 +147,11 @@ margin-left:70px;
 
 }
 
-/* Header */
-
 .header{
 
 height:70px;
+
+background:white;
 
 display:flex;
 
@@ -165,9 +159,7 @@ justify-content:space-between;
 
 align-items:center;
 
-padding:0 30px;
-
-background:white;
+padding:0 25px;
 
 box-shadow:var(--shadow);
 
@@ -175,19 +167,57 @@ position:sticky;
 
 top:0;
 
-z-index:99;
+z-index:999;
 
 }
 
-.header strong{
+body.dark .header{
+
+background:#1f2937;
+
+}
+
+.header-left{
+
+display:flex;
+
+align-items:center;
+
+gap:15px;
+
+}
+
+.menu-btn{
+
+background:none;
+
+border:none;
+
+font-size:24px;
+
+cursor:pointer;
+
+}
+
+.header-title{
 
 font-size:22px;
 
+font-weight:700;
+
 }
 
-.header-buttons button{
+.header-right{
 
-margin-left:10px;
+display:flex;
+
+align-items:center;
+
+gap:10px;
+
+}
+
+.header-right button{
 
 padding:10px 18px;
 
@@ -215,22 +245,18 @@ color:white;
 
 }
 
-/* Content */
-
 .content{
 
-padding:30px;
+padding:25px;
 
 }
-
-/* Cards */
 
 .grid{
 
 display:grid;
 
 grid-template-columns:
-repeat(auto-fit,minmax(220px,1fr));
+repeat(auto-fit,minmax(230px,1fr));
 
 gap:20px;
 
@@ -240,11 +266,11 @@ margin-bottom:25px;
 
 .card{
 
-background:white;
+background:var(--card);
 
 border-radius:14px;
 
-padding:22px;
+padding:20px;
 
 box-shadow:var(--shadow);
 
@@ -254,7 +280,7 @@ transition:.3s;
 
 .card:hover{
 
-transform:translateY(-4px);
+transform:translateY(-5px);
 
 }
 
@@ -272,9 +298,9 @@ color:#666;
 
 font-size:34px;
 
-margin-bottom:8px;
-
 color:#0d47a1;
+
+margin-bottom:10px;
 
 }
 
@@ -286,13 +312,19 @@ color:#777;
 
 }
 
-/* Tables */
+body.dark .card{
+
+background:#1f2937;
+
+}
 
 table{
 
 width:100%;
 
 border-collapse:collapse;
+
+margin-top:10px;
 
 }
 
@@ -316,23 +348,19 @@ text-align:center;
 
 }
 
-/* Notifications */
-
 .notice{
 
 padding:10px;
 
 margin:8px 0;
 
-border-left:5px solid #1565c0;
-
 background:#f5faff;
+
+border-left:5px solid #1565c0;
 
 border-radius:8px;
 
 }
-
-/* Activity */
 
 .activity{
 
@@ -346,53 +374,57 @@ border-radius:8px;
 
 }
 
-/* Chart */
-
 .chart-box{
-    height:320px;
-    position:relative;
+
+height:320px;
+
+position:relative;
+
 }
 
 .chart-box canvas{
-    width:100% !important;
-    height:100% !important;
-}
 
-/* Dark Mode */
+width:100%!important;
 
-body.dark{
-
---background:#121212;
-
---card:#1d1d1d;
-
---text:#f5f5f5;
+height:100%!important;
 
 }
 
-body.dark .card{
+.search-box{
 
-background:#1d1d1d;
+margin-bottom:15px;
+
+}
+
+.search-box input{
+
+width:100%;
+
+padding:10px;
+
+border-radius:8px;
+
+border:1px solid #ddd;
+
+outline:none;
+
+}
+
+.btn{
+
+padding:10px 16px;
+
+border:none;
+
+border-radius:8px;
+
+cursor:pointer;
+
+background:#0d47a1;
 
 color:white;
 
 }
-
-body.dark .header{
-
-background:#1d1d1d;
-
-color:white;
-
-}
-
-body.dark table td{
-
-border-color:#333;
-
-}
-
-/* Responsive */
 
 @media(max-width:768px){
 
@@ -416,7 +448,13 @@ margin-left:70px;
 
 .header{
 
-padding:0 15px;
+padding:0 12px;
+
+}
+
+.grid{
+
+grid-template-columns:1fr;
 
 }
 
@@ -425,54 +463,87 @@ padding:0 15px;
 </style>
 
 </head>
+
 <body>
 
 <script>
+
 if(localStorage.getItem("role")!=="hod"){
-  alert("Unauthorized");
-  location.href="index.html";
+
+alert("Unauthorized Access");
+
+location.href="index.html";
+
 }
+
 </script>
 
-<!-- ================= SIDEBAR ================= -->
-
 <div class="sidebar">
-  <h2>🌱 GO GREEN</h2>
-  <a href="hod.html" class="nav-link">🏠 <span>Dashboard</span></a>
-  <a href="hod-my-attendance.html" class="nav-link">📌 <span>My Attendance</span></a>
-  <a href="hod-academics.html" class="nav-link">📚 <span>Academics</span></a>
-  <a href="hod-leaves.html" class="nav-link">📝 <span>Leave & Substitute</span></a>
-  <a href="hod-marks.html" class="nav-link">📊 <span>Marks Approval</span></a>
-  <a href="hod-live.html" class="nav-link">📡 <span>Live Classes</span></a>
-  <a href="hod-warning.html" class="nav-link">🚨 <span>Early Warning</span></a>
-</div>
 
-<!-- ================= MAIN ================= -->
+<h2>🌱 GO GREEN</h2>
+
+<a href="hod.html">🏠 <span>Dashboard</span></a>
+
+<a href="hod-my-attendance.html">📌 <span>My Attendance</span></a>
+
+<a href="hod-academics.html">📚 <span>Academics</span></a>
+
+<a href="hod-leaves.html">📝 <span>Leave & Substitute</span></a>
+
+<a href="hod-marks.html">📊 <span>Marks Approval</span></a>
+
+<a href="hod-live.html">📡 <span>Live Classes</span></a>
+
+<a href="hod-warning.html">🚨 <span>Early Warning</span></a>
+
+</div>
 
 <div class="main">
 
-  <div class="header">
-    <div>
-      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-      <strong>HOD Dashboard</strong>
-    </div>
+<div class="header">
 
-    <div class="header-buttons">
-      <button class="dark-btn" onclick="toggleDark()">🌙</button>
-      <button class="logout-btn" onclick="logout()">Logout</button>
-    </div>
-  </div>
+<div class="header-left">
+
+<button class="menu-btn"
+onclick="toggleSidebar()">☰</button>
+
+<div class="header-title">
+
+HOD Dashboard
+
+</div>
+
+</div>
+
+<div class="header-right">
+
+<button class="dark-btn"
+onclick="toggleDark()">
+
+🌙
+
+</button>
+
+<button class="logout-btn"
+onclick="logout()">
+
+Logout
+
+</button>
+
+</div>
+
+</div>
 
 <div class="content">
-
-<!-- ================= DASHBOARD SUMMARY ================= -->
+    <!-- ================= DASHBOARD SUMMARY ================= -->
 
 <div class="grid">
 
     <div class="card">
         <h3>👨‍🏫 Total Faculty</h3>
         <h1 id="totalFaculty">0</h1>
-        <p>Faculty Members</p>
+        <p>Department Faculty Members</p>
     </div>
 
     <div class="card">
@@ -482,74 +553,121 @@ if(localStorage.getItem("role")!=="hod"){
     </div>
 
     <div class="card">
-        <h3>📚 Subjects</h3>
+        <h3>📚 Total Subjects</h3>
         <h1 id="totalSubjects">0</h1>
-        <p>Department Subjects</p>
+        <p>Allocated Subjects</p>
     </div>
 
     <div class="card">
         <h3>📡 Live Classes</h3>
         <h1 id="liveClasses">0</h1>
-        <p>Running Now</p>
+        <p>Currently Running</p>
     </div>
 
     <div class="card">
         <h3>📝 Pending Leaves</h3>
         <h1 id="pendingLeaves">0</h1>
-        <p>Need Approval</p>
+        <p>Awaiting Approval</p>
     </div>
 
     <div class="card">
-        <h3>📊 Marks Approval</h3>
+        <h3>📊 Pending Marks</h3>
         <h1 id="pendingMarks">0</h1>
-        <p>Pending Requests</p>
+        <p>Approval Required</p>
+    </div>
+
+    <div class="card">
+        <h3>🕒 Last Updated</h3>
+        <h2 id="lastUpdated">--</h2>
+        <p>Dashboard Refresh Time</p>
     </div>
 
 </div>
 
 <!-- ================= QUICK ACTIONS ================= -->
 
+<h2 style="margin-bottom:15px;">⚡ Quick Actions</h2>
+
 <div class="grid">
 
     <div class="card" onclick="go('hod-academics.html')">
-        📚
+
+        <h2>📚</h2>
+
         <h3>Academics</h3>
+
         <p>Subjects, Timetable & Allocation</p>
+
     </div>
 
     <div class="card" onclick="go('hod-live.html')">
-        📡
+
+        <h2>📡</h2>
+
         <h3>Live Classes</h3>
+
         <p>Monitor Running Classes</p>
+
     </div>
 
     <div class="card" onclick="go('hod-leaves.html')">
-        📝
+
+        <h2>📝</h2>
+
         <h3>Leave Approval</h3>
+
         <p>Approve Faculty Leave</p>
+
     </div>
 
     <div class="card" onclick="go('hod-marks.html')">
-        📊
+
+        <h2>📊</h2>
+
         <h3>Marks Approval</h3>
+
         <p>Approve Internal Marks</p>
+
     </div>
 
     <div class="card" onclick="go('hod-warning.html')">
-        🚨
+
+        <h2>🚨</h2>
+
         <h3>Early Warning</h3>
+
         <p>Low Attendance Students</p>
+
     </div>
 
     <div class="card" onclick="go('hod-my-attendance.html')">
-        📌
+
+        <h2>📌</h2>
+
         <h3>My Attendance</h3>
-        <p>View Attendance Report</p>
+
+        <p>View Personal Attendance</p>
+
     </div>
 
 </div>
 
-<!-- ================= LIVE STATUS ================= -->
+<!-- ================= ACTION BUTTONS ================= -->
+
+<div style="display:flex;gap:12px;margin:20px 0;flex-wrap:wrap;">
+
+<button class="btn" onclick="printDashboard()">
+🖨 Print Dashboard
+</button>
+
+<button class="btn" onclick="exportPerformanceCSV()">
+📥 Export Performance
+</button>
+
+</div>
+<!-- =========================================================
+     DEPARTMENT STATUS + AI INSIGHTS
+========================================================= -->
 
 <div class="grid">
 
@@ -561,22 +679,22 @@ if(localStorage.getItem("role")!=="hod"){
 
             <tr>
                 <td>Faculty Present</td>
-<td id="facultyPresent">0</td>
+                <td id="facultyPresent">0</td>
             </tr>
 
             <tr>
                 <td>Students Present</td>
-<td id="studentsPresent">0</td>
+                <td id="studentsPresent">0</td>
             </tr>
 
             <tr>
                 <td>Running Classes</td>
-<td id="runningClasses">0</td>
+                <td id="runningClasses">0</td>
             </tr>
 
             <tr>
-               <td>Attendance Today</td>
-<td id="attendanceToday">0%</td>
+                <td>Attendance Today</td>
+                <td id="attendanceToday">0%</td>
             </tr>
 
         </table>
@@ -589,14 +707,19 @@ if(localStorage.getItem("role")!=="hod"){
 
         <div id="aiInsights">
 
-            Loading...
+            <div class="activity">
+                Loading AI Insights...
+            </div>
 
         </div>
 
     </div>
 
 </div>
-  <!-- ================= ATTENDANCE ANALYTICS ================= -->
+
+<!-- =========================================================
+     ATTENDANCE ANALYTICS
+========================================================= -->
 
 <div class="grid">
 
@@ -604,9 +727,11 @@ if(localStorage.getItem("role")!=="hod"){
 
         <h2>📈 Attendance Analytics</h2>
 
-        <div style="height:320px;">
-    <canvas id="attendanceChart"></canvas>
-</div>
+        <div class="chart-box">
+
+            <canvas id="attendanceChart"></canvas>
+
+        </div>
 
     </div>
 
@@ -650,9 +775,60 @@ if(localStorage.getItem("role")!=="hod"){
 
 </div>
 
-<!-- ================= NOTIFICATIONS & RECENT ACTIVITY ================= -->
+<!-- =========================================================
+     LIVE HEALTH INDICATORS
+========================================================= -->
 
 <div class="grid">
+
+    <div class="card">
+
+        <h3>🟢 Faculty Availability</h3>
+
+        <h1 id="facultyAvailable">0</h1>
+
+        <p>Faculty Present Today</p>
+
+    </div>
+
+    <div class="card">
+
+        <h3>🎓 Student Attendance</h3>
+
+        <h1 id="attendancePercent">0%</h1>
+
+        <p>Today's Attendance</p>
+
+    </div>
+
+    <div class="card">
+
+        <h3>📡 Active Sessions</h3>
+
+        <h1 id="activeSessions">0</h1>
+
+        <p>Live Running Classes</p>
+
+    </div>
+
+    <div class="card">
+
+        <h3>⚠ Alerts</h3>
+
+        <h1 id="totalAlerts">0</h1>
+
+        <p>Students Below 75%</p>
+
+    </div>
+
+</div>
+<!-- =========================================================
+     NOTIFICATIONS & RECENT ACTIVITY
+========================================================= -->
+
+<div class="grid">
+
+    <!-- Notifications -->
 
     <div class="card">
 
@@ -660,11 +836,15 @@ if(localStorage.getItem("role")!=="hod"){
 
         <div id="notifications">
 
-            <div class="notice">Loading...</div>
+            <div class="notice">
+                Loading Notifications...
+            </div>
 
         </div>
 
     </div>
+
+    <!-- Recent Activity -->
 
     <div class="card">
 
@@ -672,7 +852,9 @@ if(localStorage.getItem("role")!=="hod"){
 
         <div id="recentActivity">
 
-            <div class="activity">Loading...</div>
+            <div class="activity">
+                Loading Recent Activity...
+            </div>
 
         </div>
 
@@ -680,9 +862,13 @@ if(localStorage.getItem("role")!=="hod"){
 
 </div>
 
-<!-- ================= TODAY TIMETABLE & FACULTY STATUS ================= -->
+<!-- =========================================================
+     TODAY'S TIMETABLE & FACULTY STATUS
+========================================================= -->
 
 <div class="grid">
+
+    <!-- Today's Timetable -->
 
     <div class="card">
 
@@ -710,7 +896,7 @@ if(localStorage.getItem("role")!=="hod"){
 
                     <td colspan="3">
 
-                        No timetable loaded
+                        Loading...
 
                     </td>
 
@@ -722,9 +908,33 @@ if(localStorage.getItem("role")!=="hod"){
 
     </div>
 
+    <!-- Faculty Status -->
+
     <div class="card">
 
-        <h2>👨‍🏫 Faculty Status</h2>
+        <div style="display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    margin-bottom:15px;">
+
+            <h2>👨‍🏫 Faculty Status</h2>
+
+            <input
+
+            id="facultySearch"
+
+            type="text"
+
+            placeholder="Search Faculty"
+
+            style="width:180px;
+                   padding:8px;
+                   border-radius:8px;
+                   border:1px solid #ccc;"
+
+            onkeyup="searchFaculty()">
+
+        </div>
 
         <table id="facultyStatus">
 
@@ -760,13 +970,37 @@ if(localStorage.getItem("role")!=="hod"){
 
 </div>
 
-<!-- ================= EARLY WARNING ================= -->
+<!-- =========================================================
+     EARLY WARNING STUDENTS
+========================================================= -->
 
 <div class="grid">
 
     <div class="card">
 
-        <h2>🚨 Early Warning Students</h2>
+        <div style="display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    margin-bottom:15px;">
+
+            <h2>🚨 Early Warning Students</h2>
+
+            <input
+
+            id="warningSearch"
+
+            type="text"
+
+            placeholder="Search Student"
+
+            style="width:180px;
+                   padding:8px;
+                   border-radius:8px;
+                   border:1px solid #ccc;"
+
+            onkeyup="searchWarnings()">
+
+        </div>
 
         <table id="warningTable">
 
@@ -790,7 +1024,7 @@ if(localStorage.getItem("role")!=="hod"){
 
                     <td colspan="3">
 
-                        No warnings
+                        Loading...
 
                     </td>
 
@@ -801,405 +1035,763 @@ if(localStorage.getItem("role")!=="hod"){
         </table>
 
     </div>
-</div>   
-</div>   
+
+</div>
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<div style="margin-top:40px;
+            text-align:center;
+            color:#777;
+            font-size:14px;">
+
+    <hr style="margin-bottom:15px;">
+
+    🌱 GO GREEN Attendance Management System
+
+    <br><br>
+
+    HOD Dashboard Version 3.0
+
 </div>
 <script>
-const API_URL =
-"https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-/* ===== Sidebar Toggle ===== */
+
+const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+let hodChart=null;
+
+/* ===================================================
+   SIDEBAR
+=================================================== */
+
 function toggleSidebar(){
-  document.querySelector(".sidebar").classList.toggle("collapsed");
-  document.querySelector(".main").classList.toggle("expanded");
+
+document.querySelector(".sidebar").classList.toggle("collapsed");
+
+document.querySelector(".main").classList.toggle("expanded");
+
 }
 
-/* ===== Dark Mode ===== */
+/* ===================================================
+   DARK MODE
+=================================================== */
+
 function toggleDark(){
-  document.body.classList.toggle("dark");
+
+document.body.classList.toggle("dark");
+
+localStorage.setItem(
+
+"hodTheme",
+
+document.body.classList.contains("dark")
+?"dark":"light"
+
+);
+
 }
 
-/* ===== Logout ===== */
+if(localStorage.getItem("hodTheme")=="dark"){
+
+document.body.classList.add("dark");
+
+}
+
+/* ===================================================
+   LOGOUT
+=================================================== */
+
 function logout(){
-  localStorage.clear();
-  location.href="index.html";
-}
 
-/* ===== Navigation ===== */
-function go(p){
-  window.location.href=p;
-}
+if(confirm("Are you sure you want to logout?")){
 
-/* ===== Active Link Highlight ===== */
-document.querySelectorAll(".nav-link").forEach(l=>{
-  if(l.href===window.location.href){
-    l.classList.add("active");
-  }
-});
-  function loadDashboard(){
+localStorage.clear();
 
-fetch(API_URL,{
-    method:"POST",
-    headers:{
-        "Content-Type":"text/plain"
-    },
-    body:JSON.stringify({
-        action:"getHodDashboardSummary"
-    })
-})
-.then(r=>r.json())
-.then(data=>{
-
-    if(!data.success) return;
-
-    document.getElementById("totalFaculty").innerHTML=data.faculty;
-    document.getElementById("totalStudents").innerHTML=data.students;
-    document.getElementById("totalSubjects").innerHTML=data.subjects;
-    document.getElementById("liveClasses").innerHTML=data.live;
-    document.getElementById("pendingLeaves").innerHTML=data.pendingLeaves;
-    document.getElementById("pendingMarks").innerHTML=data.pendingMarks;
-
-})
-.catch(console.error);
+location.href="index.html";
 
 }
-  function loadAI(){
 
-fetch(API_URL,{
-    method:"POST",
-    headers:{
-        "Content-Type":"text/plain"
-    },
-    body:JSON.stringify({
-        action:"getHodAIInsights"
-    })
-})
-.then(r=>r.json())
-.then(data=>{
+}
 
-    if(!data.success) return;
+/* ===================================================
+   PAGE NAVIGATION
+=================================================== */
 
-    // Department Status
-    document.getElementById("facultyPresent").innerHTML=data.facultyPresent;
-    document.getElementById("studentsPresent").innerHTML=data.studentsPresent;
-    document.getElementById("runningClasses").innerHTML=data.liveClasses;
-    document.getElementById("attendanceToday").innerHTML=data.attendancePercent+"%";
+function go(page){
 
-    // AI Insights
-    document.getElementById("aiInsights").innerHTML=`
+location.href=page;
 
-        <p>👨‍🏫 Faculty Present : <b>${data.facultyPresent}</b></p>
-        <p>🎓 Students Present : <b>${data.studentsPresent}</b></p>
-        <p>📡 Running Classes : <b>${data.liveClasses}</b></p>
-        <p>📈 Attendance Today : <b>${data.attendancePercent}%</b></p>
-        <hr>
-        <p style="color:green">
-        ✔ Department running normally
-        </p>
+}
 
-    `;
+/* ===================================================
+   ACTIVE MENU
+=================================================== */
+
+document.querySelectorAll(".sidebar a").forEach(a=>{
+
+if(a.href==location.href){
+
+a.style.background="rgba(255,255,255,.18)";
+
+}
 
 });
+
+/* ===================================================
+   UPDATE TIME
+=================================================== */
+
+function updateTime(){
+
+let now=new Date();
+
+document.getElementById("lastUpdated").innerHTML=
+
+now.toLocaleDateString()
+
++"<br>"+
+
+now.toLocaleTimeString();
+
 }
- let hodChart;
 
-async function loadChart(){
+/* ===================================================
+   SEARCH FACULTY
+=================================================== */
 
-try{
+function searchFaculty(){
+
+let value=document
+
+.getElementById("facultySearch")
+
+.value
+
+.toLowerCase();
+
+document
+
+.querySelectorAll("#facultyStatus tbody tr")
+
+.forEach(row=>{
+
+row.style.display=
+
+row.innerText
+
+.toLowerCase()
+
+.includes(value)
+
+?"":"none";
+
+});
+
+}
+
+/* ===================================================
+   SEARCH WARNING STUDENTS
+=================================================== */
+
+function searchWarnings(){
+
+let value=document
+
+.getElementById("warningSearch")
+
+.value
+
+.toLowerCase();
+
+document
+
+.querySelectorAll("#warningTable tbody tr")
+
+.forEach(row=>{
+
+row.style.display=
+
+row.innerText
+
+.toLowerCase()
+
+.includes(value)
+
+?"":"none";
+
+});
+
+}
+
+/* ===================================================
+   EXPORT PERFORMANCE CSV
+=================================================== */
+
+function exportPerformanceCSV(){
+
+let csv="Section,Attendance,Average\n";
+
+document
+
+.querySelectorAll("#performanceTable tbody tr")
+
+.forEach(r=>{
+
+let td=r.querySelectorAll("td");
+
+if(td.length>=3){
+
+csv+=
+
+td[0].innerText+","+
+
+td[1].innerText+","+
+
+td[2].innerText+"\n";
+
+}
+
+});
+
+let blob=new Blob([csv],{
+
+type:"text/csv"
+
+});
+
+let a=document.createElement("a");
+
+a.href=URL.createObjectURL(blob);
+
+a.download="DepartmentPerformance.csv";
+
+a.click();
+
+}
+
+/* ===================================================
+   PRINT
+=================================================== */
+
+function printDashboard(){
+
+window.print();
+
+}
+
+/* ===================================================
+   GENERIC API CALL
+=================================================== */
+
+async function api(action){
 
 const res=await fetch(API_URL,{
+
 method:"POST",
+
 headers:{
+
 "Content-Type":"text/plain"
+
 },
+
 body:JSON.stringify({
-action:"getAttendanceAnalytics"
+
+action:action
+
 })
+
 });
 
-const data=await res.json();
+return await res.json();
 
-console.log(data);
+}
+/* ===================================================
+   DASHBOARD SUMMARY
+=================================================== */
+
+async function loadDashboardSummary(){
+
+const data=await api("getHodDashboardSummary");
+
+if(!data.success) return;
+
+document.getElementById("totalFaculty").innerHTML=data.faculty;
+document.getElementById("totalStudents").innerHTML=data.students;
+document.getElementById("totalSubjects").innerHTML=data.subjects;
+document.getElementById("liveClasses").innerHTML=data.liveClasses;
+document.getElementById("pendingLeaves").innerHTML=data.pendingLeaves;
+document.getElementById("pendingMarks").innerHTML=data.pendingMarks;
+
+}
+
+/* ===================================================
+   DEPARTMENT STATUS
+=================================================== */
+
+async function loadDepartmentStatus(){
+
+const data=await api("getHodDepartmentStatus");
+
+if(!data.success) return;
+
+document.getElementById("facultyPresent").innerHTML=data.facultyPresent;
+
+document.getElementById("studentsPresent").innerHTML=data.studentsPresent;
+
+document.getElementById("runningClasses").innerHTML=data.runningClasses;
+
+document.getElementById("attendanceToday").innerHTML=data.attendance+"%";
+
+document.getElementById("facultyAvailable").innerHTML=data.facultyPresent;
+
+document.getElementById("attendancePercent").innerHTML=data.attendance+"%";
+
+document.getElementById("activeSessions").innerHTML=data.runningClasses;
+
+}
+
+/* ===================================================
+   AI INSIGHTS
+=================================================== */
+
+async function loadSmartAI(){
+
+const data=await api("getSmartAIInsights");
+
+if(!data.success) return;
+
+let html="";
+
+data.data.forEach(item=>{
+
+html+=`
+
+<div class="activity">
+
+${item}
+
+</div>
+
+`;
+
+});
+
+document.getElementById("aiInsights").innerHTML=html;
+
+}
+
+/* ===================================================
+   ATTENDANCE CHART
+=================================================== */
+
+async function loadAttendanceChart(){
+
+const data=await api("getHodAttendanceAnalytics");
 
 if(!data.success) return;
 
 const ctx=document.getElementById("attendanceChart");
 
-if(hodChart) hodChart.destroy();
+if(hodChart){
 
-hodChart=new Chart(ctx,{
-type:"bar",
-data:{
-labels:data.labels,
-datasets:[{
-label:"Attendance %",
-data:data.values,
-backgroundColor:"#1abc9c",
-borderRadius:8
-}]
-},
-options:{
-responsive:true,
-maintainAspectRatio:true,
-aspectRatio:2.5,
-plugins:{
-legend:{display:true}
-},
-scales:{
-y:{
-beginAtZero:true
+hodChart.destroy();
+
+}
+
+if(data.labels && data.labels.length){
+
+    hodChart = new Chart(ctx,{
+
+        type:"bar",
+
+        data:{
+            labels:data.labels,
+            datasets:[{
+                label:"Attendance",
+                data:data.values,
+                borderWidth:2
+            }]
+        },
+
+        options:{
+            responsive:true,
+            maintainAspectRatio:false
+        }
+
+    });
 }
 }
-}
+
+/* ===================================================
+   DEPARTMENT PERFORMANCE
+=================================================== */
+
+async function loadDepartmentPerformance(){
+
+const data=await api("getHodPerformance");
+
+if(!data.success) return;
+
+let html="";
+
+data.data.forEach(r=>{
+
+html+=`
+
+<tr>
+
+<td>${r.section}</td>
+
+<td>${r.attendance}%</td>
+
+<td>${r.average}%</td>
+
+</tr>
+
+`;
+
 });
 
-}catch(e){
-
-console.log(e);
+document.querySelector("#performanceTable tbody").innerHTML=html;
 
 }
 
-}
-    /* ===========================================
-   DEPARTMENT PERFORMANCE
-=========================================== */
-
-async function loadPerformance(){
-
-  const res = await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"text/plain"},
-    body:JSON.stringify({
-      action:"getHodPerformance"
-    })
-  });
-
-  const data = await res.json();
-
-  let html="";
-
-  data.data.forEach(r=>{
-
-    html += `
-    <tr>
-      <td>${r.section}</td>
-      <td>${r.attendance}%</td>
-      <td>${r.average}</td>
-    </tr>`;
-
-  });
-
-  document.querySelector("#performanceTable tbody").innerHTML = html;
-
-}
-
-
-
-/* ===========================================
+/* ===================================================
    NOTIFICATIONS
-=========================================== */
+=================================================== */
 
 async function loadNotifications(){
 
-  const res=await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"text/plain"},
-    body:JSON.stringify({
-      action:"getHodNotifications"
-    })
-  });
+const data=await api("getHodNotifications");
 
-  const data=await res.json();
+if(!data.success) return;
 
-  document.getElementById("notifications").innerHTML =
-    data.data.map(x=>`<div style="padding:8px 0">${x}</div>`).join("");
+let html="";
+
+data.data.forEach(n=>{
+
+html+=`
+
+<div class="notice">
+
+${n}
+
+</div>
+
+`;
+
+});
+
+document.getElementById("notifications").innerHTML=html;
 
 }
 
-
-
-/* ===========================================
+/* ===================================================
    RECENT ACTIVITY
-=========================================== */
+=================================================== */
 
 async function loadRecentActivity(){
 
-  const res=await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"text/plain"},
-    body:JSON.stringify({
-      action:"getHodRecentActivity"
-    })
-  });
+const data=await api("getHodRecentActivity");
 
-  const data=await res.json();
+if(!data.success) return;
 
-  document.getElementById("recentActivity").innerHTML =
-    data.data.map(x=>`<div style="padding:8px 0">✅ ${x.text}</div>`).join("");
+let html="";
+
+data.data.forEach(r=>{
+
+html+=`
+
+<div class="activity">
+
+${r.text}
+
+</div>
+
+`;
+
+});
+
+document.getElementById("recentActivity").innerHTML=html;
 
 }
 
-
-
-/* ===========================================
+/* ===================================================
    TODAY TIMETABLE
-=========================================== */
+=================================================== */
 
-async function loadTodayTimetable(){
+async function loadTimetable(){
 
-  const res=await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"text/plain"},
-    body:JSON.stringify({
-      action:"getHodTimetable"
-    })
-  });
+const data=await api("getHodTimetable");
 
-  const data=await res.json();
+if(!data.success) return;
 
-  let html="";
+let html="";
 
-  if(data.data.length===0){
+data.data.forEach(r=>{
 
-    html="<tr><td colspan='3'>No timetable today</td></tr>";
+html+=`
 
-  }else{
+<tr>
 
-    data.data.forEach(r=>{
+<td>${r.time}</td>
 
-      html+=`
-      <tr>
-        <td>${r.time}</td>
-        <td>${r.subject}</td>
-        <td>${r.faculty}</td>
-      </tr>`;
+<td>${r.subject}</td>
 
-    });
+<td>${r.faculty}</td>
 
-  }
+</tr>
 
-  document.querySelector("#todayTimetable tbody").innerHTML=html;
+`;
+
+});
+
+document.querySelector("#todayTimetable tbody").innerHTML=html;
 
 }
 
-
-
-/* ===========================================
+/* ===================================================
    FACULTY STATUS
-=========================================== */
+=================================================== */
 
 async function loadFacultyStatus(){
 
-  try{
+const data=await api("getHodFacultyStatus");
 
-    const res = await fetch(API_URL,{
-      method:"POST",
-      headers:{
-        "Content-Type":"text/plain"
-      },
-      body:JSON.stringify({
-        action:"getHodFacultyStatus"
-      })
-    });
+if(!data.success) return;
 
-    const data = await res.json();
+let html="";
 
-    console.log(data);
+data.data.forEach(r=>{
 
-    if(!data.success){
-      document.querySelector("#facultyStatus tbody").innerHTML =
-      `<tr><td colspan="2">${data.message}</td></tr>`;
-      return;
-    }
+html+=`
 
-    let html="";
+<tr>
 
-    data.data.forEach(r=>{
+<td>${r.name}</td>
 
-      html += `
-      <tr>
-        <td>${r.name}</td>
-        <td>${r.status}</td>
-      </tr>`;
+<td>
 
-    });
+<b style="color:${
+r.status=="Present"
+?"green"
+:"red"
+};">
 
-    document.querySelector("#facultyStatus tbody").innerHTML = html;
+${r.status}
 
-  }catch(err){
+</b>
 
-    console.error(err);
+</td>
 
-    document.querySelector("#facultyStatus tbody").innerHTML =
-    `<tr><td colspan="2">${err}</td></tr>`;
+</tr>
 
-  }
+`;
+
+});
+
+document.querySelector("#facultyStatus tbody").innerHTML=html;
 
 }
 
-
-/* ===========================================
+/* ===================================================
    EARLY WARNING
-=========================================== */
+=================================================== */
 
 async function loadWarnings(){
 
-  const res=await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"text/plain"},
-    body:JSON.stringify({
-      action:"getHodWarnings"
-    })
-  });
+const data=await api("getHodWarnings");
 
-  const data=await res.json();
+if(!data.success) return;
 
-  let html="";
+let html="";
 
-  if(data.data.length===0){
+document.getElementById("totalAlerts").innerHTML=data.data.length;
 
-    html="<tr><td colspan='3'>No warnings</td></tr>";
+data.data.forEach(r=>{
 
-  }else{
+html+=`
 
-    data.data.forEach(r=>{
+<tr>
 
-      html+=`
-      <tr>
-        <td>${r.student}</td>
-        <td>${r.attendance}</td>
-        <td style="color:red;font-weight:bold">${r.status}</td>
-      </tr>`;
+<td>${r.student}</td>
 
-    });
+<td>${r.attendance}%</td>
 
-  }
+<td>${r.status}</td>
 
-  document.querySelector("#warningTable tbody").innerHTML=html;
+</tr>
+
+`;
+
+});
+
+document.querySelector("#warningTable tbody").innerHTML=html;
 
 }
-window.onload=function(){
+    /* ===================================================
+   PAGE INITIALIZATION
+=================================================== */
 
-  loadDashboard();
+window.onload=async function(){
 
-  loadChart();
+try{
 
-  loadAI();
+updateTime();
 
-  loadPerformance();
+await loadDashboardSummary();
 
-  loadNotifications();
+await loadDepartmentStatus();
 
-  loadRecentActivity();
+await loadSmartAI();
 
-  loadTodayTimetable();
+await loadAttendanceChart();
 
-  loadFacultyStatus();
+await loadDepartmentPerformance();
 
-  loadWarnings();
+await loadNotifications();
+
+await loadRecentActivity();
+
+await loadTimetable();
+
+await loadFacultyStatus();
+
+await loadWarnings();
+
+}catch(err){
+
+console.error(err);
+
+alert("Dashboard loading failed.\nCheck Apps Script.");
+
+}
 
 };
+
+/* ===================================================
+   AUTO REFRESH
+=================================================== */
+
+setInterval(async()=>{
+
+updateTime();
+
+await loadDashboardSummary();
+
+await loadDepartmentStatus();
+
+await loadSmartAI();
+
+await loadAttendanceChart();
+
+await loadDepartmentPerformance();
+
+await loadNotifications();
+
+await loadRecentActivity();
+
+await loadTimetable();
+
+await loadFacultyStatus();
+
+await loadWarnings();
+
+},30000);
+
+/* ===================================================
+   AUTO LOGOUT
+=================================================== */
+
+let inactivityTimer;
+
+function resetTimer(){
+
+clearTimeout(inactivityTimer);
+
+inactivityTimer=setTimeout(()=>{
+
+alert("Session expired.");
+
+logout();
+
+},30*60*1000);
+
+}
+
+document.onclick=resetTimer;
+
+document.onmousemove=resetTimer;
+
+document.onkeypress=resetTimer;
+
+document.onscroll=resetTimer;
+
+resetTimer();
+
+/* ===================================================
+   LOADING CURSOR
+=================================================== */
+
+document.addEventListener("readystatechange",()=>{
+
+if(document.readyState==="loading"){
+
+document.body.style.cursor="wait";
+
+}else{
+
+document.body.style.cursor="default";
+
+}
+
+});
+
+/* ===================================================
+   PREVENT MULTIPLE CHARTS
+=================================================== */
+
+window.addEventListener("beforeunload",()=>{
+
+if(hodChart){
+
+hodChart.destroy();
+
+}
+
+});
+
+/* ===================================================
+   GLOBAL ERROR HANDLER
+=================================================== */
+
+window.onerror=function(msg,url,line){
+
+console.log(
+
+"Error:",
+
+msg,
+
+url,
+
+line
+
+);
+
+return false;
+
+};
+
+/* ===================================================
+   END OF SCRIPT
+=================================================== */
+
 </script>
 
 </body>
-</html>
 
+</html>
