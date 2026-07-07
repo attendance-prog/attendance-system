@@ -1768,23 +1768,26 @@ hodChart.destroy();
    GLOBAL ERROR HANDLER
 =================================================== */
 
-window.onerror=function(msg,url,line){
+async function api(action){
 
-console.log(
+    const res = await fetch(API_URL,{
+        method:"POST",
+        headers:{
+            "Content-Type":"text/plain"
+        },
+        body:JSON.stringify({action})
+    });
 
-"Error:",
+    const data = await res.json();
 
-msg,
+    console.log(action, data);
 
-url,
+    if(!data.success){
+        throw new Error(data.message || action + " failed");
+    }
 
-line
-
-);
-
-return false;
-
-};
+    return data;
+}
 
 /* ===================================================
    END OF SCRIPT
