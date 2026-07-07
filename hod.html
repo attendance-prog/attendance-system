@@ -1089,32 +1089,52 @@ async function loadTodayTimetable(){
 
 async function loadFacultyStatus(){
 
-  const res=await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"text/plain"},
-    body:JSON.stringify({
-      action:"getHodFacultyStatus"
-    })
-  });
+  try{
 
-  const data=await res.json();
+    const res = await fetch(API_URL,{
+      method:"POST",
+      headers:{
+        "Content-Type":"text/plain"
+      },
+      body:JSON.stringify({
+        action:"getHodFacultyStatus"
+      })
+    });
 
-  let html="";
+    const data = await res.json();
 
-  data.data.forEach(r=>{
+    console.log(data);
 
-    html+=`
-    <tr>
-      <td>${r.name}</td>
-      <td>${r.status}</td>
-    </tr>`;
+    if(!data.success){
+      document.querySelector("#facultyStatus tbody").innerHTML =
+      `<tr><td colspan="2">${data.message}</td></tr>`;
+      return;
+    }
 
-  });
+    let html="";
 
-  document.querySelector("#facultyStatus tbody").innerHTML=html;
+    data.data.forEach(r=>{
+
+      html += `
+      <tr>
+        <td>${r.name}</td>
+        <td>${r.status}</td>
+      </tr>`;
+
+    });
+
+    document.querySelector("#facultyStatus tbody").innerHTML = html;
+
+  }catch(err){
+
+    console.error(err);
+
+    document.querySelector("#facultyStatus tbody").innerHTML =
+    `<tr><td colspan="2">${err}</td></tr>`;
+
+  }
 
 }
-
 
 
 /* ===========================================
