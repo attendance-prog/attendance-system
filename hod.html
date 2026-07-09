@@ -1280,34 +1280,6 @@ function printDashboard(){
 window.print();
 
 }
-
-/* ===================================================
-   GENERIC API CALL
-=================================================== */
-
-async function api(action){
-
-const res=await fetch(API_URL,{
-
-method:"POST",
-
-headers:{
-
-"Content-Type":"text/plain"
-
-},
-
-body:JSON.stringify({
-
-action:action
-
-})
-
-});
-
-return await res.json();
-
-}
 /* ===================================================
    DASHBOARD SUMMARY
 =================================================== */
@@ -1389,7 +1361,7 @@ document.getElementById("aiInsights").innerHTML=html;
 
 async function loadAttendanceChart(){
 
-const data=await api("getHodAttendanceAnalytics");
+const data = await api("getAttendanceAnalytics");
 
 if(!data.success) return;
 
@@ -1431,7 +1403,7 @@ if(data.labels && data.labels.length){
 
 async function loadDepartmentPerformance(){
 
-const data=await api("getHodPerformance");
+const data = await api("getDepartmentPerformance");
 
 if(!data.success) return;
 
@@ -1636,38 +1608,32 @@ document.querySelector("#warningTable tbody").innerHTML=html;
    PAGE INITIALIZATION
 =================================================== */
 
-window.onload=async function(){
+window.onload = async function(){
 
-try{
+    updateTime();
 
-updateTime();
+    const loaders = [
+        loadDashboardSummary,
+        loadDepartmentStatus,
+        loadSmartAI,
+        loadAttendanceChart,
+        loadDepartmentPerformance,
+        loadNotifications,
+        loadRecentActivity,
+        loadTimetable,
+        loadFacultyStatus,
+        loadWarnings
+    ];
 
-await loadDashboardSummary();
+    for(const fn of loaders){
 
-await loadDepartmentStatus();
+        try{
+            await fn();
+        }catch(e){
+            console.error(fn.name, e);
+        }
 
-await loadSmartAI();
-
-await loadAttendanceChart();
-
-await loadDepartmentPerformance();
-
-await loadNotifications();
-
-await loadRecentActivity();
-
-await loadTimetable();
-
-await loadFacultyStatus();
-
-await loadWarnings();
-
-}
-catch(err){
-
-    console.error(err);
-
-}
+    }
 
 };
 
