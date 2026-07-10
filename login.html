@@ -65,26 +65,52 @@ button {
 const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 
 function sendOTP() {
+
   const email = document.getElementById("email").value.trim();
   const role = document.getElementById("role").value;
 
+  if (!email) {
+    alert("Please enter your email.");
+    return;
+  }
+
+  if (!role) {
+    alert("Please select your role.");
+    return;
+  }
+
   fetch(API_URL, {
     method: "POST",
-    headers: { "Content-Type":"text/plain;charset=utf-8" },
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
     body: JSON.stringify({
-      action:"sendOTP",
+      action: "sendOTP",
       email: email,
       role: role
     })
   })
   .then(res => res.json())
   .then(data => {
+
+    console.log(data);
+
     alert(data.message);
+
     if (data.success) {
       localStorage.setItem("email", email);
       localStorage.setItem("role", role);
     }
+
+  })
+  .catch(err => {
+
+    console.error(err);
+
+    alert("Unable to connect to server.");
+
   });
+
 }
 function verifyOtp() {
   const email = localStorage.getItem("email");
