@@ -1045,7 +1045,7 @@ let attendanceChart = null;
 
 async function loadDashboardSummary(){
 
-    const data = await api("getCoordinatorDashboard");
+    const data = await api("getCoordinatorDashboardSummary");
 
     if(!data.success) return;
 
@@ -1153,7 +1153,13 @@ async function refreshDashboard(){
    AUTO REFRESH
 =========================== */
 
-setInterval(refreshDashboard,60000);
+setInterval(async()=>{
+
+await refreshCoordinator();
+
+await refreshCoordinatorTables();
+
+},60000);
 
 /* ===========================
    INITIAL LOAD
@@ -1177,7 +1183,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
 
 async function loadAIInsights(){
 
-    const data = await api("getCoordinatorAIInsights");
+    const data = await api("getSmartAIInsights");
 
     const box = document.getElementById("aiInsights");
 
@@ -1285,7 +1291,7 @@ async function loadRecentActivity(){
 
         list.innerHTML += `
         <li>
-            ${r.text}
+           ${r.time} - ${r.activity}
         </li>`;
 
     });
@@ -1446,19 +1452,19 @@ async function loadStudentAttendance(){
 
     }
 
-    data.data.forEach(r=>{
+   data.data.forEach(r=>{
 
-        body.innerHTML += `
-        <tr>
+body.innerHTML +=`
 
-            <td>${r.section}</td>
+<tr>
 
-            <td>${r.attendance}%</td>
+<td>${r.name}</td>
 
-        </tr>`;
+<td>${r.attendance}</td>
 
-    });
+</tr>`;
 
+});
 }
 
 /* ===========================
