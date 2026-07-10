@@ -1,256 +1,353 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>GO GREEN – Coordinator Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-<link rel="stylesheet" href="css/style.css">
-<style>
+<title>GO GREEN | Coordinator Dashboard</title>
 
-/* ================= ROOT THEME ================= */
+<link rel="stylesheet" href="coordinator.css">
 
-:root{
-  --primary:#4a148c;
-  --hover:#6a1b9a;
-  --bg:#f4f7f6;
-  --card:#ffffff;
-  --text:#222;
-}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-body{
-  margin:0;
-  font-family:Segoe UI,Arial;
-  background:var(--bg);
-  color:var(--text);
-  display:flex;
-  transition:0.3s;
-}
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-/* ================= SIDEBAR ================= */
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-.sidebar{
-  width:230px;
-  background:var(--primary);
-  color:#fff;
-  height:100vh;
-  position:fixed;
-  padding:20px 0;
-  transition:.3s;
-}
-
-.sidebar h2{
-  text-align:center;
-  margin-bottom:30px;
-}
-
-.sidebar a{
-  display:block;
-  color:#fff;
-  text-decoration:none;
-  padding:12px 20px;
-  transition:.3s;
-}
-
-.sidebar a:hover{
-  background:var(--hover);
-}
-
-.sidebar.collapsed{
-  width:70px;
-}
-
-.sidebar.collapsed a span{
-  display:none;
-}
-
-.nav-link.active{
-  background:var(--hover);
-}
-
-/* ================= MAIN ================= */
-
-.main{
-  margin-left:230px;
-  width:100%;
-  transition:.3s;
-  animation:fadeIn .4s;
-}
-
-.main.expanded{
-  margin-left:70px;
-}
-
-/* ================= HEADER ================= */
-
-.header{
-  background:linear-gradient(135deg,var(--primary),var(--hover));
-  color:white;
-  padding:15px 30px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  box-shadow:0 2px 6px rgba(0,0,0,.1);
-}
-
-.menu-btn{
-  background:none;
-  border:none;
-  font-size:22px;
-  color:white;
-  cursor:pointer;
-}
-
-.header-buttons button{
-  margin-left:10px;
-  padding:6px 12px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-.dark-btn{
-  background:white;
-  color:black;
-}
-
-.logout-btn{
-  background:black;
-  color:white;
-}
-
-/* ================= CONTENT ================= */
-
-.content{
-  padding:30px;
-}
-
-.grid{
-  display:grid;
-  gap:20px;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-}
-
-.card{
-  background:var(--card);
-  padding:25px;
-  border-radius:12px;
-  box-shadow:0 4px 10px rgba(0,0,0,.08);
-  cursor:pointer;
-  text-align:center;
-  font-weight:bold;
-  transition:.3s;
-}
-
-.card:hover{
-  transform:translateY(-5px);
-}
-
-/* ================= DARK MODE ================= */
-
-body.dark{
-  --bg:#121212;
-  --card:#1e1e1e;
-  --text:#f5f5f5;
-}
-
-/* ================= ANIMATION ================= */
-
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(10px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-</style>
 </head>
 
 <body>
 
-<script>
-if(localStorage.getItem("role")!=="coordinator"){
-  alert("Unauthorized");
-  location.href="index.html";
-}
-</script>
+<div class="sidebar" id="sidebar">
 
-<!-- ================= SIDEBAR ================= -->
+<div class="logo">
 
-<div class="sidebar">
-  <h2>🌱 GO GREEN</h2>
-  <a href="coordinator.html" class="nav-link">🏠 <span>Dashboard</span></a>
-  <a href="coordinator-attendance.html" class="nav-link">📊 <span>My Attendance</span></a>
-  <a href="coordinator-timetable.html" class="nav-link">📅 <span>Faculty Timetable</span></a>
-  <a href="coordinator-faculty.html" class="nav-link">👨‍🏫 <span>Faculty Attendance</span></a>
-  <a href="coordinator-leaves.html" class="nav-link">📝 <span>Leave Approval</span></a>
-  <a href="coordinator-substitute.html" class="nav-link">🤖 <span>Substitute Suggestion</span></a>
-  <a href="coordinator-map.html" class="nav-link">🗺 <span>Attendance Map</span></a>
+<h2>GO GREEN</h2>
+<p>Coordinator Panel</p>
+
 </div>
 
-<!-- ================= MAIN ================= -->
+<ul>
+
+<li class="active">
+<i class="fa-solid fa-house"></i>
+<span>Dashboard</span>
+</li>
+
+<li>
+<i class="fa-solid fa-camera"></i>
+<span>Attendance</span>
+</li>
+
+<li>
+<i class="fa-solid fa-book-open"></i>
+<span>Take Lecture</span>
+</li>
+
+<li>
+<i class="fa-solid fa-users"></i>
+<span>Students</span>
+</li>
+
+<li>
+<i class="fa-solid fa-user-tie"></i>
+<span>Faculty</span>
+</li>
+
+<li>
+<i class="fa-solid fa-calendar-days"></i>
+<span>Timetable</span>
+</li>
+
+<li>
+<i class="fa-solid fa-chart-line"></i>
+<span>Reports</span>
+</li>
+
+<li>
+<i class="fa-solid fa-bell"></i>
+<span>Notifications</span>
+</li>
+
+<li>
+<i class="fa-solid fa-clock"></i>
+<span>My Attendance</span>
+</li>
+
+<li>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</li>
+
+</ul>
+
+</div>
 
 <div class="main">
 
-  <div class="header">
-    <div>
-      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-      <strong>Coordinator Dashboard</strong>
-    </div>
+<header>
 
-    <div class="header-buttons">
-      <button class="dark-btn" onclick="toggleDark()">🌙</button>
-      <button class="logout-btn" onclick="logout()">Logout</button>
-    </div>
-  </div>
+<button id="menuBtn">
 
-  <div class="content">
-    <div class="grid">
+<i class="fa-solid fa-bars"></i>
 
-      <div class="card" onclick="go('coordinator-attendance.html')">📊 My Attendance</div>
-      <div class="card" onclick="go('coordinator-timetable.html')">📅 Faculty Timetable</div>
-      <div class="card" onclick="go('coordinator-faculty.html')">👨‍🏫 Faculty Attendance</div>
-      <div class="card" onclick="go('coordinator-leaves.html')">📝 Faculty Leave Approval</div>
-      <div class="card" onclick="go('coordinator-substitute.html')">🤖 Substitute Suggestions</div>
-      <div class="card" onclick="go('coordinator-map.html')">🗺 Attendance Map</div>
-<div class="card" onclick="go('coordinator-seating.html')">
-🪑 Exam Seating Plan
+</button>
+
+<div class="profile">
+
+<h3>Coordinator Dashboard</h3>
+
+<p id="lastUpdated">Last Updated : --</p>
+
 </div>
-    </div>
-  </div>
 
+</header>
 
-<script>
+<section class="cards">
 
-/* ===== Sidebar Toggle ===== */
-function toggleSidebar(){
-  document.querySelector(".sidebar").classList.toggle("collapsed");
-  document.querySelector(".main").classList.toggle("expanded");
-}
+<div class="card">
 
-/* ===== Dark Mode ===== */
-function toggleDark(){
-  document.body.classList.toggle("dark");
-}
+<h4>Total Students</h4>
 
-/* ===== Logout ===== */
-function logout(){
-  localStorage.clear();
-  location.href="index.html";
-}
+<h2 id="totalStudents">Loading...</h2>
 
-/* ===== Navigation ===== */
-function go(p){
-  window.location.href=p;
-}
+</div>
 
-/* ===== Active Link Highlight ===== */
-document.querySelectorAll(".nav-link").forEach(l=>{
-  if(l.href===window.location.href){
-    l.classList.add("active");
-  }
-});
+<div class="card">
 
-</script>
+<h4>Assigned Faculty</h4>
+
+<h2 id="totalFaculty">Loading...</h2>
+
+</div>
+
+<div class="card">
+
+<h4>Today's Classes</h4>
+
+<h2 id="todayClasses">Loading...</h2>
+
+</div>
+
+<div class="card">
+
+<h4>Running Classes</h4>
+
+<h2 id="runningClasses">Loading...</h2>
+
+</div>
+
+<div class="card">
+
+<h4>Attendance Today</h4>
+
+<h2 id="attendanceToday">Loading...</h2>
+
+</div>
+
+<div class="card">
+
+<h4>My Attendance</h4>
+
+<h2 id="myAttendance">Loading...</h2>
+
+</div>
+
+</section>
+
+<div class="row">
+
+<div class="box">
+
+<h3>Attendance Analytics</h3>
+
+<canvas id="attendanceChart"></canvas>
+
+</div>
+
+<div class="box">
+
+<h3>AI Insights</h3>
+
+<ul id="aiInsights">
+
+<li>Loading...</li>
+
+</ul>
+
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="box">
+
+<h3>Quick Actions</h3>
+
+<div class="actions">
+
+<button id="btnAttendance">
+📷 Attendance
+</button>
+
+<button id="btnLecture">
+🎓 Take Lecture
+</button>
+
+<button id="btnStudents">
+👨‍🎓 Students
+</button>
+
+<button id="btnReports">
+📊 Reports
+</button>
+
+</div>
+
+</div>
+
+<div class="box">
+
+<h3>Today's Timetable</h3>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Time</th>
+
+<th>Subject</th>
+
+<th>Faculty</th>
+
+</tr>
+
+</thead>
+
+<tbody id="timetableBody">
+
+<tr>
+
+<td colspan="3">
+
+Loading...
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="box">
+
+<h3>Faculty Status</h3>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Name</th>
+
+<th>Status</th>
+
+</tr>
+
+</thead>
+
+<tbody id="facultyBody">
+
+<tr>
+
+<td colspan="2">
+
+Loading...
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="box">
+
+<h3>Notifications</h3>
+
+<ul id="notificationList">
+
+<li>Loading...</li>
+
+</ul>
+
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="box full">
+
+<h3>Recent Activity</h3>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Time</th>
+
+<th>Activity</th>
+
+</tr>
+
+</thead>
+
+<tbody id="activityBody">
+
+<tr>
+
+<td colspan="2">
+
+Loading...
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<footer>
+
+GO GREEN Attendance System
+
+</footer>
+
+</div>
+
+<script src="coordinator.js"></script>
 
 </body>
 </html>
-
