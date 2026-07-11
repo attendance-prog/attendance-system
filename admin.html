@@ -1471,7 +1471,7 @@ FACULTY ATTENDANCE
 
 async function loadFacultyAttendance(){
 
-    const res=await fetch(API_URL,{
+    const res = await fetch(API_URL,{
         method:"POST",
         headers:{
             "Content-Type":"text/plain"
@@ -1481,18 +1481,20 @@ async function loadFacultyAttendance(){
         })
     });
 
-    const data=await res.json();
+    const result = await res.json();
+
+    if(!result.success) return;
 
     const body=document.getElementById("facultyAttendanceBody");
 
     body.innerHTML="";
 
-    data.faculty.forEach(f=>{
+    result.data.forEach(f=>{
 
-        body.innerHTML+=`
+        body.innerHTML += `
         <tr>
             <td>${f.name}</td>
-            <td class="${f.status=="Present"?"status-present":"status-absent"}">
+            <td class="${f.status=="Present" ? "status-present" : "status-absent"}">
                 ${f.status}
             </td>
         </tr>`;
@@ -1534,50 +1536,36 @@ async function loadFacultyAttendance(){
 }
    async function loadAIInsights(){
 
-try{
+    const res = await fetch(API_URL,{
+        method:"POST",
+        headers:{
+            "Content-Type":"text/plain"
+        },
+        body:JSON.stringify({
+            action:"getAIInsights"
+        })
+    });
 
-const res = await fetch(API_URL,{
-method:"POST",
-headers:{
-"Content-Type":"text/plain"
-},
-body:JSON.stringify({
-action:"getAIInsights"
-})
-});
+    const result = await res.json();
 
-const data = await res.json();
+    const box = document.getElementById("aiInsights");
 
-const box = document.getElementById("aiInsights");
+    box.innerHTML = "";
 
-box.innerHTML = "";
+    if(!result.success) return;
 
-if(!data.success){
+    result.data.forEach(x=>{
 
-box.innerHTML="<div class='ai-item'>No Data</div>";
+        box.innerHTML += `
+        <div class="ai-item">${x.message}</div>
+        `;
 
-return;
-
-}
-
-data.data.forEach(x=>{
-
-box.innerHTML += `
-<div class="ai-item">${x}</div>
-`;
-
-});
-
-}catch(err){
-
-console.log(err);
+    });
 
 }
+  async function loadNotifications(){
 
-}
-   async function loadNotifications(){
-
-    const res=await fetch(API_URL,{
+    const res = await fetch(API_URL,{
         method:"POST",
         headers:{
             "Content-Type":"text/plain"
@@ -1587,23 +1575,26 @@ console.log(err);
         })
     });
 
-    const data=await res.json();
+    const result = await res.json();
 
-    const box=document.getElementById("notificationList");
+    if(!result.success) return;
 
-    box.innerHTML="";
+    const box = document.getElementById("notificationList");
 
-    data.notifications.forEach(n=>{
+    box.innerHTML = "";
 
-        box.innerHTML+=`
-<li>${n}</li>`;
+    result.data.forEach(n=>{
+
+        box.innerHTML += `
+        <li>${n.title}</li>
+        `;
 
     });
 
 }
    async function loadRecentActivity(){
 
-    const res=await fetch(API_URL,{
+    const res = await fetch(API_URL,{
         method:"POST",
         headers:{
             "Content-Type":"text/plain"
@@ -1613,21 +1604,20 @@ console.log(err);
         })
     });
 
-    const data=await res.json();
+    const result = await res.json();
 
-    if(!data.success)return;
+    if(!result.success) return;
 
-    const box=document.getElementById("recentActivity");
+    const box = document.getElementById("recentActivity");
 
-    box.innerHTML="";
+    box.innerHTML = "";
 
-    data.activities.forEach(a=>{
+    result.data.forEach(a=>{
 
-        box.innerHTML+=`
-<li>
-✅ ${a.email}<br>
-${a.subject} • ${a.status}
-</li>`;
+        box.innerHTML += `
+        <li>${a.title}</li>
+        `;
+
     });
 
 }
