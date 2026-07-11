@@ -1572,7 +1572,7 @@ async function loadFacultyAttendance(){
     });
 
 }
-  async function loadNotifications(){
+ async function loadNotifications(){
 
     const res = await fetch(API_URL,{
         method:"POST",
@@ -1584,18 +1584,22 @@ async function loadFacultyAttendance(){
         })
     });
 
-    const result = await res.json();
+    const d = await res.json();
 
-    if(!result.success) return;
+    console.log("Notifications", d);
 
-    const box = document.getElementById("notificationList");
+    if(!d.success) return;
+
+    const box = document.getElementById("notifications");
 
     box.innerHTML = "";
 
-    result.data.forEach(n=>{
+    d.data.forEach(item=>{
 
         box.innerHTML += `
-        <li>${n.title}</li>
+            <div class="notification-item">
+                ${item.title}
+            </div>
         `;
 
     });
@@ -1613,18 +1617,22 @@ async function loadFacultyAttendance(){
         })
     });
 
-    const result = await res.json();
+    const d = await res.json();
 
-    if(!result.success) return;
+    console.log("Recent Activity", d);
+
+    if(!d.success) return;
 
     const box = document.getElementById("recentActivity");
 
     box.innerHTML = "";
 
-    result.data.forEach(a=>{
+    d.data.forEach(item=>{
 
         box.innerHTML += `
-        <li>${a.title}</li>
+            <div class="activity-item">
+                ${item.title}
+            </div>
         `;
 
     });
