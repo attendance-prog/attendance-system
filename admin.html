@@ -1398,11 +1398,26 @@ async function loadDashboard(){
 
     console.log(data);
 
-    document.getElementById("studentCount").textContent = data.students || 0;
-    document.getElementById("facultyCount").textContent = data.faculty || 0;
-    document.getElementById("liveClasses").textContent = data.live || 0;
-    document.getElementById("attendancePercent").textContent =
-      (data.attendance || 0) + "%";
+   document.getElementById("studentCount").innerHTML = data.students;
+
+document.getElementById("facultyCount").innerHTML = data.faculty;
+
+document.getElementById("liveClasses").innerHTML = data.liveClasses;
+
+document.getElementById("attendancePercent").innerHTML =
+data.attendance + "%";
+
+document.getElementById("onlineStudents").innerHTML =
+data.onlineStudents;
+
+document.getElementById("onlineFaculty").innerHTML =
+data.onlineFaculty;
+
+document.getElementById("activeQR").innerHTML =
+data.activeQR;
+
+document.getElementById("gpsUsers").innerHTML =
+data.gpsUsers;
 
   }catch(e){
     console.log(e);
