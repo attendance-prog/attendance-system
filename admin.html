@@ -1445,7 +1445,7 @@ loadSystemChart();
 
 async function loadLiveCampus(){
 
-    const res=await fetch(API_URL,{
+    const res = await fetch(API_URL,{
         method:"POST",
         headers:{
             "Content-Type":"text/plain"
@@ -1455,14 +1455,23 @@ async function loadLiveCampus(){
         })
     });
 
-    const d=await res.json();
+    const d = await res.json();
+
+    console.log(d);
 
     if(!d.success) return;
 
-    document.getElementById("onlineStudents").innerText=d.studentsOnline;
-document.getElementById("onlineFaculty").innerText=d.facultyOnline;
-document.getElementById("activeQR").innerText=d.qrSessions;
-document.getElementById("gpsUsers").innerText=d.gpsActive;
+    document.getElementById("onlineStudents").innerText =
+        d.data.studentsOnline;
+
+    document.getElementById("onlineFaculty").innerText =
+        d.data.facultyOnline;
+
+    document.getElementById("activeQR").innerText =
+        d.data.qrSessions;
+
+    document.getElementById("gpsUsers").innerText =
+        d.data.gpsActive;
 
 }
 /* ===========================
