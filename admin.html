@@ -1227,406 +1227,882 @@ Loading...
 
 </div>
 <script>
+/*=====================================================
+    GO GREEN ADMIN DASHBOARD
+    PART-1 : CORE FUNCTIONS
+======================================================*/
+
+/* ---------- Login Protection ---------- */
+
+if (
+    !localStorage.getItem("role") ||
+    localStorage.getItem("role").toLowerCase() !== "admin"
+) {
+
+    alert("Unauthorized Access");
+
+    window.location.replace("login.html");
+
+}
+
+/* ---------- API ---------- */
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+
+async function callAPI(action, payload = {}) {
+
+    try {
+
+        const response = await fetch(API_URL, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+
+            body: JSON.stringify({
+
+                action,
+
+                ...payload
+
+            })
+
+        });
+
+        const result = await response.json();
+
+        console.log(action, result);
+
+        return result;
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+        return {
+
+            success: false,
+
+            message: err.toString()
+
+        };
+
+    }
+
+}
+
+/* ---------- Navigation ---------- */
 
 function go(page){
-location.href=page;
+
+    window.location.href = page;
+
 }
+
+/* ---------- Logout ---------- */
 
 function logout(){
-localStorage.clear();
-location.href="login.html";
+
+    if(!confirm("Logout from GO GREEN ?")) return;
+
+    localStorage.clear();
+
+    sessionStorage.clear();
+
+    window.location.replace("login.html");
+
 }
 
-function toggleDark(){
-document.body.classList.toggle("dark");
-}
+/* ---------- Sidebar ---------- */
 
 function toggleSidebar(){
-document.getElementById("sidebar").classList.toggle("collapse");
+
+    document
+    .getElementById("sidebar")
+    .classList
+    .toggle("collapse");
+
 }
 
-let attendanceChart;
+/* ---------- Dark Mode ---------- */
 
-async function loadAttendanceChart(){
+function toggleDark(){
 
-  try{
+    document.body.classList.toggle("dark");
 
-    const res = await fetch(API_URL,{
-      method:"POST",
-      headers:{
-        "Content-Type":"text/plain"
-      },
-     body:JSON.stringify({
-    action:"getAttendanceAnalytics"
-})
-    });
+    localStorage.setItem(
 
-    const data = await res.json();
-     console.log(data.labels);
-console.log(data.values);
+        "theme",
 
-    if(!data.success) return;
+        document.body.classList.contains("dark")
 
-    const ctx=document.getElementById("attendanceChart");
+        ? "dark"
 
-    if(attendanceChart) attendanceChart.destroy();
+        : "light"
 
-    attendanceChart = new Chart(ctx,{
+    );
 
-    type:"bar",
+}
 
-    data:{
+/* ---------- Restore Theme ---------- */
 
-        labels:data.labels,
+window.addEventListener("load",()=>{
 
-        datasets:[{
+    if(localStorage.getItem("theme")=="dark"){
 
-            label:"Students Present",
-
-            data:data.values,
-
-            backgroundColor:"#1abc9c",
-
-            borderRadius:10,
-
-            borderSkipped:false
-
-        }]
-
-    },
-
-    options:{
-
-        responsive:true,
-
-        maintainAspectRatio:false,
-
-        plugins:{
-
-            legend:{
-                display:true
-            }
-
-        },
-
-        scales:{
-
-            y:{
-
-                beginAtZero:true,
-
-                ticks:{
-                    precision:0
-                }
-
-            }
-
-        }
+        document.body.classList.add("dark");
 
     }
 
 });
-  }catch(err){
-    console.log(err);
-  }
 
-}   
+/* ---------- Dashboard Search ---------- */
 
-let systemChart;
+function searchDashboard(){
 
-async function loadSystemChart(){
+    const keyword=document
+    .querySelector(".search input")
+    .value
+    .toLowerCase();
 
-const res=await fetch(API_URL,{
-method:"POST",
-headers:{
-"Content-Type":"text/plain"
-},
-body:JSON.stringify({
-action:"getSystemActivity"
-})
-});
+    document.querySelectorAll(".panel").forEach(panel=>{
 
-const data=await res.json();
+        const txt=panel.innerText.toLowerCase();
 
-const ctx=document.getElementById("systemChart");
+        panel.style.display=
+            txt.includes(keyword)
+            ? ""
+            : "none";
 
-if(systemChart) systemChart.destroy();
-
-systemChart=new Chart(ctx,{
-type:"bar",
-data:{
-labels:[
-"Students",
-"Faculty",
-"Present",
-"Active Classes"
-],
-datasets:[{
-label:"Today's Activity",
-data:[
-data.students,
-data.faculty,
-data.present,
-data.active
-]
-}]
-},
-options:{
-responsive:true,
-maintainAspectRatio:false
-}
-});
+    });
 
 }
-   const API_URL = "https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+/* ---------- Global Charts ---------- */
+
+let attendanceChart = null;
+
+let systemChart = null;
+   /*=====================================================
+    PART-2 : DASHBOARD & LIVE CAMPUS
+======================================================*/
+
+/* ---------- Dashboard Summary ---------- */
 
 async function loadDashboard(){
 
-  try{
+    const data = await callAPI("getDashboardSummary");
 
-    const res = await fetch(API_URL,{
-      method:"POST",
-      headers:{
-        "Content-Type":"text/plain"
-      },
-      body:JSON.stringify({
-        action:"getDashboardSummary"
-      })
-    });
+    if(!data.success){
 
-    const data = await res.json();
+        console.error(data.message);
 
-    console.log(data);
+        return;
 
-   document.getElementById("studentCount").innerHTML = data.students;
+    }
 
-document.getElementById("facultyCount").innerHTML = data.faculty;
+    document.getElementById("studentCount").innerText =
+        data.students || 0;
 
-document.getElementById("liveClasses").innerHTML = data.liveClasses;
+    document.getElementById("facultyCount").innerText =
+        data.faculty || 0;
 
-document.getElementById("attendancePercent").innerHTML =
-data.attendance + "%";
+    document.getElementById("liveClasses").innerText =
+        data.liveClasses || 0;
 
-document.getElementById("onlineStudents").innerHTML =
-data.onlineStudents;
-
-document.getElementById("onlineFaculty").innerHTML =
-data.onlineFaculty;
-
-document.getElementById("activeQR").innerHTML =
-data.activeQR;
-
-document.getElementById("gpsUsers").innerHTML =
-data.gpsUsers;
-
-  }catch(e){
-    console.log(e);
-    alert("Unable to load dashboard.");
-  }
+    document.getElementById("attendancePercent").innerText =
+        (data.attendance || 0) + "%";
 
 }
 
-document.addEventListener("DOMContentLoaded",function(){
 
-loadDashboard();
-loadLiveCampus();
-loadFacultyAttendance();
-loadStudentAttendance();
-loadAIInsights();
-loadNotifications();
-loadRecentActivity();
-loadAttendanceChart();
-loadSystemChart();
-
-});
-   /* ===========================
-   LIVE CAMPUS
-===========================*/
+/* ---------- Live Campus ---------- */
 
 async function loadLiveCampus(){
 
-    const res = await fetch(API_URL,{
-        method:"POST",
-        headers:{
-            "Content-Type":"text/plain"
-        },
-        body:JSON.stringify({
-            action:"getLiveCampus"
-        })
-    });
+    const data = await callAPI("getLiveCampus");
 
-    const d = await res.json();
+    if(!data.success){
 
-if(!d.success) return;
+        console.error(data.message);
 
-document.getElementById("onlineStudents").innerText = d.data.studentsOnline;
-document.getElementById("onlineFaculty").innerText = d.data.facultyOnline;
-document.getElementById("activeQR").innerText = d.data.qrSessions;
-document.getElementById("gpsUsers").innerText = d.data.gpsActive;
+        return;
+
+    }
+
+    /*
+        Supports BOTH formats
+
+        1)
+        {
+          success:true,
+          studentsOnline:0,
+          facultyOnline:0
+        }
+
+        2)
+        {
+          success:true,
+          data:{
+             studentsOnline:0
+          }
+        }
+
+    */
+
+    const live = data.data || data;
+
+    document.getElementById("onlineStudents").innerText =
+        live.studentsOnline ?? 0;
+
+    document.getElementById("onlineFaculty").innerText =
+        live.facultyOnline ?? 0;
+
+    document.getElementById("activeQR").innerText =
+        live.qrSessions ?? 0;
+
+    document.getElementById("gpsUsers").innerText =
+        live.gpsActive ?? 0;
+
 }
-/* ===========================
-FACULTY ATTENDANCE
-===========================*/
+   /*=====================================================
+    PART-3 : CHARTS
+======================================================*/
+
+/* ---------- Attendance Chart ---------- */
+
+async function loadAttendanceChart(){
+
+    try{
+
+        const data = await callAPI("getAttendanceAnalytics");
+
+        if(!data.success){
+
+            console.error(data.message);
+
+            return;
+
+        }
+
+        const ctx = document
+            .getElementById("attendanceChart")
+            .getContext("2d");
+
+        if(attendanceChart){
+
+            attendanceChart.destroy();
+
+        }
+
+        attendanceChart = new Chart(ctx,{
+
+            type:"bar",
+
+            data:{
+
+                labels:data.labels || [],
+
+                datasets:[{
+
+                    label:"Today's Attendance",
+
+                    data:data.values || [],
+
+                    backgroundColor:[
+                        "#16a085",
+                        "#e74c3c"
+                    ],
+
+                    borderRadius:8,
+
+                    borderSkipped:false
+
+                }]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                plugins:{
+
+                    legend:{
+                        display:false
+                    }
+
+                },
+
+                scales:{
+
+                    y:{
+
+                        beginAtZero:true,
+
+                        ticks:{
+                            precision:0
+                        }
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
+
+}
+
+
+/* ---------- System Activity ---------- */
+
+async function loadSystemChart(){
+
+    try{
+
+        const data = await callAPI("getSystemActivity");
+
+        if(!data.success){
+
+            console.error(data.message);
+
+            return;
+
+        }
+
+        const chart = data.data || data;
+
+        const values = [
+
+            chart.students ?? 0,
+
+            chart.faculty ?? 0,
+
+            chart.present ?? 0,
+
+            chart.active ?? 0
+
+        ];
+
+        const ctx = document
+            .getElementById("systemChart")
+            .getContext("2d");
+
+        if(systemChart){
+
+            systemChart.destroy();
+
+        }
+
+        systemChart = new Chart(ctx,{
+
+            type:"bar",
+
+            data:{
+
+                labels:[
+
+                    "Students",
+
+                    "Faculty",
+
+                    "Present",
+
+                    "Active Classes"
+
+                ],
+
+                datasets:[{
+
+                    label:"System Activity",
+
+                    data:values,
+
+                    backgroundColor:[
+
+                        "#16a085",
+
+                        "#2196f3",
+
+                        "#f39c12",
+
+                        "#8e44ad"
+
+                    ],
+
+                    borderRadius:8,
+
+                    borderSkipped:false
+
+                }]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                plugins:{
+
+                    legend:{
+
+                        display:false
+
+                    }
+
+                },
+
+                scales:{
+
+                    y:{
+
+                        beginAtZero:true,
+
+                        ticks:{
+
+                            precision:0
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
+
+}
+   /*=====================================================
+    PART-4 : AI + NOTIFICATIONS + RECENT ACTIVITY
+======================================================*/
+
+/* ---------- AI Insights ---------- */
+
+async function loadAIInsights(){
+
+    try{
+
+        const data = await callAPI("getAIInsights");
+
+        const box = document.getElementById("aiInsights");
+
+        box.innerHTML = "";
+
+        if(!data.success){
+
+            box.innerHTML =
+            `<div class="ai-item">Unable to load AI Insights</div>`;
+
+            return;
+
+        }
+
+        if(!data.data || data.data.length===0){
+
+            box.innerHTML =
+            `<div class="ai-item">No AI Insights Available</div>`;
+
+            return;
+
+        }
+
+        data.data.forEach(item=>{
+
+            box.innerHTML += `
+            <div class="ai-item">
+
+                ${item.message || item.title || "No Data"}
+
+            </div>
+            `;
+
+        });
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
+
+}
+
+
+/* ---------- Notifications ---------- */
+
+async function loadNotifications(){
+
+    try{
+
+        const data = await callAPI("getNotifications");
+
+        const list =
+        document.getElementById("notificationList");
+
+        list.innerHTML = "";
+
+        if(!data.success){
+
+            list.innerHTML =
+            "<li>Unable to load notifications.</li>";
+
+            return;
+
+        }
+
+        if(!data.data || data.data.length===0){
+
+            list.innerHTML =
+            "<li>No Notifications</li>";
+
+            return;
+
+        }
+
+        data.data.forEach(item=>{
+
+            list.innerHTML += `
+
+            <li>
+
+                ${item.title || item.message}
+
+            </li>
+
+            `;
+
+        });
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
+
+}
+
+
+/* ---------- Recent Activity ---------- */
+
+async function loadRecentActivity(){
+
+    try{
+
+        const data = await callAPI("getRecentActivity");
+
+        const list =
+        document.getElementById("recentActivity");
+
+        list.innerHTML = "";
+
+        if(!data.success){
+
+            list.innerHTML =
+            "<li>Unable to load activity.</li>";
+
+            return;
+
+        }
+
+        if(!data.data || data.data.length===0){
+
+            list.innerHTML =
+            "<li>No Activity Found</li>";
+
+            return;
+
+        }
+
+        data.data.forEach(item=>{
+
+            list.innerHTML += `
+
+            <li>
+
+                ${item.title}
+
+            </li>
+
+            `;
+
+        });
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
+
+}
+   /*=====================================================
+    PART-5 : FACULTY & STUDENT ATTENDANCE
+======================================================*/
+
+/* ---------- Faculty Attendance ---------- */
 
 async function loadFacultyAttendance(){
 
-    const res = await fetch(API_URL,{
-        method:"POST",
-        headers:{
-            "Content-Type":"text/plain"
-        },
-        body:JSON.stringify({
-            action:"getFacultyAttendance"
-        })
-    });
+    try{
 
-    const result = await res.json();
+        const data = await callAPI("getFacultyAttendance");
 
-    if(!result.success) return;
+        const tbody = document.getElementById("facultyAttendanceBody");
 
-    const body=document.getElementById("facultyAttendanceBody");
+        tbody.innerHTML = "";
 
-    body.innerHTML="";
+        if(!data.success){
 
-    result.data.forEach(f=>{
+            tbody.innerHTML = `
+            <tr>
+                <td colspan="2">Unable to load faculty attendance.</td>
+            </tr>`;
+            return;
 
-        body.innerHTML += `
-        <tr>
-            <td>${f.name}</td>
-            <td class="${f.status=="Present" ? "status-present" : "status-absent"}">
-                ${f.status}
-            </td>
-        </tr>`;
+        }
 
-    });
+        if(!data.data || data.data.length===0){
 
-}
- async function loadStudentAttendance(){
+            tbody.innerHTML = `
+            <tr>
+                <td colspan="2">No Faculty Attendance Found</td>
+            </tr>`;
+            return;
 
-    const res = await fetch(API_URL,{
-        method:"POST",
-        headers:{
-            "Content-Type":"text/plain"
-        },
-        body:JSON.stringify({
-            action:"getStudentAttendanceSummary"
-        })
-    });
+        }
 
-    const data = await res.json();
+        data.data.forEach(f=>{
 
-    if(!data.success) return;
+            let status = String(f.status || "ABSENT").toUpperCase();
 
-    let html="";
+            let cls =
+                status==="PRESENT"
+                ? "status-present"
+                : "status-absent";
 
-    data.data.forEach(r=>{
+            tbody.innerHTML += `
 
-        html+=`
-        <tr>
-            <td>${r.section}</td>
-            <td>${r.attendance}</td>
-        </tr>
-        `;
+            <tr>
 
-    });
+                <td>
 
-    document.getElementById("studentAttendanceBody").innerHTML=html;
+                    ${f.name || "-"}
 
-}
-   async function loadAIInsights(){
+                </td>
 
-    const res = await fetch(API_URL,{
-        method:"POST",
-        headers:{
-            "Content-Type":"text/plain"
-        },
-        body:JSON.stringify({
-            action:"getAIInsights"
-        })
-    });
+                <td class="${cls}">
 
-    const result = await res.json();
+                    ${status}
 
-    const box = document.getElementById("aiInsights");
+                </td>
 
-    box.innerHTML = "";
+            </tr>
 
-    if(!result.success) return;
+            `;
 
-    result.data.forEach(x=>{
+        });
 
-        box.innerHTML += `
-        <div class="ai-item">${x.message}</div>
-        `;
+    }
 
-    });
+    catch(err){
+
+        console.error(err);
+
+    }
 
 }
- async function loadNotifications(){
 
-    const res = await fetch(API_URL,{
-        method:"POST",
-        headers:{
-            "Content-Type":"text/plain"
-        },
-        body:JSON.stringify({
-            action:"getNotifications"
-        })
-    });
 
-    const d = await res.json();
+/* ---------- Student Attendance ---------- */
 
-    console.log("Notifications", d);
+async function loadStudentAttendance(){
 
-    if(!d.success) return;
+    try{
 
-    const box = document.getElementById("notifications");
+        const data = await callAPI("getStudentAttendanceSummary");
 
-    box.innerHTML="";
+        const tbody = document.getElementById("studentAttendanceBody");
 
-d.data.forEach(item=>{
+        tbody.innerHTML = "";
 
-    box.innerHTML+=`
-    <div class="notification-item">
-        ${item.title}
-    </div>`;
+        if(!data.success){
+
+            tbody.innerHTML = `
+            <tr>
+                <td colspan="2">Unable to load student attendance.</td>
+            </tr>`;
+            return;
+
+        }
+
+        if(!data.data || data.data.length===0){
+
+            tbody.innerHTML = `
+            <tr>
+                <td colspan="2">No Student Attendance Found</td>
+            </tr>`;
+            return;
+
+        }
+
+        data.data.forEach(item=>{
+
+            tbody.innerHTML += `
+
+            <tr>
+
+                <td>
+
+                    ${item.section || "General"}
+
+                </td>
+
+                <td>
+
+                    ${item.attendance ?? 0}
+
+                    ${typeof item.attendance==="number" ? "%" : ""}
+
+                </td>
+
+            </tr>
+
+            `;
+
+        });
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
+
+}
+   /*=====================================================
+    PART-6 : INITIALIZATION & AUTO REFRESH
+======================================================*/
+
+/* ---------- Initialize Dashboard ---------- */
+
+async function initializeDashboard(){
+
+    try{
+
+        await loadDashboard();
+
+        await loadLiveCampus();
+
+        await loadAttendanceChart();
+
+        await loadSystemChart();
+
+        await loadAIInsights();
+
+        await loadNotifications();
+
+        await loadRecentActivity();
+
+        await loadFacultyAttendance();
+
+        await loadStudentAttendance();
+
+        console.log("GO GREEN Admin Dashboard Loaded Successfully");
+
+    }
+
+    catch(err){
+
+        console.error("Dashboard Initialization Error");
+
+        console.error(err);
+
+    }
+
+}
+
+/* ---------- Auto Refresh ---------- */
+
+function startAutoRefresh(){
+
+    setInterval(async()=>{
+
+        try{
+
+            await loadDashboard();
+
+            await loadLiveCampus();
+
+            await loadAttendanceChart();
+
+            await loadSystemChart();
+
+            await loadAIInsights();
+
+            await loadNotifications();
+
+            await loadRecentActivity();
+
+            await loadFacultyAttendance();
+
+            await loadStudentAttendance();
+
+            console.log("Dashboard Refreshed");
+
+        }
+
+        catch(err){
+
+            console.error(err);
+
+        }
+
+    },60000);
+
+}
+
+/* ---------- Page Loaded ---------- */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+    initializeDashboard();
+
+    startAutoRefresh();
 
 });
-
-}
-   async function loadRecentActivity(){
-
-    const res = await fetch(API_URL,{
-        method:"POST",
-        headers:{
-            "Content-Type":"text/plain"
-        },
-        body:JSON.stringify({
-            action:"getRecentActivity"
-        })
-    });
-
-    const d = await res.json();
-
-    console.log("Recent Activity", d);
-
-    if(!d.success) return;
-
-    const box = document.getElementById("recentActivity");
-
-    box.innerHTML = "";
-
-    d.data.forEach(item=>{
-
-        box.innerHTML += `
-            <div class="activity-item">
-                ${item.title}
-            </div>
-        `;
-
-    });
-
-}
 </script>
 
 </div>
