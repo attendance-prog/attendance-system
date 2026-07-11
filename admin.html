@@ -1457,14 +1457,12 @@ async function loadLiveCampus(){
 
     const d = await res.json();
 
-    console.log(d);
+if(!d.success) return;
 
-    if(!d.success) return;
-
-   document.getElementById("onlineStudents").innerText=d.data.studentsOnline;
-document.getElementById("onlineFaculty").innerText=d.data.facultyOnline;
-document.getElementById("activeQR").innerText=d.data.qrSessions;
-document.getElementById("gpsUsers").innerText=d.data.gpsActive;
+document.getElementById("onlineStudents").innerText = d.data.studentsOnline;
+document.getElementById("onlineFaculty").innerText = d.data.facultyOnline;
+document.getElementById("activeQR").innerText = d.data.qrSessions;
+document.getElementById("gpsUsers").innerText = d.data.gpsActive;
 }
 /* ===========================
 FACULTY ATTENDANCE
