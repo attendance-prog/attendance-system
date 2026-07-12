@@ -1886,7 +1886,7 @@ ${f.status}
         });
 
         document.getElementById("facultyAvailable").innerText =
-            res.total || 0;
+res.data.filter(f=>f.status=="PRESENT").length;
 
     }
 
