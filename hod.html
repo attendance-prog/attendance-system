@@ -1472,7 +1472,7 @@ async function loadAttendanceAnalytics() {
         const res = await callAPI("getHodAttendanceAnalytics", {
             email: email
         });
-
+console.log("Attendance API Response:", res);
         if (!res.success) return;
 
         const ctx = document
