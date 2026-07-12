@@ -663,7 +663,12 @@ Logout
 <button class="btn" onclick="exportPerformanceCSV()">
 📥 Export Performance
 </button>
+<button
+onclick="initializeDashboard()">
 
+🔄 Refresh Dashboard
+
+</button>
 </div>
 <!-- =========================================================
      DEPARTMENT STATUS + AI INSIGHTS
@@ -872,7 +877,9 @@ Logout
 
     <div class="card">
 
-        <h2>📅 Today's Timetable</h2>
+        <h2 id="timetableTitle">
+📅 Today's Timetable
+</h2>
 
         <table id="todayTimetable">
 
@@ -1752,9 +1759,20 @@ document.querySelector("#todayTimetable tbody");
         if(list.length===0){
 
             tbody.innerHTML=`
-            <tr>
-                <td colspan="5">No Lecture Today</td>
-            </tr>`;
+            const day = new Date().toLocaleDateString(
+'en-US',
+{weekday:'long'}
+);
+
+tbody.innerHTML = `
+<tr>
+<td colspan="5"
+style="text-align:center;font-weight:bold;color:green;">
+${day==="Sunday"
+?"🌴 Sunday Holiday - No Lecture Today"
+:"No Lecture Today"}
+</td>
+</tr>`;
 
             return;
 
@@ -1833,11 +1851,17 @@ async function loadFacultyStatus() {
 
                     <td>
 
-                        <span class="badge">
-
-                            ${f.status}
-
-                        </span>
+                       <span class="badge ${
+f.status==="PRESENT"
+?"bg-success"
+:f.status==="ABSENT"
+?"bg-danger"
+:f.status==="LATE"
+?"bg-warning"
+:"bg-secondary"
+}">
+${f.status}
+</span>
 
                     </td>
 
@@ -1959,7 +1983,16 @@ await loadTimetable();
         console.error(err);
 
     }
+const day =
+new Date().toLocaleDateString(
+'en-US',
+{weekday:'long'}
+);
 
+document.getElementById(
+'timetableTitle'
+).innerHTML=
+`📅 Today's Timetable (${day})`;
 }
 
 /* ===================================================
