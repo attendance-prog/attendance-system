@@ -1756,28 +1756,25 @@ document.querySelector("#todayTimetable tbody");
 
         tbody.innerHTML = "";
 
-        if(list.length===0){
+        if (list.length === 0) {
 
-            tbody.innerHTML=`
-            const day = new Date().toLocaleDateString(
-'en-US',
-{weekday:'long'}
-);
+    const day = new Date().toLocaleDateString(
+        "en-US",
+        { weekday: "long" }
+    );
 
-tbody.innerHTML = `
-<tr>
-<td colspan="5"
-style="text-align:center;font-weight:bold;color:green;">
-${day==="Sunday"
-?"🌴 Sunday Holiday - No Lecture Today"
-:"No Lecture Today"}
-</td>
-</tr>`;
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="5" style="text-align:center;font-weight:bold;color:green;">
+                ${day === "Sunday"
+                    ? "🌴 Sunday Holiday - No Lecture Today"
+                    : "📚 No Lecture Today"}
+            </td>
+        </tr>
+    `;
 
-            return;
-
-        }
-
+    return;
+}
         list.forEach(item=>{
 
             tbody.innerHTML += `
