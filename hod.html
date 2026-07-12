@@ -1733,7 +1733,7 @@ async function loadTimetable(){
 
     try{
 
-        cconst email = localStorage.getItem("email");
+        const email = localStorage.getItem("email");
 
 const res = await callAPI("getHodTimetable", {
     email: email
