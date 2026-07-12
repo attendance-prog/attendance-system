@@ -1284,35 +1284,37 @@ window.print();
    DASHBOARD SUMMARY
 =================================================== */
 
-async function loadDashboardSummary(){
+async function loadDashboardSummary() {
 
-    try{
+    try {
 
-        const res = await callAPI("getHodDashboardSummary");
+       const email = localStorage.getItem("email");
 
-        if(!res.success) return;
+        const res = await callAPI("getHodDashboardSummary", {
+            email: email
+        });
 
-        const d = res.data || res;
+        if (!res.success) return;
+
+        const d = res.dashboard;
 
         document.getElementById("totalFaculty").innerText =
-            d.faculty ?? 0;
+            d.totalFaculty || 0;
 
         document.getElementById("totalStudents").innerText =
-            d.students ?? 0;
+            d.totalStudents || 0;
 
         document.getElementById("totalSubjects").innerText =
-            d.subjects ?? 0;
+            d.totalStudents || 0; // until subject API is added
 
         document.getElementById("liveClasses").innerText =
-            d.liveClasses ?? 0;
+            d.liveClasses || 0;
 
-        document.getElementById("pendingLeaves").innerText =
-            d.pendingLeaves ?? 0;
+        document.getElementById("pendingLeaves").innerText = 0;
 
-        document.getElementById("pendingMarks").innerText =
-            d.pendingMarks ?? 0;
+        document.getElementById("pendingMarks").innerText = 0;
 
-    }catch(err){
+    } catch (err) {
 
         console.error(err);
 
@@ -1327,24 +1329,31 @@ async function loadDepartmentStatus(){
 
     try{
 
-        const res = await callAPI("getHodDepartmentStatus");
+        const email = localStorage.getItem("email");
+
+        const res = await callAPI("getHodDashboardSummary",{
+            email
+        });
 
         if(!res.success) return;
 
-        const d = res.data || res;
+        const d = res.dashboard;
 
         document.getElementById("facultyPresent").innerText =
-            d.facultyPresent ?? 0;
+            d.activeFaculty || 0;
 
         document.getElementById("studentsPresent").innerText =
-            d.studentsPresent ?? 0;
+            d.totalStudents || 0;
 
         document.getElementById("runningClasses").innerText =
-            d.runningClasses ?? 0;
+            d.liveClasses || 0;
 
         document.getElementById("attendanceToday").innerText =
-            (d.attendanceToday ?? 0) + "%";
-
+            (d.attendancePercent || 0) + "%";
+document.getElementById("attendancePercent").innerText =
+(d.attendancePercent || 0) + "%";
+        document.getElementById("activeSessions").innerText =
+d.liveClasses || 0;
     }
 
     catch(err){
@@ -1354,44 +1363,48 @@ async function loadDepartmentStatus(){
     }
 
 }
-
 /* ===================================================
    AI INSIGHTS
 =================================================== */
 
-async function loadAIInsights(){
+async function loadAIInsights() {
 
-    try{
+    try {
 
-        const res = await callAPI("getAIInsights");
+       const email = localStorage.getItem("email");
 
-        if(!res.success) return;
-
-        const list = res.data || [];
+        const res = await callAPI("getHodAIInsights", {
+            email: email
+        });
 
         const box = document.getElementById("aiInsights");
 
-        box.innerHTML = "";
+        if (!res.success) {
 
-        if(list.length===0){
-
-            box.innerHTML="<div class='info-card'>No AI Insights Available</div>";
+            box.innerHTML = "No AI Insights";
 
             return;
 
         }
 
-        list.forEach(item=>{
+        box.innerHTML = "";
 
-            const div=document.createElement("div");
+        if (!res.data || res.data.length === 0) {
 
-            div.className="info-card";
+            box.innerHTML = "<div>No AI Insights</div>";
 
-            div.innerHTML=`
-                🤖 ${item.message}
+            return;
+
+        }
+
+        res.data.forEach(item => {
+
+            box.innerHTML += `
+                <div class="insight-card">
+                    🤖 <b>${item.type}</b><br>
+                    ${item.message}
+                </div>
             `;
-
-            box.appendChild(div);
 
         });
 
@@ -1404,82 +1417,85 @@ async function loadAIInsights(){
     }
 
 }
-
 /* ===================================================
    ATTENDANCE CHART
 =================================================== */
 
-let attendanceChart = null;
+async function loadAttendanceAnalytics() {
 
-async function loadAttendanceAnalytics(){
+    try {
 
-    try{
+       const email = localStorage.getItem("email");
 
-        const res = await callAPI("getAttendanceAnalytics");
+        const res = await callAPI("getHodAttendanceAnalytics", {
+            email: email
+        });
 
-        if(!res.success) return;
-
-        const d = res.data || res;
+        if (!res.success) return;
 
         const ctx = document
             .getElementById("attendanceChart")
             .getContext("2d");
 
-        if(attendanceChart){
-
-            attendanceChart.destroy();
-
+        if (window.attendanceChartObj) {
+            window.attendanceChartObj.destroy();
         }
 
-        attendanceChart = new Chart(ctx,{
+        window.attendanceChartObj = new Chart(ctx, {
 
-            type:"bar",
+            type: "bar",
 
-            data:{
+            data: {
 
-                labels:["Present","Absent"],
+                labels: [
 
-                datasets:[{
+                    "Present",
 
-                    label:"Attendance",
+                    "Absent"
 
-                    data:[
+                ],
 
-                        d.present ?? 0,
+                datasets: [{
 
-                        d.absent ?? 0
+                    label: "Attendance",
+
+                    data: [
+
+                        res.present || 0,
+
+                        res.absent || 0
 
                     ],
 
-                    backgroundColor:[
+                    backgroundColor: [
 
-                        "#16a085",
+                        "#2ecc71",
 
                         "#e74c3c"
 
                     ],
 
-                    borderRadius:8
+                    borderRadius: 8
 
                 }]
 
             },
 
-            options:{
+            options: {
 
-                responsive:true,
+                responsive: true,
 
-                maintainAspectRatio:false,
+                maintainAspectRatio: false,
 
-                scales:{
+                scales: {
 
-                    y:{
+                    y: {
 
-                        beginAtZero:true,
+                        beginAtZero: true,
 
-                        ticks:{
+                        ticks: {
 
-                            precision:0
+                            precision: 0
 
                         }
 
@@ -1505,48 +1521,36 @@ async function loadAttendanceAnalytics(){
    DEPARTMENT PERFORMANCE
 =================================================== */
 
-async function loadDepartmentPerformance(){
+async function loadDepartmentPerformance() {
 
-    try{
+    try {
 
-        const res = await callAPI("getDepartmentPerformance");
+        const email = localStorage.getItem("email");
 
-        if(!res.success) return;
+        const res = await callAPI("getDepartmentPerformance", {
+            email: email
+        });
 
-        const list = res.data || [];
+        if (!res.success) return;
 
         const tbody =
 document.querySelector("#performanceTable tbody");
+
         tbody.innerHTML = "";
 
-        if(list.length===0){
-
-            tbody.innerHTML=`
-            <tr>
-                <td colspan="3">No Records</td>
-            </tr>`;
-
-            return;
-
-        }
-
-        list.forEach(item=>{
-
-            tbody.innerHTML += `
+        tbody.innerHTML = `
 
             <tr>
 
-                <td>${item.section}</td>
+                <td>Department</td>
 
-                <td>${item.attendance}%</td>
+                <td>${res.totalRecords || 0}</td>
 
-                <td>${item.average}%</td>
+                <td>${res.averageMarks || 0}%</td>
 
             </tr>
 
-            `;
-
-        });
+        `;
 
     }
 
@@ -1561,44 +1565,59 @@ document.querySelector("#performanceTable tbody");
    NOTIFICATIONS
 =================================================== */
 
-async function loadNotifications(){
+async function loadNotifications() {
 
-    try{
+    try {
 
-        const res = await callAPI("getHodNotifications");
+        const email = localStorage.getItem("email");
 
-        if(!res.success) return;
-
-        const list = res.data || [];
+        const res = await callAPI("getHodNotifications", {
+            email: email
+        });
 
         const box = document.getElementById("notifications");
 
         box.innerHTML = "";
 
-        if(list.length===0){
+        if (!res.success) {
 
-            box.innerHTML = `
-            <div class="info-card">
-                No Notifications
-            </div>`;
+            box.innerHTML =
+                "<div class='notice'>Unable to load notifications.</div>";
 
             return;
 
         }
 
-        list.forEach(item=>{
+        if (!res.data || res.data.length === 0) {
+
+            box.innerHTML =
+                "<div class='notice'>No Notifications</div>";
+
+            return;
+
+        }
+
+        res.data.forEach(item => {
 
             box.innerHTML += `
 
-            <div class="info-card">
+                <div class="notice">
 
-                <b>${item.title || "Notification"}</b>
+                    <b>${item.title}</b>
 
-                <br>
+                    <br>
 
-                ${item.message || ""}
+                    ${item.description || ""}
 
-            </div>
+                    <br>
+
+                    <small>
+
+                        ${item.date || ""}
+
+                    </small>
+
+                </div>
 
             `;
 
@@ -1606,51 +1625,75 @@ async function loadNotifications(){
 
     }
 
-    catch(err){
+    catch (err) {
 
         console.error(err);
 
     }
 
 }
-
 /* ===================================================
    RECENT ACTIVITY
 =================================================== */
-async function loadRecentActivity(){
+async function loadRecentActivity() {
 
-    try{
+    try {
 
-        const res = await callAPI("getHodRecentActivity");
+        const email = localStorage.getItem("email");
 
-        if(!res.success) return;
-
-        const list = res.data || [];
+        const res = await callAPI("getHodRecentActivity", {
+            email: email
+        });
 
         const box = document.getElementById("recentActivity");
 
         box.innerHTML = "";
 
-        if(list.length===0){
+        if (!res.success) {
 
-            box.innerHTML = `
-            <div class="info-card">
-                No Recent Activity
-            </div>`;
+            box.innerHTML =
+                "<div class='activity'>Unable to load activity.</div>";
 
             return;
 
         }
 
-        list.forEach(item=>{
+        if (!res.data || res.data.length === 0) {
+
+            box.innerHTML =
+                "<div class='activity'>No Recent Activity</div>";
+
+            return;
+
+        }
+
+        res.data.forEach(item => {
 
             box.innerHTML += `
 
-            <div class="info-card">
+                <div class="activity">
 
-                ${item.title}
+                    <b>${item.student}</b>
 
-            </div>
+                    <br>
+
+                    Subject :
+                    ${item.subject}
+
+                    <br>
+
+                    Status :
+                    <b>${item.status}</b>
+
+                    <br>
+
+                    <small>
+
+                        ${item.date}
+
+                    </small>
+
+                </div>
 
             `;
 
@@ -1658,7 +1701,7 @@ async function loadRecentActivity(){
 
     }
 
-    catch(err){
+    catch (err) {
 
         console.error(err);
 
@@ -1732,49 +1775,59 @@ document.querySelector("#todayTimetable tbody");
    FACULTY STATUS
 =================================================== */
 
-async function loadFacultyStatus(){
+async function loadFacultyStatus() {
 
-    try{
+    try {
 
-        const res=await callAPI("getHodFacultyStatus");
+        const email = localStorage.getItem("email");
 
-        if(!res.success) return;
+        const res = await callAPI("getHodFacultyStatus", {
+            email: email
+        });
 
-        const list=res.data||[];
+        if (!res.success) return;
 
-        const tbody =
-document.querySelector("#facultyStatus tbody");
+        const tbody = document.querySelector("#facultyStatus tbody");
 
-        tbody.innerHTML="";
+        tbody.innerHTML = "";
 
-        if(list.length===0){
+        if (!res.data || res.data.length === 0) {
 
-            tbody.innerHTML=`
-            <tr>
-                <td colspan="3">No Faculty Found</td>
-            </tr>`;
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="2">No Faculty Found</td>
+                </tr>`;
 
             return;
 
         }
 
-        list.forEach(f=>{
+        res.data.forEach(f => {
 
-            tbody.innerHTML+=`
+            tbody.innerHTML += `
 
-            <tr>
+                <tr>
 
-                <td>${f.name}</td>
+                    <td>${f.name}</td>
 
-                <td>${f.subject}</td>
+                    <td>
 
-                <td>${f.status}</td>
+                        <span class="badge">
 
-            </tr>
+                            ${f.status}
+
+                        </span>
+
+                    </td>
+
+                </tr>
 
             `;
 
         });
+
+        document.getElementById("facultyAvailable").innerText =
+            res.total || 0;
 
     }
 
@@ -1789,55 +1842,51 @@ document.querySelector("#facultyStatus tbody");
    EARLY WARNING
 =================================================== */
 
-async function loadWarnings(){
+async function loadWarnings() {
 
-    try{
+    try {
 
-        const res = await callAPI("getHodWarnings");
+       const email = localStorage.getItem("email");
 
-        if(!res.success) return;
+        const res = await callAPI("getHodWarnings", {
+            email: email
+        });
 
-        const list = res.data || [];
+        if (!res.success) return;
 
-        const tbody =
-document.querySelector("#warningTable tbody");
+        const tbody = document.querySelector("#warningTable tbody");
 
         tbody.innerHTML = "";
 
-        if(list.length===0){
+        if (!res.data || res.data.length === 0) {
 
             tbody.innerHTML = `
-            <tr>
-                <td colspan="4">No Warning Students</td>
-            </tr>`;
+                <tr>
+                    <td colspan="3">No Warning Students</td>
+                </tr>`;
+
+            document.getElementById("totalAlerts").innerText = 0;
 
             return;
 
         }
 
-        list.forEach(student=>{
+        document.getElementById("totalAlerts").innerText =
+            res.total || 0;
+
+        res.data.forEach(student => {
 
             tbody.innerHTML += `
 
-            <tr>
+                <tr>
 
-                <td>${student.name}</td>
+                    <td>${student.name}</td>
 
-                <td>${student.rollNo}</td>
+                    <td>${student.attendance}%</td>
 
-                <td>${student.attendance}%</td>
+                    <td>${student.level}</td>
 
-                <td>
-
-                    <span class="badge bg-danger">
-
-                        ${student.status}
-
-                    </span>
-
-                </td>
-
-            </tr>
+                </tr>
 
             `;
 
@@ -1853,68 +1902,98 @@ document.querySelector("#warningTable tbody");
 
 }
     /* ===================================================
-   PAGE INITIALIZATION
+   INITIALIZE HOD DASHBOARD
 =================================================== */
 
-window.onload = async function(){
+async function initializeDashboard(){
 
-    updateTime();
+    try{
 
-   const loaders = [
-    loadDashboardSummary,
-    loadDepartmentStatus,
-    loadAIInsights,
-    loadAttendanceAnalytics,
-        loadDepartmentPerformance,
-        loadNotifications,
-        loadRecentActivity,
-        loadTimetable,
-        loadFacultyStatus,
-        loadWarnings
-    ];
+        updateTime();
 
-    for(const fn of loaders){
+        await loadDashboardSummary();
 
-        try{
-            await fn();
-        }catch(e){
-            console.error(fn.name, e);
-        }
+        await loadDepartmentStatus();
+
+        await loadAIInsights();
+
+        await loadAttendanceAnalytics();
+
+        await loadDepartmentPerformance();
+
+        await loadNotifications();
+
+        await loadRecentActivity();
+
+        await loadFacultyStatus();
+
+        await loadWarnings();
+await loadTimetable();
+    }
+
+    catch(err){
+
+        console.error("Dashboard Initialization Error");
+
+        console.error(err);
 
     }
 
-};
+}
 
 /* ===================================================
    AUTO REFRESH
 =================================================== */
 
-setInterval(async()=>{
+function startAutoRefresh(){
 
-    updateTime();
+    setInterval(async()=>{
 
-    await loadDashboardSummary();
+        try{
 
-    await loadDepartmentStatus();
+            updateTime();
 
-    await loadAIInsights();
+            await loadDashboardSummary();
 
-    await loadAttendanceAnalytics();
+            await loadDepartmentStatus();
 
-    await loadDepartmentPerformance();
+            await loadAIInsights();
 
-    await loadNotifications();
+            await loadAttendanceAnalytics();
 
-    await loadRecentActivity();
+            await loadDepartmentPerformance();
 
-    await loadTimetable();
+            await loadNotifications();
 
-    await loadFacultyStatus();
+            await loadRecentActivity();
 
-    await loadWarnings();
+            await loadFacultyStatus();
 
-},60000);
+            await loadWarnings();
 
+        }
+
+        catch(err){
+
+            console.error(err);
+
+        }
+
+    },60000);
+
+}
+
+/* ===================================================
+   PAGE LOADED
+=================================================== */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+    initializeDashboard();
+
+    startAutoRefresh();
+
+});
 /* ===================================================
    AUTO LOGOUT
 =================================================== */
