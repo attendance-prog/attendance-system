@@ -1734,8 +1734,10 @@ async function loadTimetable(){
 
         const email = localStorage.getItem("email");
 
+const user = JSON.parse(localStorage.getItem("user") || "{}");
+
 const res = await callAPI("getHodTimetable", {
-    email: email
+    email: user.email
 });
 
         if(!res.success) return;
