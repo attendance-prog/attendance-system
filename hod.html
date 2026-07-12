@@ -459,7 +459,26 @@ grid-template-columns:1fr;
 }
 
 }
+.badge-success{
+background:#4CAF50;
+color:white;
+padding:5px 10px;
+border-radius:20px;
+}
 
+.badge-warning{
+background:#ff9800;
+color:white;
+padding:5px 10px;
+border-radius:20px;
+}
+
+.badge-danger{
+background:#e53935;
+color:white;
+padding:5px 10px;
+border-radius:20px;
+}
 </style>
 
 </head>
@@ -1365,8 +1384,8 @@ async function loadDepartmentStatus(){
         document.getElementById("facultyPresent").innerText =
             d.activeFaculty || 0;
 
-        document.getElementById("studentsPresent").innerText =
-            d.totalStudents || 0;
+       document.getElementById("studentsPresent").innerText =
+    d.presentStudents || 0;
 
         document.getElementById("runningClasses").innerText =
             d.liveClasses || 0;
@@ -1848,14 +1867,12 @@ async function loadFacultyStatus() {
 
                     <td>
 
-                       <span class="badge ${
-f.status==="PRESENT"
-?"bg-success"
-:f.status==="ABSENT"
-?"bg-danger"
-:f.status==="LATE"
-?"bg-warning"
-:"bg-secondary"
+                      <span class="${
+f.status=="PRESENT"
+?"badge-success"
+:f.status=="LATE"
+?"badge-warning"
+:"badge-danger"
 }">
 ${f.status}
 </span>
