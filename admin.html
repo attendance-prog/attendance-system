@@ -1402,7 +1402,6 @@ async function loadDashboard(){
     if(!data.success){
 
         console.error(data.message);
-
         return;
 
     }
@@ -1413,14 +1412,13 @@ async function loadDashboard(){
     document.getElementById("facultyCount").innerText =
         data.faculty || 0;
 
-    document.getElementById("liveClasses").textContent =
-    dashboard.liveClasses ?? 0;
+    document.getElementById("liveClasses").innerText =
+        data.liveClasses || 0;
 
     document.getElementById("attendancePercent").innerText =
         (data.attendance || 0) + "%";
 
 }
-
 
 /* ---------- Live Campus ---------- */
 
