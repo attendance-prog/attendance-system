@@ -885,7 +885,8 @@ Logout
                     <th>Subject</th>
 
                     <th>Faculty</th>
-
+<th>room</th>
+                    <th>Status</th>
                 </tr>
 
             </thead>
@@ -1320,7 +1321,7 @@ async function loadDashboardSummary() {
             d.totalStudents || 0;
 
         document.getElementById("totalSubjects").innerText =
-            d.totalStudents || 0; // until subject API is added
+d.totalSubjects || 0;
 
         document.getElementById("liveClasses").innerText =
             d.liveClasses || 0;
@@ -1732,13 +1733,12 @@ async function loadTimetable(){
 
     try{
 
-        const email = localStorage.getItem("email");
-
-const user = JSON.parse(localStorage.getItem("user") || "{}");
+        cconst email = localStorage.getItem("email");
 
 const res = await callAPI("getHodTimetable", {
-    email: user.email
+    email: email
 });
+
 
         if(!res.success) return;
 
