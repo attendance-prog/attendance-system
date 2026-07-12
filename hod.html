@@ -1061,7 +1061,22 @@ Logout
 const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
 
 let hodChart=null;
+async function callAPI(action, data = {}) {
 
+    const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "text/plain"
+        },
+        body: JSON.stringify({
+            action,
+            ...data
+        })
+    });
+
+    return await response.json();
+
+}
 /* ===================================================
    SIDEBAR
 =================================================== */
@@ -1717,7 +1732,11 @@ async function loadTimetable(){
 
     try{
 
-        const res = await callAPI("getHodTimetable");
+        const email = localStorage.getItem("email");
+
+const res = await callAPI("getHodTimetable", {
+    email: email
+});
 
         if(!res.success) return;
 
@@ -2055,27 +2074,7 @@ hodChart.destroy();
 }
 
 });
-    async function callAPI(action, data = {}) {
-
-    const response = await fetch(API_URL, {
-
-        method: "POST",
-
-        headers: {
-            "Content-Type": "text/plain"
-        },
-
-        body: JSON.stringify({
-            action,
-            ...data
-        })
-
-    });
-
-    return await response.json();
-
-}
-
+   
 </script>
 
 </body>
