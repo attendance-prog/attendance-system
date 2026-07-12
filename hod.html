@@ -1286,42 +1286,72 @@ window.print();
 
 async function loadDashboardSummary(){
 
-const data=await api("getHodDashboardSummary");
+    try{
 
-if(!data.success) return;
+        const res = await callAPI("getHodDashboardSummary");
 
-document.getElementById("totalFaculty").innerHTML=data.faculty;
-document.getElementById("totalStudents").innerHTML=data.students;
-document.getElementById("totalSubjects").innerHTML=data.subjects;
-document.getElementById("liveClasses").innerHTML=data.liveClasses;
-document.getElementById("pendingLeaves").innerHTML=data.pendingLeaves;
-document.getElementById("pendingMarks").innerHTML=data.pendingMarks;
+        if(!res.success) return;
+
+        const d = res.data || res;
+
+        document.getElementById("totalFaculty").innerText =
+            d.faculty ?? 0;
+
+        document.getElementById("totalStudents").innerText =
+            d.students ?? 0;
+
+        document.getElementById("totalSubjects").innerText =
+            d.subjects ?? 0;
+
+        document.getElementById("liveClasses").innerText =
+            d.liveClasses ?? 0;
+
+        document.getElementById("pendingLeaves").innerText =
+            d.pendingLeaves ?? 0;
+
+        document.getElementById("pendingMarks").innerText =
+            d.pendingMarks ?? 0;
+
+    }catch(err){
+
+        console.error(err);
+
+    }
 
 }
-
 /* ===================================================
    DEPARTMENT STATUS
 =================================================== */
 
 async function loadDepartmentStatus(){
 
-const data=await api("getHodDepartmentStatus");
+    try{
 
-if(!data.success) return;
+        const res = await callAPI("getHodDepartmentStatus");
 
-document.getElementById("facultyPresent").innerHTML=data.facultyPresent;
+        if(!res.success) return;
 
-document.getElementById("studentsPresent").innerHTML=data.studentsPresent;
+        const d = res.data || res;
 
-document.getElementById("runningClasses").innerHTML=data.runningClasses;
+        document.getElementById("facultyPresent").innerText =
+            d.facultyPresent ?? 0;
 
-document.getElementById("attendanceToday").innerHTML=data.attendance+"%";
+        document.getElementById("studentsPresent").innerText =
+            d.studentsPresent ?? 0;
 
-document.getElementById("facultyAvailable").innerHTML=data.facultyPresent;
+        document.getElementById("runningClasses").innerText =
+            d.runningClasses ?? 0;
 
-document.getElementById("attendancePercent").innerHTML=data.attendance+"%";
+        document.getElementById("attendanceToday").innerText =
+            (d.attendanceToday ?? 0) + "%";
 
-document.getElementById("activeSessions").innerHTML=data.runningClasses;
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
 
 }
 
@@ -1329,29 +1359,49 @@ document.getElementById("activeSessions").innerHTML=data.runningClasses;
    AI INSIGHTS
 =================================================== */
 
-async function loadSmartAI(){
+async function loadAIInsights(){
 
-const data=await api("getSmartAIInsights");
+    try{
 
-if(!data.success) return;
+        const res = await callAPI("getAIInsights");
 
-let html="";
+        if(!res.success) return;
 
-data.data.forEach(item=>{
+        const list = res.data || [];
 
-html+=`
+        const box = document.getElementById("aiInsights");
 
-<div class="activity">
+        box.innerHTML = "";
 
-${item}
+        if(list.length===0){
 
-</div>
+            box.innerHTML="<div class='info-card'>No AI Insights Available</div>";
 
-`;
+            return;
 
-});
+        }
 
-document.getElementById("aiInsights").innerHTML=html;
+        list.forEach(item=>{
+
+            const div=document.createElement("div");
+
+            div.className="info-card";
+
+            div.innerHTML=`
+                🤖 ${item.message}
+            `;
+
+            box.appendChild(div);
+
+        });
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
 
 }
 
@@ -1359,42 +1409,96 @@ document.getElementById("aiInsights").innerHTML=html;
    ATTENDANCE CHART
 =================================================== */
 
-async function loadAttendanceChart(){
+let attendanceChart = null;
 
-const data = await api("getAttendanceAnalytics");
+async function loadAttendanceAnalytics(){
 
-if(!data.success) return;
+    try{
 
-const ctx=document.getElementById("attendanceChart");
+        const res = await callAPI("getAttendanceAnalytics");
 
-if(hodChart){
+        if(!res.success) return;
 
-hodChart.destroy();
+        const d = res.data || res;
 
-}
+        const ctx = document
+            .getElementById("attendanceChart")
+            .getContext("2d");
 
-if(data.labels && data.labels.length){
+        if(attendanceChart){
 
-    hodChart = new Chart(ctx,{
+            attendanceChart.destroy();
 
-        type:"bar",
-
-        data:{
-            labels:data.labels,
-            datasets:[{
-                label:"Attendance",
-                data:data.values,
-                borderWidth:2
-            }]
-        },
-
-        options:{
-            responsive:true,
-            maintainAspectRatio:false
         }
 
-    });
-}
+        attendanceChart = new Chart(ctx,{
+
+            type:"bar",
+
+            data:{
+
+                labels:["Present","Absent"],
+
+                datasets:[{
+
+                    label:"Attendance",
+
+                    data:[
+
+                        d.present ?? 0,
+
+                        d.absent ?? 0
+
+                    ],
+
+                    backgroundColor:[
+
+                        "#16a085",
+
+                        "#e74c3c"
+
+                    ],
+
+                    borderRadius:8
+
+                }]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                scales:{
+
+                    y:{
+
+                        beginAtZero:true,
+
+                        ticks:{
+
+                            precision:0
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
+
 }
 
 /* ===================================================
@@ -1403,91 +1507,162 @@ if(data.labels && data.labels.length){
 
 async function loadDepartmentPerformance(){
 
-const data = await api("getDepartmentPerformance");
+    try{
 
-if(!data.success) return;
+        const res = await callAPI("getDepartmentPerformance");
 
-let html="";
+        if(!res.success) return;
 
-data.data.forEach(r=>{
+        const list = res.data || [];
 
-html+=`
+        const tbody =
+document.querySelector("#performanceTable tbody");
+        tbody.innerHTML = "";
 
-<tr>
+        if(list.length===0){
 
-<td>${r.section}</td>
+            tbody.innerHTML=`
+            <tr>
+                <td colspan="3">No Records</td>
+            </tr>`;
 
-<td>${r.attendance}%</td>
+            return;
 
-<td>${r.average}%</td>
+        }
 
-</tr>
+        list.forEach(item=>{
 
-`;
+            tbody.innerHTML += `
 
-});
+            <tr>
 
-document.querySelector("#performanceTable tbody").innerHTML=html;
+                <td>${item.section}</td>
+
+                <td>${item.attendance}%</td>
+
+                <td>${item.average}%</td>
+
+            </tr>
+
+            `;
+
+        });
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
 
 }
-
 /* ===================================================
    NOTIFICATIONS
 =================================================== */
 
 async function loadNotifications(){
 
-const data=await api("getHodNotifications");
+    try{
 
-if(!data.success) return;
+        const res = await callAPI("getHodNotifications");
 
-let html="";
+        if(!res.success) return;
 
-data.data.forEach(n=>{
+        const list = res.data || [];
 
-html+=`
+        const box = document.getElementById("notifications");
 
-<div class="notice">
+        box.innerHTML = "";
 
-${n}
+        if(list.length===0){
 
-</div>
+            box.innerHTML = `
+            <div class="info-card">
+                No Notifications
+            </div>`;
 
-`;
+            return;
 
-});
+        }
 
-document.getElementById("notifications").innerHTML=html;
+        list.forEach(item=>{
+
+            box.innerHTML += `
+
+            <div class="info-card">
+
+                <b>${item.title || "Notification"}</b>
+
+                <br>
+
+                ${item.message || ""}
+
+            </div>
+
+            `;
+
+        });
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
 
 }
 
 /* ===================================================
    RECENT ACTIVITY
 =================================================== */
-
 async function loadRecentActivity(){
 
-const data=await api("getHodRecentActivity");
+    try{
 
-if(!data.success) return;
+        const res = await callAPI("getHodRecentActivity");
 
-let html="";
+        if(!res.success) return;
 
-data.data.forEach(r=>{
+        const list = res.data || [];
 
-html+=`
+        const box = document.getElementById("recentActivity");
 
-<div class="activity">
+        box.innerHTML = "";
 
-${r.text}
+        if(list.length===0){
 
-</div>
+            box.innerHTML = `
+            <div class="info-card">
+                No Recent Activity
+            </div>`;
 
-`;
+            return;
 
-});
+        }
 
-document.getElementById("recentActivity").innerHTML=html;
+        list.forEach(item=>{
+
+            box.innerHTML += `
+
+            <div class="info-card">
+
+                ${item.title}
+
+            </div>
+
+            `;
+
+        });
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
 
 }
 
@@ -1497,31 +1672,59 @@ document.getElementById("recentActivity").innerHTML=html;
 
 async function loadTimetable(){
 
-const data=await api("getHodTimetable");
+    try{
 
-if(!data.success) return;
+        const res = await callAPI("getHodTimetable");
 
-let html="";
+        if(!res.success) return;
 
-data.data.forEach(r=>{
+        const list = res.data || [];
 
-html+=`
+        const tbody =
+document.querySelector("#todayTimetable tbody");
 
-<tr>
+        tbody.innerHTML = "";
 
-<td>${r.time}</td>
+        if(list.length===0){
 
-<td>${r.subject}</td>
+            tbody.innerHTML=`
+            <tr>
+                <td colspan="5">No Lecture Today</td>
+            </tr>`;
 
-<td>${r.faculty}</td>
+            return;
 
-</tr>
+        }
 
-`;
+        list.forEach(item=>{
 
-});
+            tbody.innerHTML += `
 
-document.querySelector("#todayTimetable tbody").innerHTML=html;
+            <tr>
+
+                <td>${item.time}</td>
+
+                <td>${item.subject}</td>
+
+                <td>${item.faculty}</td>
+
+                <td>${item.room}</td>
+
+                <td>${item.status}</td>
+
+            </tr>
+
+            `;
+
+        });
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
 
 }
 
@@ -1531,77 +1734,122 @@ document.querySelector("#todayTimetable tbody").innerHTML=html;
 
 async function loadFacultyStatus(){
 
-const data=await api("getHodFacultyStatus");
+    try{
 
-if(!data.success) return;
+        const res=await callAPI("getHodFacultyStatus");
 
-let html="";
+        if(!res.success) return;
 
-data.data.forEach(r=>{
+        const list=res.data||[];
 
-html+=`
+        const tbody =
+document.querySelector("#facultyStatus tbody");
 
-<tr>
+        tbody.innerHTML="";
 
-<td>${r.name}</td>
+        if(list.length===0){
 
-<td>
+            tbody.innerHTML=`
+            <tr>
+                <td colspan="3">No Faculty Found</td>
+            </tr>`;
 
-<b style="color:${
-r.status=="Present"
-?"green"
-:"red"
-};">
+            return;
 
-${r.status}
+        }
 
-</b>
+        list.forEach(f=>{
 
-</td>
+            tbody.innerHTML+=`
 
-</tr>
+            <tr>
 
-`;
+                <td>${f.name}</td>
 
-});
+                <td>${f.subject}</td>
 
-document.querySelector("#facultyStatus tbody").innerHTML=html;
+                <td>${f.status}</td>
+
+            </tr>
+
+            `;
+
+        });
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
 
 }
-
 /* ===================================================
    EARLY WARNING
 =================================================== */
 
 async function loadWarnings(){
 
-const data=await api("getHodWarnings");
+    try{
 
-if(!data.success) return;
+        const res = await callAPI("getHodWarnings");
 
-let html="";
+        if(!res.success) return;
 
-document.getElementById("totalAlerts").innerHTML=data.data.length;
+        const list = res.data || [];
 
-data.data.forEach(r=>{
+        const tbody =
+document.querySelector("#warningTable tbody");
 
-html+=`
+        tbody.innerHTML = "";
 
-<tr>
+        if(list.length===0){
 
-<td>${r.student}</td>
+            tbody.innerHTML = `
+            <tr>
+                <td colspan="4">No Warning Students</td>
+            </tr>`;
 
-<td>${r.attendance}%</td>
+            return;
 
-<td>${r.status}</td>
+        }
 
-</tr>
+        list.forEach(student=>{
 
-`;
+            tbody.innerHTML += `
 
-});
+            <tr>
 
-document.querySelector("#warningTable tbody").innerHTML=html;
+                <td>${student.name}</td>
+
+                <td>${student.rollNo}</td>
+
+                <td>${student.attendance}%</td>
+
+                <td>
+
+                    <span class="badge bg-danger">
+
+                        ${student.status}
+
+                    </span>
+
+                </td>
+
+            </tr>
+
+            `;
+
+        });
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
 
 }
     /* ===================================================
@@ -1612,11 +1860,11 @@ window.onload = async function(){
 
     updateTime();
 
-    const loaders = [
-        loadDashboardSummary,
-        loadDepartmentStatus,
-        loadSmartAI,
-        loadAttendanceChart,
+   const loaders = [
+    loadDashboardSummary,
+    loadDepartmentStatus,
+    loadAIInsights,
+    loadAttendanceAnalytics,
         loadDepartmentPerformance,
         loadNotifications,
         loadRecentActivity,
@@ -1643,29 +1891,29 @@ window.onload = async function(){
 
 setInterval(async()=>{
 
-updateTime();
+    updateTime();
 
-await loadDashboardSummary();
+    await loadDashboardSummary();
 
-await loadDepartmentStatus();
+    await loadDepartmentStatus();
 
-await loadSmartAI();
+    await loadAIInsights();
 
-await loadAttendanceChart();
+    await loadAttendanceAnalytics();
 
-await loadDepartmentPerformance();
+    await loadDepartmentPerformance();
 
-await loadNotifications();
+    await loadNotifications();
 
-await loadRecentActivity();
+    await loadRecentActivity();
 
-await loadTimetable();
+    await loadTimetable();
 
-await loadFacultyStatus();
+    await loadFacultyStatus();
 
-await loadWarnings();
+    await loadWarnings();
 
-},30000);
+},60000);
 
 /* ===================================================
    AUTO LOGOUT
@@ -1728,31 +1976,6 @@ hodChart.destroy();
 }
 
 });
-
-/* ===================================================
-   GLOBAL ERROR HANDLER
-=================================================== */
-
-async function api(action){
-
-    const res = await fetch(API_URL,{
-        method:"POST",
-        headers:{
-            "Content-Type":"text/plain"
-        },
-        body:JSON.stringify({action})
-    });
-
-    const data = await res.json();
-
-    console.log(action, data);
-
-    if(!data.success){
-        throw new Error(data.message || action + " failed");
-    }
-
-    return data;
-}
 
 </script>
 
