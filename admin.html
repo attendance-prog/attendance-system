@@ -1122,12 +1122,40 @@ Loading...
 
 </div>
 
-<ul class="notification-list" id="recentActivity">
+<div style="overflow:auto;max-height:350px;">
 
-<li>Loading...</li>
+<table id="recentActivityTable" style="width:100%;border-collapse:collapse;">
 
-</ul>
+<thead>
 
+<tr>
+
+<th>Date</th>
+<th>Student</th>
+<th>Subject</th>
+<th>Status</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td colspan="4" style="text-align:center;padding:25px;">
+
+Loading...
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
 </div>
 
 </div>
@@ -1817,40 +1845,99 @@ async function loadRecentActivity(){
 
     try{
 
-        const data = await callAPI("getRecentActivity");
+        const res = await callAPI("getRecentActivity");
 
-        const list =
-        document.getElementById("recentActivity");
+        const tbody =
+        document.querySelector("#recentActivityTable tbody");
 
-        list.innerHTML = "";
+        tbody.innerHTML = "";
 
-        if(!data.success){
+        if(!res.success){
 
-            list.innerHTML =
-            "<li>Unable to load activity.</li>";
+            tbody.innerHTML = `
+
+            <tr>
+
+                <td colspan="4"
+                style="text-align:center;padding:25px;">
+
+                    Unable to load activity.
+
+                </td>
+
+            </tr>
+
+            `;
 
             return;
 
         }
 
-        if(!data.data || data.data.length===0){
+        if(!res.data || res.data.length===0){
 
-            list.innerHTML =
-            "<li>No Activity Found</li>";
+            tbody.innerHTML = `
+
+            <tr>
+
+                <td colspan="4"
+                style="text-align:center;padding:25px;">
+
+                    No Activity Found
+
+                </td>
+
+            </tr>
+
+            `;
 
             return;
 
         }
 
-        data.data.forEach(item=>{
+        res.data.forEach(item=>{
 
-            list.innerHTML += `
+            let badge = "badge-secondary";
 
-            <li>
+            switch(String(item.status).toUpperCase()){
 
-                ${item.title}
+                case "PRESENT":
+                    badge = "badge-success";
+                    break;
 
-            </li>
+                case "LATE":
+                    badge = "badge-warning";
+                    break;
+
+                case "ABSENT":
+                    badge = "badge-danger";
+                    break;
+
+                default:
+                    badge = "badge-secondary";
+
+            }
+
+            tbody.innerHTML += `
+
+            <tr>
+
+                <td>${item.date}</td>
+
+                <td>${item.student}</td>
+
+                <td>${item.subject}</td>
+
+                <td>
+
+                    <span class="${badge}">
+
+                        ${item.status}
+
+                    </span>
+
+                </td>
+
+            </tr>
 
             `;
 
