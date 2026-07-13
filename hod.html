@@ -1587,12 +1587,28 @@ async function loadTimetable(){
 
             let badge = "badge-info";
 
-            if(item.status==="Running")
-                badge="badge-success";
+switch(item.status){
 
-            if(item.status==="Completed")
-                badge="badge-secondary";
+    case "Running":
+        badge = "badge-success";
+        break;
 
+    case "Taken":
+        badge = "badge-success";
+        break;
+
+    case "Not Taken":
+        badge = "badge-danger";
+        break;
+
+    case "Not Started":
+        badge = "badge-warning";
+        break;
+
+    case "Upcoming":
+        badge = "badge-primary";
+        break;
+}
             tbody.innerHTML += `
 
             <tr>
