@@ -1073,23 +1073,28 @@ let attendanceChart = null;
 
 async function loadDashboardSummary(){
 
-    const data = await api("getCoordinatorDashboardSummary");
+    const data = await api(
+        "getCoordinatorDashboardSummary",
+        {
+            email: localStorage.getItem("email")
+        }
+    );
 
     if(!data.success) return;
 
-   const d = data.dashboard;
+    const d = data.dashboard;
 
-document.getElementById("studentCount").innerText =
-    d.totalStudents || 0;
+    document.getElementById("studentCount").innerText =
+        d.totalStudents || 0;
 
-document.getElementById("facultyCount").innerText =
-    d.totalFaculty || 0;
+    document.getElementById("facultyCount").innerText =
+        d.totalFaculty || 0;
 
-document.getElementById("runningClasses").innerText =
-    d.liveClasses || 0;
+    document.getElementById("runningClasses").innerText =
+        d.liveClasses || 0;
 
-document.getElementById("attendancePercent").innerText =
-    (d.attendance || 0) + "%";
+    document.getElementById("attendancePercent").innerText =
+        (d.attendance || 0) + "%";
 
 }
 
@@ -1169,29 +1174,6 @@ if(!data.success) return;
     });
 
 }
-
-
-/* ===========================
-   AUTO REFRESH
-=========================== */
-
-setInterval(async()=>{
-
-await refreshCoordinator();
-
-await refreshCoordinatorTables();
-
-},60000);
-
-/* ===========================
-   INITIAL LOAD
-=========================== */
-
-document.addEventListener("DOMContentLoaded",async()=>{
-
-    await refreshDashboard();
-
-});
     /* =====================================================
    GO GREEN V2.0
    PART 2C
@@ -1205,9 +1187,13 @@ document.addEventListener("DOMContentLoaded",async()=>{
 
 async function loadAIInsights(){
 
-   await api("getCoordinatorAIInsights",{
-    email:localStorage.getItem("email")
-});
+    const data = await api(
+        "getCoordinatorAIInsights",
+        {
+            email: localStorage.getItem("email")
+        }
+    );
+
     const box = document.getElementById("aiInsights");
 
     box.innerHTML = "";
@@ -1231,14 +1217,18 @@ async function loadAIInsights(){
     });
 
 }
-
 /* ===========================
    LIVE DEPARTMENT
 =========================== */
 
 async function loadLiveDepartment(){
 
-    const data = await api("getCoordinatorDepartmentStatus");
+    const data = await api(
+        "getCoordinatorDepartmentStatus",
+        {
+            email: localStorage.getItem("email")
+        }
+    );
 
     if(!data.success) return;
 
@@ -1262,9 +1252,12 @@ async function loadLiveDepartment(){
 
 async function loadNotifications(){
 
-    await api("getCoordinatorNotifications",{
-    email:localStorage.getItem("email")
-});
+    const data = await api(
+        "getCoordinatorNotifications",
+        {
+            email: localStorage.getItem("email")
+        }
+    );
 
     const list =
         document.getElementById("notificationList");
@@ -1280,10 +1273,10 @@ async function loadNotifications(){
 
     }
 
-    data.data.forEach(n=>{
+    data.data.forEach(item=>{
 
         list.innerHTML += `
-        <li>${n.title}</li>`;
+        <li>${item.title}</li>`;
 
     });
 
@@ -1673,7 +1666,7 @@ async function initializeDashboard(){
 
         await loadDashboardSummary();
 
-        await loadDepartmentStatus();
+     await loadLiveDepartment();
 
         await loadAttendanceChart();
 
@@ -1737,13 +1730,11 @@ async function refreshDashboard(){
    AUTO REFRESH
 =========================================================*/
 
-function startAutoRefresh(){
+async function refreshDashboard(){
 
-    setInterval(async()=>{
+    await initializeDashboard();
 
-        await refreshDashboard();
-
-    },60000); // Refresh every 60 seconds
+    updateTime();
 
 }
     /* =========================================================
