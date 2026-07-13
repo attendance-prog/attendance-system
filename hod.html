@@ -282,7 +282,14 @@ padding:5px 12px;
 border-radius:20px;
 
 }
+.badge-info{
 
+background:#2196f3;
+color:#fff;
+padding:5px 12px;
+border-radius:20px;
+
+}
 @media(max-width:768px){
 
 .sidebar{
@@ -372,9 +379,6 @@ Logout
 </div>
 
 <div class="content">
-
-</header>
-
 <div class="container">
 
 <h3 class="section-title">
@@ -1056,10 +1060,8 @@ async function callAPI(action,data={}){
             method:"POST",
 
             headers:{
-
-                "-Type":"text/plain;charset=utf-8"
-
-            },
+"Content-Type":"text/plain;charset=utf-8"
+},
 
             body:JSON.stringify(payload)
 
@@ -1990,21 +1992,15 @@ function updateCurrentDay(){
    PAGE LOAD
 ========================================================== */
 
-document.addEventListener(
+document.addEventListener("DOMContentLoaded", async () => {
 
-    "DOMLoaded",
+    updateCurrentDay();
 
-    async()=>{
+    await initializeDashboard();
 
-        updateCurrentDay();
+    startAutoRefresh();
 
-        await initializeDashboard();
-
-        startAutoRefresh();
-
-    }
-
-);
+});
 
 </script>
 
