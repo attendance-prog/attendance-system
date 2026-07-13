@@ -708,12 +708,11 @@ grid-template-columns:1fr;
 
                 <tr>
 
-                    <th>Time</th>
-
-                    <th>Subject</th>
-
-                    <th>Faculty</th>
-
+                   <th>Time</th>
+<th>Subject</th>
+<th>Faculty</th>
+<th>Room</th>
+<th>Status</th>
                 </tr>
 
             </thead>
@@ -722,7 +721,7 @@ grid-template-columns:1fr;
 
                 <tr>
 
-                    <td colspan="3">
+                    <td colspan="5">
                         Loading...
                     </td>
 
@@ -854,11 +853,40 @@ grid-template-columns:1fr;
 
         </div>
 
-        <ul class="notification-list" id="recentActivity">
+        <div style="overflow:auto;max-height:350px;">
 
-            <li>Loading...</li>
+<table id="recentActivityTable" class="activity-table">
 
-        </ul>
+<thead>
+
+<tr>
+
+<th>Date</th>
+<th>Student</th>
+<th>Subject</th>
+<th>Status</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td colspan="4" style="text-align:center;padding:25px;">
+
+Loading...
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
 
     </div>
 
@@ -1049,17 +1077,19 @@ async function loadDashboardSummary(){
 
     if(!data.success) return;
 
-    document.getElementById("studentCount").innerText =
-        data.students || 0;
+   const d = data.dashboard;
 
-    document.getElementById("facultyCount").innerText =
-        data.faculty || 0;
+document.getElementById("studentCount").innerText =
+    d.totalStudents || 0;
 
-    document.getElementById("runningClasses").innerText =
-        data.liveClasses || 0;
+document.getElementById("facultyCount").innerText =
+    d.totalFaculty || 0;
 
-    document.getElementById("attendancePercent").innerText =
-        (data.attendance || 0) + "%";
+document.getElementById("runningClasses").innerText =
+    d.liveClasses || 0;
+
+document.getElementById("attendancePercent").innerText =
+    (d.attendance || 0) + "%";
 
 }
 
@@ -1069,7 +1099,9 @@ async function loadDashboardSummary(){
 
 async function loadAttendanceChart(){
 
-    const data = await api("getCoordinatorAttendanceAnalytics");
+   callAPI("getCoordinatorAttendanceAnalytics",{
+    email:email
+})
 
     if(!data.success) return;
 
@@ -1183,7 +1215,9 @@ document.addEventListener("DOMContentLoaded",async()=>{
 
 async function loadAIInsights(){
 
-    const data = await api("getSmartAIInsights");
+    callAPI("getCoordinatorAIInsights",{
+    email:email
+})
 
     const box = document.getElementById("aiInsights");
 
@@ -1239,7 +1273,9 @@ async function loadLiveDepartment(){
 
 async function loadNotifications(){
 
-    const data = await api("getCoordinatorNotifications");
+    callAPI("getCoordinatorNotifications",{
+    email:email
+})
 
     const list =
         document.getElementById("notificationList");
@@ -1270,71 +1306,99 @@ async function loadNotifications(){
 
 async function loadRecentActivity(){
 
-    const data =
-        await api("getCoordinatorRecentActivity");
+    try{
 
-    const list =
-        document.getElementById("recentActivity");
+        const res = await api(
+            "getCoordinatorRecentActivity",
+            {
+                email:localStorage.getItem("email")
+            }
+        );
 
-    list.innerHTML = "";
+        const tbody =
+        document.querySelector("#recentActivityTable tbody");
 
-    if(!data.success){
+        tbody.innerHTML="";
 
-        list.innerHTML =
-        "<li>No Recent Activity</li>";
+        if(!res.success){
 
-        return;
+            tbody.innerHTML=`
+            <tr>
+            <td colspan="4"
+            style="text-align:center;padding:25px;">
+            Unable to load activity
+            </td>
+            </tr>`;
+            return;
+
+        }
+
+        if(!res.data || res.data.length===0){
+
+            tbody.innerHTML=`
+            <tr>
+            <td colspan="4"
+            style="text-align:center;padding:25px;">
+            No Recent Activity
+            </td>
+            </tr>`;
+            return;
+
+        }
+
+        res.data.forEach(item=>{
+
+            let badge="badge-secondary";
+
+            switch(item.status){
+
+                case "PRESENT":
+                    badge="badge-success";
+                    break;
+
+                case "LATE":
+                    badge="badge-warning";
+                    break;
+
+                case "ABSENT":
+                    badge="badge-danger";
+                    break;
+
+            }
+
+            tbody.innerHTML+=`
+
+            <tr>
+
+                <td>${item.date}</td>
+
+                <td>${item.student}</td>
+
+                <td>${item.subject}</td>
+
+                <td>
+
+                    <span class="${badge}">
+
+                        ${item.status}
+
+                    </span>
+
+                </td>
+
+            </tr>`;
+
+        });
 
     }
 
-    data.data.forEach(r=>{
+    catch(err){
 
-        list.innerHTML += `
-        <li>
-           ${r.time} - ${r.activity}
-        </li>`;
+        console.error(err);
 
-    });
+    }
 
 }
-
-/* ===========================
-   REFRESH
-=========================== */
-
-async function refreshCoordinator(){
-
-    await loadDashboardSummary();
-
-    await loadAttendanceChart();
-
-    await loadAIInsights();
-
-    await loadLiveDepartment();
-
-    await loadNotifications();
-
-    await loadRecentActivity();
-
-    updateTime();
-
-}
-
-/* ===========================
-   AUTO REFRESH
-=========================== */
-
-setInterval(refreshCoordinator,60000);
-
-/* ===========================
-   INITIAL LOAD
-=========================== */
-
-document.addEventListener("DOMContentLoaded",async()=>{
-
-    await refreshCoordinator();
-
-});
   /* =====================================================
    GO GREEN V2.0
    PART 2D
@@ -1350,36 +1414,123 @@ let coordinatorChart = null;
 
 async function loadTimetable(){
 
-    const data = await api("getCoordinatorTimetable");
+    try{
 
-    const body =
+        const res = await api(
+            "getCoordinatorTimetable",
+            {
+                email:localStorage.getItem("email")
+            }
+        );
+
+        const body =
         document.getElementById("todayTimetableBody");
 
-    body.innerHTML = "";
+        body.innerHTML="";
 
-    if(!data.success || !data.data.length){
+        if(!res.success){
 
-        body.innerHTML =
-        "<tr><td colspan='3'>No Classes Today</td></tr>";
+            body.innerHTML=`
+            <tr>
+            <td colspan="5"
+            style="text-align:center;padding:20px;">
+            Unable to load timetable
+            </td>
+            </tr>`;
+            return;
 
-        return;
+        }
+
+        if(res.holiday){
+
+            body.innerHTML=`
+            <tr>
+            <td colspan="5"
+            style="text-align:center;
+            padding:25px;
+            color:#2e7d32;
+            font-weight:bold;">
+            🌴 Sunday Holiday - No Classes Today
+            </td>
+            </tr>`;
+            return;
+
+        }
+
+        if(!res.data || res.data.length==0){
+
+            body.innerHTML=`
+            <tr>
+            <td colspan="5"
+            style="text-align:center;padding:20px;">
+            No Timetable Available
+            </td>
+            </tr>`;
+            return;
+
+        }
+
+        res.data.forEach(item=>{
+
+            let badge="badge-info";
+
+            switch(item.status){
+
+                case "Running":
+                    badge="badge-success";
+                    break;
+
+                case "Taken":
+                    badge="badge-success";
+                    break;
+
+                case "Not Taken":
+                    badge="badge-danger";
+                    break;
+
+                case "Not Started":
+                    badge="badge-warning";
+                    break;
+
+                case "Upcoming":
+                    badge="badge-info";
+                    break;
+
+            }
+
+            body.innerHTML+=`
+
+            <tr>
+
+                <td>${item.time}</td>
+
+                <td>${item.subject}</td>
+
+                <td>${item.faculty}</td>
+
+                <td>${item.room}</td>
+
+                <td>
+
+                    <span class="${badge}">
+
+                        ${item.status}
+
+                    </span>
+
+                </td>
+
+            </tr>`;
+
+        });
 
     }
 
-    data.data.forEach(t=>{
+    catch(err){
 
-        body.innerHTML += `
-        <tr>
+        console.error(err);
 
-            <td>${t.time}</td>
-
-            <td>${t.subject}</td>
-
-            <td>${t.faculty}</td>
-
-        </tr>`;
-
-    });
+    }
 
 }
 
@@ -1522,38 +1673,103 @@ async function loadCoordinatorPerformance(){
     });
 
 }
+/* =========================================================
+   BLOCK-6A
+   INITIALIZE COORDINATOR DASHBOARD
+=========================================================*/
 
-/* ===========================
-   REFRESH TABLES
-=========================== */
+async function initializeDashboard(){
 
-async function refreshCoordinatorTables(){
+    try{
 
-    await loadTimetable();
+        await loadDashboardSummary();
 
-    await loadFacultyStatus();
+        await loadDepartmentStatus();
 
-    await loadStudentAttendance();
+        await loadAttendanceChart();
 
-    await loadCoordinatorPerformance();
+        await loadAIInsights();
+
+        await loadNotifications();
+
+        await loadRecentActivity();
+
+        await loadTimetable();
+
+        await loadFacultyStatus();
+
+        console.log("Coordinator Dashboard Loaded Successfully");
+
+    }
+
+    catch(err){
+
+        console.error("Dashboard Error :",err);
+
+    }
 
 }
+    /* =========================================================
+   BLOCK-6B
+   REFRESH DASHBOARD
+=========================================================*/
 
-/* ===========================
+async function refreshDashboard(){
+
+    try{
+
+        await loadDashboardSummary();
+
+        await loadDepartmentStatus();
+
+        await loadAttendanceChart();
+
+        await loadAIInsights();
+
+        await loadNotifications();
+
+        await loadRecentActivity();
+
+        await loadTimetable();
+
+        await loadFacultyStatus();
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
+
+}
+    /* =========================================================
+   BLOCK-6C
    AUTO REFRESH
-=========================== */
+=========================================================*/
 
-setInterval(refreshCoordinatorTables,60000);
+function startAutoRefresh(){
 
-/* ===========================
-   INITIAL LOAD
-=========================== */
+    setInterval(async()=>{
 
-document.addEventListener("DOMContentLoaded",async()=>{
+        await refreshDashboard();
 
-    await refreshCoordinatorTables();
+    },60000); // Refresh every 60 seconds
+
+}
+    /* =========================================================
+   BLOCK-6D
+   PAGE LOAD
+=========================================================*/
+
+document.addEventListener("DOMContentLoaded", async()=>{
+
+    await initializeDashboard();
+
+    startAutoRefresh();
 
 });
+    
   </script>
 
 </body>
