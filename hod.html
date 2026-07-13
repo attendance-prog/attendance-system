@@ -1369,97 +1369,63 @@ d.totalSubjects || 0;
 
 async function loadDepartmentStatus(){
 
-    try{
+    const r=await callAPI(
 
-        const email = localStorage.getItem("email");
+        "getDepartmentStatus",
 
-        const res = await callAPI("getHodDashboardSummary",{
-            email
-        });
+        {
 
-        if(!res.success) return;
+            department:user.department
 
-        const d = res.dashboard;
+        }
 
-        document.getElementById("facultyPresent").innerText =
-            d.activeFaculty || 0;
+    );
 
-       document.getElementById("studentsPresent").innerText =
-    d.presentStudents || 0;
+    document.getElementById("facultyPresent").textContent=r.facultyPresent;
 
-        document.getElementById("runningClasses").innerText =
-            d.liveClasses || 0;
+    document.getElementById("studentsPresent").textContent=r.studentsPresent;
 
-        document.getElementById("attendanceToday").innerText =
-            (d.attendancePercent || 0) + "%";
-document.getElementById("attendancePercent").innerText =
-(d.attendancePercent || 0) + "%";
-        document.getElementById("activeSessions").innerText =
-d.liveClasses || 0;
-    }
+    document.getElementById("runningClasses").textContent=r.runningClasses;
 
-    catch(err){
-
-        console.error(err);
-
-    }
+    document.getElementById("attendanceToday").textContent=r.attendance+"%";
 
 }
 /* ===================================================
    AI INSIGHTS
 =================================================== */
 
-async function loadAIInsights() {
+async function loadAIInsights(){
 
-    try {
+    const r=await callAPI(
 
-       const email = localStorage.getItem("email");
+        "getHodAIInsights",
 
-        const res = await callAPI("getHodAIInsights", {
-            email: email
-        });
+        {
 
-        const box = document.getElementById("aiInsights");
-
-        if (!res.success) {
-
-            box.innerHTML = "No AI Insights";
-
-            return;
+            department:user.department
 
         }
 
-        box.innerHTML = "";
+    );
 
-        if (!res.data || res.data.length === 0) {
+    const box=document.getElementById("aiInsights");
 
-            box.innerHTML = "<div>No AI Insights</div>";
+    box.innerHTML="";
 
-            return;
+    r.data.forEach(i=>{
 
-        }
+        box.innerHTML+=`
 
-        res.data.forEach(item => {
+        <div class="insight-card">
 
-            box.innerHTML += `
-                <div class="insight-card">
-                    🤖 <b>${item.type}</b><br>
-                    ${item.message}
-                </div>
-            `;
+        ${i.title}
 
-        });
+        </div>`;
 
-    }
-
-    catch(err){
-
-        console.error(err);
-
-    }
+    });
 
 }
-/* ===================================================
+    /* ===================================================
    ATTENDANCE CHART
 =================================================== */
 
@@ -1755,76 +1721,66 @@ async function loadRecentActivity() {
    TODAY TIMETABLE
 =================================================== */
 
-async function loadTimetable(){
+async function loadTodayTimetable(){
 
-    try{
+    const result=await callAPI(
 
-        const email = localStorage.getItem("email");
+        "getHodTodayTimetable",
 
-const res = await callAPI("getHodTimetable", {
-    email: email
-});
+        {
 
+            department:user.department
 
-        if(!res.success) return;
+        }
 
-        const list = res.data || [];
-
-        const tbody =
-document.querySelector("#todayTimetable tbody");
-
-        tbody.innerHTML = "";
-
-        if (list.length === 0) {
-
-    const day = new Date().toLocaleDateString(
-        "en-US",
-        { weekday: "long" }
     );
 
-    tbody.innerHTML = `
+    const tbody=document.getElementById("todayTimetableBody");
+
+    tbody.innerHTML="";
+
+    if(result.holiday){
+
+        tbody.innerHTML=`
         <tr>
-            <td colspan="5" style="text-align:center;font-weight:bold;color:green;">
-                ${day === "Sunday"
-                    ? "🌴 Sunday Holiday - No Lecture Today"
-                    : "📚 No Lecture Today"}
-            </td>
-        </tr>
-    `;
+        <td colspan="5" style="text-align:center;color:red">
+        Sunday Holiday
+        </td>
+        </tr>`;
 
-    return;
-}
-        list.forEach(item=>{
-
-            tbody.innerHTML += `
-
-            <tr>
-
-                <td>${item.time}</td>
-
-                <td>${item.subject}</td>
-
-                <td>${item.faculty}</td>
-
-                <td>${item.room}</td>
-
-                <td>${item.status}</td>
-
-            </tr>
-
-            `;
-
-        });
+        return;
 
     }
 
-    catch(err){
+    result.data.forEach(c=>{
 
-        console.error(err);
+        tbody.innerHTML+=`
 
-    }
+        <tr>
 
-}
+        <td>${c.time}</td>
+
+        <td>${c.subject}</td>
+
+        <td>${c.faculty}</td>
+
+        <td>${c.room}</td>
+
+        <td>
+
+        <span class="badge ${c.status.toLowerCase()}">
+
+        ${c.status}
+
+        </span>
+
+        </td>
+
+        </tr>`;
+
+    });
+
+}    
 
 /* ===================================================
    FACULTY STATUS
