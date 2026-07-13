@@ -1099,11 +1099,14 @@ document.getElementById("attendancePercent").innerText =
 
 async function loadAttendanceChart(){
 
-   callAPI("getCoordinatorAttendanceAnalytics",{
-    email:email
-})
+ const data = await api(
+    "getCoordinatorAttendanceAnalytics",
+    {
+        email:localStorage.getItem("email")
+    }
+);
 
-    if(!data.success) return;
+if(!data.success) return;
 
     const ctx =
         document.getElementById("attendanceChart");
@@ -1167,19 +1170,6 @@ async function loadAttendanceChart(){
 
 }
 
-/* ===========================
-   REFRESH DASHBOARD
-=========================== */
-
-async function refreshDashboard(){
-
-    await loadDashboardSummary();
-
-    await loadAttendanceChart();
-
-    updateTime();
-
-}
 
 /* ===========================
    AUTO REFRESH
@@ -1215,10 +1205,9 @@ document.addEventListener("DOMContentLoaded",async()=>{
 
 async function loadAIInsights(){
 
-    callAPI("getCoordinatorAIInsights",{
-    email:email
-})
-
+   await api("getCoordinatorAIInsights",{
+    email:localStorage.getItem("email")
+});
     const box = document.getElementById("aiInsights");
 
     box.innerHTML = "";
@@ -1236,7 +1225,7 @@ async function loadAIInsights(){
 
         box.innerHTML += `
         <div class="ai-item">
-            ${item}
+            ${item.title}
         </div>`;
 
     });
@@ -1273,9 +1262,9 @@ async function loadLiveDepartment(){
 
 async function loadNotifications(){
 
-    callAPI("getCoordinatorNotifications",{
-    email:email
-})
+    await api("getCoordinatorNotifications",{
+    email:localStorage.getItem("email")
+});
 
     const list =
         document.getElementById("notificationList");
@@ -1294,7 +1283,7 @@ async function loadNotifications(){
     data.data.forEach(n=>{
 
         list.innerHTML += `
-        <li>${n}</li>`;
+        <li>${n.title}</li>`;
 
     });
 
