@@ -3202,40 +3202,49 @@ email:localStorage.getItem("email")
 
 if(!res.success) return;
 
-document.getElementById("attendancePercent").innerHTML=
-res.attendance+"%";
+const canvas=document.getElementById("attendanceChart");
 
-document.getElementById("presentStudents").innerHTML=
-res.present;
+if(!canvas) return;
 
-document.getElementById("absentStudents").innerHTML=
-res.absent;
+const ctx=canvas.getContext("2d");
 
-document.getElementById("lateStudents").innerHTML=
-res.late;
+if(window.attendanceChart){
 
-if(attendanceChart){
+window.attendanceChart.destroy();
 
-attendanceChart.destroy();
-attendanceChart = null;
+window.attendanceChart=null;
 
 }
 
-attendanceChart=new Chart(
-
-document.getElementById("attendanceChart"),
-
-{
+window.attendanceChart=new Chart(ctx,{
 
 type:"doughnut",
 
 data:{
 
-labels:res.labels,
+labels:["Present","Absent","Late"],
 
 datasets:[{
 
-data:res.values
+data:[
+
+res.present,
+
+res.absent,
+
+res.late
+
+],
+
+backgroundColor:[
+
+"#2ecc71",
+
+"#e74c3c",
+
+"#f1c40f"
+
+]
 
 }]
 
@@ -3245,24 +3254,21 @@ options:{
 
 responsive:true,
 
-maintainAspectRatio:false,
-
-plugins:{
-
-legend:{
-
-position:"bottom"
-
-}
-
-}
+maintainAspectRatio:false
 
 }
 
 });
 
-}
+document.getElementById("attendancePercent").innerHTML=res.percent+"%";
 
+document.getElementById("presentStudents").innerHTML=res.present;
+
+document.getElementById("absentStudents").innerHTML=res.absent;
+
+document.getElementById("lateStudents").innerHTML=res.late;
+
+}
 
 
 /* ===========================================================
