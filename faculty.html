@@ -151,6 +151,1473 @@ body{
     margin-left:0;
   }
 }
+  .welcome-card{
+
+    background:white;
+    border-radius:20px;
+    padding:25px;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.welcome-top{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+
+}
+
+.faculty-info{
+
+    display:flex;
+    gap:25px;
+    margin-top:15px;
+    color:#555;
+    font-size:15px;
+
+}
+
+.clock{
+
+    text-align:right;
+
+}
+
+#currentTime{
+
+    font-size:32px;
+    font-weight:bold;
+    color:#1b5e20;
+
+}
+
+#currentDate{
+
+    color:#666;
+
+}
+
+.welcome-stats{
+
+    margin-top:25px;
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:20px;
+
+}
+
+
+
+.welcome-box:hover{
+
+    transform:translateY(-5px);
+
+}
+
+.welcome-box span{
+
+    font-size:30px;
+
+}
+
+.welcome-box h3{
+
+    margin:10px 0;
+
+    font-size:30px;
+
+}
+
+.welcome-box p{
+
+    margin:0;
+
+    font-size:14px;
+
+}
+
+@media(max-width:900px){
+
+.welcome-stats{
+
+grid-template-columns:repeat(2,1fr);
+
+}
+
+}
+
+@media(max-width:600px){
+
+.welcome-stats{
+
+grid-template-columns:1fr;
+
+}
+
+.faculty-info{
+
+flex-direction:column;
+
+gap:8px;
+
+}
+
+}
+  /*=================================
+PREMIUM DASHBOARD CARDS
+==================================*/
+
+.dashboard-cards{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+
+gap:20px;
+
+margin:25px 0;
+
+}
+
+.dash-card{
+
+background:white;
+
+border-radius:18px;
+
+padding:22px;
+
+display:flex;
+
+align-items:center;
+
+gap:18px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+transition:.35s;
+
+cursor:pointer;
+
+position:relative;
+
+overflow:hidden;
+
+}
+
+.dash-card:hover{
+
+transform:translateY(-6px);
+
+}
+
+.dash-card::before{
+
+content:"";
+
+position:absolute;
+
+left:0;
+
+top:0;
+
+width:6px;
+
+height:100%;
+
+}
+
+.students::before{
+
+background:#3498db;
+
+}
+
+.present::before{
+
+background:#2ecc71;
+
+}
+
+.absent::before{
+
+background:#e74c3c;
+
+}
+
+.qr::before{
+
+background:#9b59b6;
+
+}
+
+.class::before{
+
+background:#f39c12;
+
+}
+
+.next::before{
+
+background:#16a085;
+
+}
+
+.dash-icon{
+
+font-size:40px;
+
+width:65px;
+
+height:65px;
+
+border-radius:18px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+background:#f5f5f5;
+
+}
+
+.dash-card h2{
+
+margin:0;
+
+font-size:32px;
+
+color:#1b5e20;
+
+}
+
+.dash-card p{
+
+margin-top:6px;
+
+font-size:15px;
+
+color:#666;
+
+}
+  /*==================================
+LIVE CLASS CARD
+===================================*/
+
+.live-class-card{
+
+margin:25px 0;
+
+background:white;
+
+border-radius:18px;
+
+padding:25px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.live-header{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:25px;
+
+}
+
+.live-title{
+
+font-size:22px;
+
+font-weight:700;
+
+color:#1b5e20;
+
+margin-left:8px;
+
+}
+
+.live-dot{
+
+height:12px;
+
+width:12px;
+
+background:#00c853;
+
+border-radius:50%;
+
+display:inline-block;
+
+animation:pulse 1s infinite;
+
+}
+
+@keyframes pulse{
+
+0%{
+
+transform:scale(1);
+
+opacity:1;
+
+}
+
+50%{
+
+transform:scale(1.4);
+
+opacity:.4;
+
+}
+
+100%{
+
+transform:scale(1);
+
+opacity:1;
+
+}
+
+}
+
+.live-badge{
+
+background:#1b5e20;
+
+color:white;
+
+padding:8px 15px;
+
+border-radius:30px;
+
+font-weight:bold;
+
+}
+
+.live-grid{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+
+gap:20px;
+
+margin-bottom:25px;
+
+}
+
+.live-item{
+
+background:#f8faf9;
+
+padding:20px;
+
+border-radius:15px;
+
+text-align:center;
+
+}
+
+.live-item small{
+
+color:#666;
+
+display:block;
+
+margin-bottom:8px;
+
+}
+
+.live-item h3{
+
+margin:0;
+
+font-size:24px;
+
+color:#1b5e20;
+
+}
+
+.live-buttons{
+
+display:flex;
+
+gap:15px;
+
+flex-wrap:wrap;
+
+}
+
+.live-buttons button{
+
+padding:12px 20px;
+
+border:none;
+
+border-radius:10px;
+
+cursor:pointer;
+
+font-size:15px;
+
+transition:.3s;
+
+}
+
+.btn-live{
+
+background:#2e7d32;
+
+color:white;
+
+}
+
+.btn-live:hover{
+
+background:#1b5e20;
+
+}
+
+.btn-end{
+
+background:#e53935;
+
+color:white;
+
+}
+
+.btn-end:hover{
+
+background:#c62828;
+
+}
+
+.btn-refresh{
+
+background:#1565c0;
+
+color:white;
+
+}
+
+.btn-refresh:hover{
+
+background:#0d47a1;
+
+}
+  /*==================================
+ATTENDANCE ANALYTICS
+==================================*/
+
+.analytics-card{
+
+background:white;
+
+padding:25px;
+
+border-radius:18px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+margin-bottom:25px;
+
+}
+
+.analytics-header{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:20px;
+
+}
+
+.analytics-header h2{
+
+margin:0;
+
+color:#1b5e20;
+
+}
+
+.analytics-header select{
+
+padding:8px 15px;
+
+border-radius:8px;
+
+}
+
+.analytics-grid{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+
+gap:18px;
+
+margin-bottom:20px;
+
+}
+
+.mini-card{
+
+background:#f7faf8;
+
+padding:18px;
+
+border-radius:15px;
+
+text-align:center;
+
+}
+
+.mini-card h3{
+
+margin:0;
+
+font-size:30px;
+
+color:#1b5e20;
+
+}
+
+.chart-container{
+
+height:320px;
+
+}
+  /*=========================================
+TODAY TIMETABLE
+=========================================*/
+
+.timetable-card{
+
+background:#fff;
+
+border-radius:18px;
+
+padding:25px;
+
+margin-top:25px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.section-header{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:25px;
+
+}
+
+.section-header h2{
+
+margin:0;
+
+color:#1b5e20;
+
+}
+
+.view-btn{
+
+background:#1b5e20;
+
+color:#fff;
+
+border:none;
+
+padding:10px 18px;
+
+border-radius:8px;
+
+cursor:pointer;
+
+}
+
+.timetable-grid{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+
+gap:20px;
+
+}
+
+.lecture-card{
+
+background:#f9fcfb;
+
+border-left:6px solid #2e7d32;
+
+border-radius:15px;
+
+padding:20px;
+
+transition:.3s;
+
+}
+
+.lecture-card:hover{
+
+transform:translateY(-5px);
+
+}
+
+.lecture-time{
+
+font-size:15px;
+
+color:#666;
+
+margin-bottom:10px;
+
+}
+
+.lecture-subject{
+
+font-size:22px;
+
+font-weight:bold;
+
+color:#1b5e20;
+
+margin-bottom:12px;
+
+}
+
+.lecture-room{
+
+margin-bottom:8px;
+
+}
+
+.lecture-status{
+
+display:inline-block;
+
+padding:6px 14px;
+
+border-radius:20px;
+
+font-size:13px;
+
+font-weight:bold;
+
+color:#fff;
+
+}
+
+.status-running{
+
+background:#2ecc71;
+
+}
+
+.status-completed{
+
+background:#3498db;
+
+}
+
+.status-upcoming{
+
+background:#f39c12;
+
+}
+ 
+  /*=========================================
+AI ASSISTANT
+=========================================*/
+
+.ai-card{
+
+margin-top:25px;
+
+background:#fff;
+
+padding:25px;
+
+border-radius:18px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.ai-item{
+
+display:flex;
+
+align-items:center;
+
+gap:15px;
+
+padding:14px;
+
+margin-bottom:12px;
+
+border-left:5px solid #16a085;
+
+background:#f8fbfa;
+
+border-radius:10px;
+
+transition:.3s;
+
+}
+
+.ai-item:hover{
+
+background:#eef9f6;
+
+}
+
+.ai-icon{
+
+font-size:22px;
+
+}
+  /*==================================
+BLOCK-2
+FACULTY WELCOME
+===================================*/
+
+.clock-box{
+
+text-align:right;
+
+}
+
+.clock-time{
+
+font-size:34px;
+
+font-weight:700;
+
+color:#1b5e20;
+
+}
+
+.clock-date{
+
+margin-top:6px;
+
+color:#666;
+
+font-size:15px;
+
+}
+
+.welcome-icon{
+
+font-size:34px;
+
+margin-bottom:10px;
+
+}
+
+.welcome-box{
+
+cursor:pointer;
+
+}
+
+.welcome-box:hover{
+
+transform:translateY(-6px);
+
+box-shadow:0 8px 18px rgba(0,0,0,.12);
+
+}
+
+#welcomeName{
+
+color:#1b5e20;
+
+}
+  /*==========================================
+BLOCK-7
+LIVE STUDENT MONITOR
+==========================================*/
+
+.student-monitor-card{
+
+background:#fff;
+
+border-radius:18px;
+
+padding:25px;
+
+margin-bottom:25px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.student-summary{
+
+font-weight:600;
+
+color:#1b5e20;
+
+}
+
+.student-grid{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+
+gap:18px;
+
+margin-top:20px;
+
+}
+
+.student-card{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:18px;
+
+border-radius:15px;
+
+background:#f9fbfa;
+
+box-shadow:0 4px 10px rgba(0,0,0,.05);
+
+transition:.3s;
+
+}
+
+.student-card:hover{
+
+transform:translateY(-5px);
+
+}
+
+.student-left{
+
+display:flex;
+
+align-items:center;
+
+gap:15px;
+
+}
+
+.student-avatar{
+
+width:50px;
+
+height:50px;
+
+border-radius:50%;
+
+background:#1b5e20;
+
+color:white;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+font-size:20px;
+
+font-weight:bold;
+
+}
+
+.student-name{
+
+font-size:17px;
+
+font-weight:600;
+
+}
+
+.student-id{
+
+font-size:13px;
+
+color:#777;
+
+margin-top:4px;
+
+}
+
+.student-status{
+
+padding:7px 14px;
+
+border-radius:20px;
+
+font-size:13px;
+
+font-weight:600;
+
+color:white;
+
+}
+
+.status-present{
+
+background:#2ecc71;
+
+}
+
+.status-late{
+
+background:#f39c12;
+
+}
+
+.status-absent{
+
+background:#e74c3c;
+
+}
+  /*==========================================
+BLOCK-8
+QUICK ACTIONS
+==========================================*/
+
+.quick-actions-card{
+
+background:#fff;
+
+padding:25px;
+
+border-radius:18px;
+
+margin-bottom:25px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.quick-grid{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+
+gap:18px;
+
+margin-top:20px;
+
+}
+
+.quick-item{
+
+background:#f9fbfa;
+
+padding:22px;
+
+border-radius:15px;
+
+text-align:center;
+
+cursor:pointer;
+
+transition:.3s;
+
+border:1px solid #eef2f1;
+
+}
+
+.quick-item:hover{
+
+transform:translateY(-6px);
+
+background:#1b5e20;
+
+color:#fff;
+
+}
+
+.quick-item:hover p{
+
+color:#fff;
+
+}
+
+.quick-item:hover .quick-icon{
+
+transform:scale(1.2);
+
+}
+
+.quick-icon{
+
+font-size:38px;
+
+margin-bottom:15px;
+
+transition:.3s;
+
+}
+
+.quick-item h4{
+
+margin:0;
+
+font-size:17px;
+
+}
+
+.quick-item p{
+
+margin-top:8px;
+
+font-size:13px;
+
+color:#666;
+
+}
+  /*==========================================
+BLOCK-9
+TEACHING TIMELINE
+==========================================*/
+
+.progress-card{
+
+background:#fff;
+
+padding:25px;
+
+border-radius:18px;
+
+margin-bottom:25px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.timeline-badge{
+
+background:#2e7d32;
+
+color:#fff;
+
+padding:8px 15px;
+
+border-radius:20px;
+
+font-size:13px;
+
+font-weight:600;
+
+}
+
+.timeline-item{
+
+display:flex;
+
+gap:18px;
+
+margin-bottom:22px;
+
+position:relative;
+
+}
+
+.timeline-item:last-child{
+
+margin-bottom:0;
+
+}
+
+.timeline-icon{
+
+width:52px;
+
+height:52px;
+
+border-radius:50%;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+font-size:24px;
+
+background:#1b5e20;
+
+color:#fff;
+
+flex-shrink:0;
+
+}
+
+.timeline-content{
+
+flex:1;
+
+background:#f9fbfa;
+
+padding:15px;
+
+border-radius:12px;
+
+}
+
+.timeline-time{
+
+font-size:13px;
+
+color:#777;
+
+margin-bottom:6px;
+
+}
+
+.timeline-title{
+
+font-size:17px;
+
+font-weight:600;
+
+margin-bottom:5px;
+
+}
+
+.timeline-desc{
+
+font-size:14px;
+
+color:#666;
+
+}
+  /*==========================================
+BLOCK-10
+FACULTY PERFORMANCE
+==========================================*/
+
+.performance-card{
+
+background:#fff;
+
+padding:25px;
+
+border-radius:18px;
+
+margin-bottom:25px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.performance-badge{
+
+background:#2e7d32;
+
+color:#fff;
+
+padding:8px 16px;
+
+border-radius:20px;
+
+font-size:13px;
+
+font-weight:600;
+
+}
+
+.performance-grid{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+
+gap:20px;
+
+margin-top:20px;
+
+}
+
+.performance-box{
+
+background:#f8fbfa;
+
+padding:22px;
+
+border-radius:15px;
+
+text-align:center;
+
+transition:.3s;
+
+}
+
+.performance-box:hover{
+
+transform:translateY(-5px);
+
+box-shadow:0 8px 18px rgba(0,0,0,.10);
+
+}
+
+.performance-icon{
+
+font-size:36px;
+
+margin-bottom:12px;
+
+}
+
+.performance-box h2{
+
+margin:0;
+
+font-size:30px;
+
+color:#1b5e20;
+
+}
+
+.performance-box p{
+
+margin-top:8px;
+
+color:#666;
+
+font-size:14px;
+
+}
+  /*==========================================
+BLOCK-11
+NOTIFICATIONS
+==========================================*/
+
+.notification-card{
+
+background:#fff;
+
+padding:25px;
+
+border-radius:18px;
+
+margin-bottom:25px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.notification-count{
+
+background:#e53935;
+
+color:#fff;
+
+padding:6px 12px;
+
+border-radius:20px;
+
+font-size:13px;
+
+font-weight:600;
+
+}
+
+.notification-item{
+
+display:flex;
+
+align-items:flex-start;
+
+gap:15px;
+
+padding:16px;
+
+margin-bottom:15px;
+
+border-radius:14px;
+
+background:#f8fbfa;
+
+border-left:5px solid #1b5e20;
+
+transition:.3s;
+
+}
+
+.notification-item:hover{
+
+transform:translateX(5px);
+
+}
+
+.notification-icon{
+
+font-size:26px;
+
+width:42px;
+
+text-align:center;
+
+}
+
+.notification-body{
+
+flex:1;
+
+}
+
+.notification-title{
+
+font-size:16px;
+
+font-weight:600;
+
+margin-bottom:5px;
+
+}
+
+.notification-message{
+
+font-size:14px;
+
+color:#666;
+
+margin-bottom:6px;
+
+}
+
+.notification-time{
+
+font-size:12px;
+
+color:#999;
+
+}
+  /*==========================================
+BLOCK-12
+FLOATING ACTION BUTTONS
+==========================================*/
+
+.floating-actions{
+
+position:fixed;
+
+right:25px;
+
+bottom:25px;
+
+display:flex;
+
+flex-direction:column;
+
+gap:15px;
+
+z-index:9999;
+
+}
+
+.fab{
+
+width:60px;
+
+height:60px;
+
+border:none;
+
+border-radius:50%;
+
+cursor:pointer;
+
+font-size:26px;
+
+color:#fff;
+
+box-shadow:0 8px 20px rgba(0,0,0,.25);
+
+transition:.3s;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+}
+
+.fab:hover{
+
+transform:scale(1.12);
+
+}
+
+.fab-call{
+
+background:#1976d2;
+
+}
+
+.fab-whatsapp{
+
+background:#25D366;
+
+}
+
+.fab-help{
+
+background:#f39c12;
+
+}
+
+@media(max-width:768px){
+
+.floating-actions{
+
+right:15px;
+
+bottom:15px;
+
+}
+
+.fab{
+
+width:55px;
+
+height:55px;
+
+font-size:22px;
+
+}
+
+}
 </style>
 </head>
 
@@ -158,221 +1625,2236 @@ body{
 
 <script>
 if(localStorage.getItem("role")!=="faculty"){
-  alert("Unauthorized");
-  location.href="index.html";
+    alert("Unauthorized");
+    location.href="index.html";
 }
 </script>
 
-<!-- ===== Sidebar ===== -->
-<div class="sidebar">
-  <h2>🌱 GO GREEN</h2>
+<!-- =========================================
+SIDEBAR
+========================================= -->
 
-  <a href="faculty.html" class="nav-link">🏠 <span>Dashboard</span></a>
-  <a href="faculty-attendance.html" class="nav-link">📊 <span>My Attendance</span></a>
-  <a href="faculty-qr.html" class="nav-link">📷 <span>Generate QR</span></a>
-  <a href="faculty-timetable.html" class="nav-link">📅 <span>My Timetable</span></a>
-  <a href="faculty-leave.html" class="nav-link">📝 <span>Apply Leave</span></a>
-  <a href="faculty-students.html" class="nav-link">🎓 <span>My Class Students</span></a>
-  <a href="faculty-marks.html" class="nav-link">📘 <span>Permanent List & Marks</span></a>
-  <a href="faculty-questionbank.html" class="nav-link">📂 <span>Question Bank</span></a>
+<div class="sidebar">
+
+    <h2>🌱 GO GREEN</h2>
+
+    <a href="faculty.html" class="nav-link active">
+        🏠 <span>Dashboard</span>
+    </a>
+
+    <a href="faculty-attendance.html" class="nav-link">
+        📊 <span>My Attendance</span>
+    </a>
+
+    <a href="faculty-qr.html" class="nav-link">
+        📷 <span>Generate QR</span>
+    </a>
+
+    <a href="faculty-timetable.html" class="nav-link">
+        📅 <span>My Timetable</span>
+    </a>
+
+    <a href="faculty-leave.html" class="nav-link">
+        📝 <span>Apply Leave</span>
+    </a>
+
+    <a href="faculty-students.html" class="nav-link">
+        🎓 <span>My Class Students</span>
+    </a>
+
+    <a href="faculty-marks.html" class="nav-link">
+        📘 <span>Permanent List & Marks</span>
+    </a>
+
+    <a href="faculty-questionbank.html" class="nav-link">
+        📂 <span>Question Bank</span>
+    </a>
+
 </div>
 
-<!-- ===== Main ===== -->
+<!-- =========================================
+MAIN
+========================================= -->
+
 <div class="main">
 
-  <div class="header">
-    <div style="display:flex;align-items:center;gap:15px;">
-      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-      <strong>Faculty Dashboard</strong>
-      <span id="liveIndicator" style="margin-left:10px;"></span>
-    </div>
-    <button class="logout-btn" onclick="logout()">Logout</button>
-  </div>
-<button class="logout-btn"
-onclick="stillTeaching()">
-✔ Still Teaching
-</button>
-  <div class="content">
+    <!-- ================= HEADER ================= -->
 
-    <div class="welcome-card">
-      <h2 id="welcomeName">Welcome</h2>
-      <p id="facultyEmail"></p>
-    </div>
+    <div class="header">
 
-    <div class="stats">
+        <div style="display:flex;align-items:center;gap:15px;">
 
-      <div class="stat-card">
-        <h3>Attendance %</h3>
-        <p id="attendancePercent">0</p>
-      </div>
+            <button
+                class="menu-btn"
+                onclick="toggleSidebar()">
 
-      <div class="stat-card">
-        <h3>Live Students</h3>
+                ☰
 
-<table>
+            </button>
 
-<thead>
+            <strong>
 
-<tr>
+                Faculty Dashboard
 
-<th>System ID</th>
-<th>Name</th>
-<th>Status</th>
+            </strong>
 
-</tr>
+            <span id="liveIndicator"></span>
 
-</thead>
+        </div>
 
-<tbody id="liveBody"></tbody>
+        <button
+            class="logout-btn"
+            onclick="logout()">
 
-</table>
-      </div>
+            Logout
+
+        </button>
 
     </div>
 
-  </div>
+    <!-- ================= CONTENT ================= -->
+
+    <div class="content">
+
+        <!-- =========================================
+BLOCK-2 : FACULTY WELCOME
+========================================= -->
+
+<div class="welcome-card">
+
+    <div class="welcome-top">
+
+        <div class="welcome-left">
+
+            <h2 id="greeting">
+
+                👋 Welcome,
+
+                <span id="welcomeName">
+
+                    Faculty
+
+                </span>
+
+            </h2>
+
+            <p id="facultyEmail"
+               style="margin-top:8px;color:#666;font-size:15px;">
+
+                faculty@college.edu
+
+            </p>
+
+            <div class="faculty-info">
+
+                <div>
+
+                    🆔 Faculty ID
+
+                    <br>
+
+                    <strong id="facultyId">
+
+                        Loading...
+
+                    </strong>
+
+                </div>
+
+                <div>
+
+                    🏢 Department
+
+                    <br>
+
+                    <strong id="facultyDept">
+
+                        Loading...
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="welcome-right">
+
+            <div class="clock-box">
+
+                <div class="clock-time"
+                     id="currentTime">
+
+                    00:00:00
+
+                </div>
+
+                <div class="clock-date"
+                     id="currentDate">
+
+                    Loading...
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <hr style="margin:22px 0;border:none;border-top:1px solid #eee;">
+
+    <div class="welcome-stats">
+
+        <div class="welcome-box">
+
+            <div class="welcome-icon">
+
+                📚
+
+            </div>
+
+            <h3 id="todayClasses">
+
+                0
+
+            </h3>
+
+            <p>
+
+                Today's Classes
+
+            </p>
+
+        </div>
+
+        <div class="welcome-box">
+
+            <div class="welcome-icon">
+
+                🟢
+
+            </div>
+
+            <h3 id="runningClasses">
+
+                0
+
+            </h3>
+
+            <p>
+
+                Running Now
+
+            </p>
+
+        </div>
+
+        <div class="welcome-box">
+
+            <div class="welcome-icon">
+
+                ⏰
+
+            </div>
+
+            <h3 id="nextClass">
+
+                --:--
+
+            </h3>
+
+            <p>
+
+                Next Class
+
+            </p>
+
+        </div>
+
+        <div class="welcome-box">
+
+            <div class="welcome-icon">
+
+                📊
+
+            </div>
+
+            <h3 id="attendanceToday">
+
+                0%
+
+            </h3>
+
+            <p>
+
+                Attendance
+
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+        <!-- =========================================
+BLOCK-3 : PREMIUM DASHBOARD CARDS
+========================================= -->
+
+<div class="dashboard-cards">
+
+    <div class="dash-card students">
+
+        <div class="dash-icon">
+            👨‍🎓
+        </div>
+
+        <div class="dash-info">
+
+            <h2 id="cardStudents">0</h2>
+
+            <p>Today's Students</p>
+
+        </div>
+
+    </div>
+
+    <div class="dash-card present">
+
+        <div class="dash-icon">
+            ✅
+        </div>
+
+        <div class="dash-info">
+
+            <h2 id="cardPresent">0</h2>
+
+            <p>Present Today</p>
+
+        </div>
+
+    </div>
+
+    <div class="dash-card absent">
+
+        <div class="dash-icon">
+            ❌
+        </div>
+
+        <div class="dash-info">
+
+            <h2 id="cardAbsent">0</h2>
+
+            <p>Absent Today</p>
+
+        </div>
+
+    </div>
+
+    <div class="dash-card qr">
+
+        <div class="dash-icon">
+            📡
+        </div>
+
+        <div class="dash-info">
+
+            <h2 id="cardQR">
+
+                Inactive
+
+            </h2>
+
+            <p>Live QR Session</p>
+
+        </div>
+
+    </div>
+
+    <div class="dash-card class">
+
+        <div class="dash-icon">
+            📚
+        </div>
+
+        <div class="dash-info">
+
+            <h2 id="cardClasses">
+
+                0
+
+            </h2>
+
+            <p>Today's Classes</p>
+
+        </div>
+
+    </div>
+
+    <div class="dash-card next">
+
+        <div class="dash-icon">
+            ⏰
+        </div>
+
+        <div class="dash-info">
+
+            <h2 id="cardNext">
+
+                --:--
+
+            </h2>
+
+            <p>Next Class</p>
+
+        </div>
+
+    </div>
+
 </div>
 
-<script>
-const API_URL="https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
-let currentSession="";
-/* Logout */
+       <!-- =========================================
+BLOCK-4 : LIVE CLASS CONTROL
+========================================= -->
+
+<div class="live-class-card">
+
+    <div class="live-header">
+
+        <div>
+
+            <span class="live-dot"></span>
+
+            <span class="live-title">
+
+                LIVE CLASS
+
+            </span>
+
+        </div>
+
+        <span id="liveStatusBadge" class="live-badge">
+
+            NO ACTIVE CLASS
+
+        </span>
+
+    </div>
+
+    <div class="live-grid">
+
+        <div class="live-item">
+
+            <small>📚 Subject</small>
+
+            <h3 id="liveSubject">
+
+                --
+
+            </h3>
+
+        </div>
+
+        <div class="live-item">
+
+            <small>🏫 Room</small>
+
+            <h3 id="liveRoom">
+
+                --
+
+            </h3>
+
+        </div>
+
+        <div class="live-item">
+
+            <small>🕒 Time</small>
+
+            <h3 id="liveTime">
+
+                --
+
+            </h3>
+
+        </div>
+
+        <div class="live-item">
+
+            <small>📷 QR Remaining</small>
+
+            <h3 id="qrTimer">
+
+                00:00
+
+            </h3>
+
+        </div>
+
+    </div>
+
+    <div class="live-buttons">
+
+        <button
+            class="btn-live"
+            onclick="stillTeaching()">
+
+            ✔ Still Teaching
+
+        </button>
+
+        <button
+            class="btn-refresh"
+            onclick="refreshQR()">
+
+            🔄 Refresh QR
+
+        </button>
+
+        <button
+            class="btn-end"
+            onclick="endLecture()">
+
+            ⛔ End Lecture
+
+        </button>
+
+    </div>
+
+</div>
+
+       <!-- =========================================
+BLOCK-5 : ATTENDANCE ANALYTICS
+========================================= -->
+
+<div class="analytics-card">
+
+    <div class="analytics-header">
+
+        <h2>📊 Attendance Analytics</h2>
+
+        <select id="analyticsFilter">
+
+            <option value="today">Today</option>
+
+            <option value="week" selected>This Week</option>
+
+            <option value="month">This Month</option>
+
+            <option value="overall">Overall</option>
+
+        </select>
+
+    </div>
+
+    <div class="analytics-grid">
+
+        <div class="mini-card">
+
+            <span>📈</span>
+
+            <h3 id="attendancePercent">
+
+                0%
+
+            </h3>
+
+            <p>Attendance</p>
+
+        </div>
+
+        <div class="mini-card">
+
+            <span>✅</span>
+
+            <h3 id="presentStudents">
+
+                0
+
+            </h3>
+
+            <p>Present</p>
+
+        </div>
+
+        <div class="mini-card">
+
+            <span>❌</span>
+
+            <h3 id="absentStudents">
+
+                0
+
+            </h3>
+
+            <p>Absent</p>
+
+        </div>
+
+        <div class="mini-card">
+
+            <span>🟡</span>
+
+            <h3 id="lateStudents">
+
+                0
+
+            </h3>
+
+            <p>Late</p>
+
+        </div>
+
+    </div>
+
+    <div class="chart-container">
+
+        <canvas id="attendanceChart"></canvas>
+
+    </div>
+
+</div>
+
+       <!-- =========================================
+BLOCK-6 : TODAY'S TIMETABLE
+========================================= -->
+
+<div class="timetable-card">
+
+    <div class="section-header">
+
+        <h2>📅 Today's Timetable</h2>
+
+        <button
+            class="view-btn"
+            onclick="location.href='faculty-timetable.html'">
+
+            View Full Timetable
+
+        </button>
+
+    </div>
+
+    <div
+        id="todayTimetableCards"
+        class="timetable-grid">
+
+        <!-- Dynamic Cards -->
+
+    </div>
+
+</div>
+       <!-- =========================================
+BLOCK-7 : LIVE STUDENT MONITOR
+========================================= -->
+
+<div class="student-monitor-card">
+
+    <div class="section-header">
+
+        <h2>👨‍🎓 Live Student Monitor</h2>
+
+        <div class="student-summary">
+
+            Present :
+            <span id="studentPresentCount">0</span>
+
+            &nbsp; | &nbsp;
+
+            Late :
+            <span id="studentLateCount">0</span>
+
+            &nbsp; | &nbsp;
+
+            Absent :
+            <span id="studentAbsentCount">0</span>
+
+        </div>
+
+    </div>
+
+    <div
+        id="liveStudentGrid"
+        class="student-grid">
+
+        <!-- Dynamic Student Cards -->
+
+    </div>
+
+</div>
+
+       <!-- =========================================
+BLOCK-8 : QUICK ACTIONS
+========================================= -->
+
+<div class="quick-actions-card">
+
+    <div class="section-header">
+
+        <h2>⚡ Quick Actions</h2>
+
+    </div>
+
+    <div class="quick-grid">
+
+        <div class="quick-item" onclick="location.href='faculty-qr.html'">
+
+            <div class="quick-icon">📷</div>
+
+            <h4>Generate QR</h4>
+
+            <p>Create attendance QR</p>
+
+        </div>
+
+        <div class="quick-item" onclick="stillTeaching()">
+
+            <div class="quick-icon">✅</div>
+
+            <h4>Still Teaching</h4>
+
+            <p>Confirm lecture</p>
+
+        </div>
+
+        <div class="quick-item" onclick="location.href='faculty-students.html'">
+
+            <div class="quick-icon">👨‍🎓</div>
+
+            <h4>Students</h4>
+
+            <p>View class list</p>
+
+        </div>
+
+        <div class="quick-item" onclick="location.href='faculty-attendance.html'">
+
+            <div class="quick-icon">📊</div>
+
+            <h4>Attendance</h4>
+
+            <p>Attendance reports</p>
+
+        </div>
+
+        <div class="quick-item" onclick="location.href='faculty-marks.html'">
+
+            <div class="quick-icon">📝</div>
+
+            <h4>Marks</h4>
+
+            <p>Permanent List & Marks</p>
+
+        </div>
+
+        <div class="quick-item" onclick="location.href='faculty-leave.html'">
+
+            <div class="quick-icon">🌴</div>
+
+            <h4>Leave</h4>
+
+            <p>Apply leave</p>
+
+        </div>
+
+        <div class="quick-item" onclick="updateGPS()">
+
+            <div class="quick-icon">📍</div>
+
+            <h4>Update GPS</h4>
+
+            <p>Current location</p>
+
+        </div>
+
+        <div class="quick-item" onclick="downloadAttendanceReport()">
+
+            <div class="quick-icon">📥</div>
+
+            <h4>Download</h4>
+
+            <p>Excel Report</p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+     <!-- =========================================
+BLOCK-9 : TEACHING PROGRESS
+========================================= -->
+
+<div class="progress-card">
+
+    <div class="section-header">
+
+        <h2>📚 Teaching Progress</h2>
+
+        <span class="timeline-badge">
+
+            Today's Activity
+
+        </span>
+
+    </div>
+
+    <div id="teachingTimeline">
+
+        <!-- Dynamic Timeline -->
+
+    </div>
+
+</div>
+      <!-- =========================================
+BLOCK-10 : FACULTY PERFORMANCE
+========================================= -->
+
+<div class="performance-card">
+
+    <div class="section-header">
+
+        <h2>🏆 Faculty Performance</h2>
+
+        <span class="performance-badge">
+
+            Today
+
+        </span>
+
+    </div>
+
+    <div class="performance-grid">
+
+        <div class="performance-box">
+
+            <div class="performance-icon">
+
+                📚
+
+            </div>
+
+            <h2 id="classesTaken">
+
+                0
+
+            </h2>
+
+            <p>
+
+                Classes Taken
+
+            </p>
+
+        </div>
+
+        <div class="performance-box">
+
+            <div class="performance-icon">
+
+                👨‍🎓
+
+            </div>
+
+            <h2 id="studentsHandled">
+
+                0
+
+            </h2>
+
+            <p>
+
+                Students Handled
+
+            </p>
+
+        </div>
+
+        <div class="performance-box">
+
+            <div class="performance-icon">
+
+                📷
+
+            </div>
+
+            <h2 id="qrGenerated">
+
+                0
+
+            </h2>
+
+            <p>
+
+                QR Generated
+
+            </p>
+
+        </div>
+
+        <div class="performance-box">
+
+            <div class="performance-icon">
+
+                ⏰
+
+            </div>
+
+            <h2 id="lateClasses">
+
+                0
+
+            </h2>
+
+            <p>
+
+                Late Classes
+
+            </p>
+
+        </div>
+
+        <div class="performance-box">
+
+            <div class="performance-icon">
+
+                🌴
+
+            </div>
+
+            <h2 id="leaveCount">
+
+                0
+
+            </h2>
+
+            <p>
+
+                Leaves
+
+            </p>
+
+        </div>
+
+        <div class="performance-box">
+
+            <div class="performance-icon">
+
+                📊
+
+            </div>
+
+            <h2 id="facultyScore">
+
+                100%
+
+            </h2>
+
+            <p>
+
+                Performance Score
+
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+       <!-- =========================================
+BLOCK-11 : NOTIFICATIONS & ALERTS
+========================================= -->
+
+<div class="notification-card">
+
+    <div class="section-header">
+
+        <h2>🔔 Notifications & Alerts</h2>
+
+        <span class="notification-count"
+              id="notificationCount">
+
+            0
+
+        </span>
+
+    </div>
+
+    <div id="notificationList">
+
+        <!-- Dynamic Notifications -->
+
+    </div>
+
+</div>
+    </div>
+<!-- =========================================
+BLOCK-12 : FLOATING ACTION BUTTONS
+========================================= -->
+
+<div class="floating-actions">
+
+    <button
+        class="fab fab-call"
+        onclick="callHOD()"
+        title="Call HOD">
+
+        📞
+
+    </button>
+
+    <button
+        class="fab fab-whatsapp"
+        onclick="openWhatsAppAdmin()"
+        title="WhatsApp Admin">
+
+        💬
+
+    </button>
+
+    <button
+        class="fab fab-help"
+        onclick="openFacultyHelp()"
+        title="Help">
+
+        🆘
+
+    </button>
+
+</div>
+</div>
+<script src="api.js"></script>
+  <script>
+  /* ===========================================================
+   GO GREEN
+   FACULTY DASHBOARD
+   PART-1
+   CONFIGURATION
+=========================================================== */
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycbwV_SjR5wASHwKWjWd-fLlVFFWbc-pGAUUVXcYlEOUbH1JeUnwILr-nMhPvHWLoUW19BQ/exec";
+
+/* ===========================================================
+   GLOBAL VARIABLES
+=========================================================== */
+
+const facultyEmail =
+localStorage.getItem("email") || "";
+
+const facultyName =
+localStorage.getItem("name") || "Faculty";
+
+let currentSession = "";
+
+let attendanceChart = null;
+
+let qrSeconds = 0;
+
+/* ===========================================================
+   LOGIN CHECK
+=========================================================== */
+
+if(localStorage.getItem("role")!=="faculty"){
+
+    alert("Unauthorized");
+
+    location.href="index.html";
+
+}
+
+/* ===========================================================
+   COMMON API
+=========================================================== */
+
+async function api(action,data={}){
+
+    try{
+
+        const res = await fetch(API_URL,{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"text/plain;charset=utf-8"
+            },
+
+            body:JSON.stringify({
+
+                action,
+
+                ...data
+
+            })
+
+        });
+
+        return await res.json();
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+        return{
+
+            success:false,
+
+            message:err.toString()
+
+        };
+
+    }
+
+}
+
+/* ===========================================================
+   LOGOUT
+=========================================================== */
+
 function logout(){
-  localStorage.clear();
-  location.href="index.html";
+
+    localStorage.clear();
+
+    location.href="index.html";
+
 }
 
-/* Sidebar Toggle */
+/* ===========================================================
+   SIDEBAR
+=========================================================== */
+
 function toggleSidebar(){
-  document.querySelector(".sidebar").classList.toggle("collapsed");
-  document.querySelector(".main").classList.toggle("expanded");
+
+    document
+    .querySelector(".sidebar")
+    .classList
+    .toggle("collapsed");
+
+    document
+    .querySelector(".main")
+    .classList
+    .toggle("expanded");
+
 }
 
-/* Active Link Highlight */
-document.querySelectorAll(".nav-link").forEach(link=>{
-  if(link.href === window.location.href){
-    link.classList.add("active");
-  }
-});
+/* ===========================================================
+   ACTIVE MENU
+=========================================================== */
 
-/* Welcome Info */
-document.getElementById("welcomeName").innerText =
-  "Welcome, " + localStorage.getItem("name");
+document.querySelectorAll(".nav-link")
+.forEach(link=>{
 
-document.getElementById("facultyEmail").innerText =
-  localStorage.getItem("email");
+    if(link.href===window.location.href){
 
-/* Animated Counter */
-function animateCounter(id, endValue){
-  let start=0;
-  const duration=800;
-  const increment=endValue/(duration/20);
+        link.classList.add("active");
 
-  const counter=setInterval(()=>{
-    start+=increment;
-    if(start>=endValue){
-      start=endValue;
-      clearInterval(counter);
     }
-    document.getElementById(id).innerText=Math.floor(start);
-  },20);
-}
-
-/* Load Attendance % */
-fetch(API_URL,{
-  method:"POST",
-  headers:{ "Content-Type":"text/plain;charset=utf-8" },
-  body:JSON.stringify({
-    action:"getMyAttendanceAnalytics",
-    email: localStorage.getItem("email")
-  })
-})
-.then(r=>r.json())
-.then(res=>{
-  if(res.success){
-    animateCounter("attendancePercent", res.percent);
-  }
-});
-
-/* Load Live Classes */
-fetch(API_URL,{
-  method:"POST",
-  headers:{ "Content-Type":"text/plain;charset=utf-8" },
-  body:JSON.stringify({ action:"getLiveClasses" })
-})
-.then(r=>r.json())
-.then(res=>{
-  if(res.success){
-    animateCounter("liveClasses", res.data.length);
-  }
-});
-let currentSession="";
-
-function loadCurrentSession(){
-
-fetch(API_URL,{
-method:"POST",
-headers:{
-"Content-Type":"text/plain;charset=utf-8"
-},
-body:JSON.stringify({
-action:"getCurrentSession",
-email:localStorage.getItem("email")
-})
-})
-
-.then(r=>r.json())
-
-.then(res=>{
-
-if(res.success && res.sessionId){
-
-currentSession=res.sessionId;
-
-loadLiveStudents();
-
-}
 
 });
 
+/* ===========================================================
+   CLOCK
+=========================================================== */
+
+function updateClock(){
+
+    const now = new Date();
+
+    document.getElementById("currentTime").innerHTML =
+
+    now.toLocaleTimeString();
+
+    document.getElementById("currentDate").innerHTML =
+
+    now.toLocaleDateString("en-IN",{
+
+        weekday:"long",
+
+        day:"numeric",
+
+        month:"long",
+
+        year:"numeric"
+
+    });
+
 }
 
-loadCurrentSession();
-  function stillTeaching(){
+/* ===========================================================
+   ANIMATED COUNTER
+=========================================================== */
 
-post({
-action:"confirmAttendance",
-sessionId:currentSession
-})
-.then(r=>alert("Attendance finalized"));
+function animateCounter(id,value){
+
+    let start = 0;
+
+    const duration = 800;
+
+    const increment =
+
+    value/(duration/20);
+
+    const timer = setInterval(()=>{
+
+        start += increment;
+
+        if(start>=value){
+
+            start=value;
+
+            clearInterval(timer);
+
+        }
+
+        document.getElementById(id).innerHTML=
+
+        Math.round(start);
+
+    },20);
 
 }
-/* Live Status Indicator */
-function checkLiveStatus(){
-  fetch(API_URL,{
-    method:"POST",
-    headers:{ "Content-Type":"text/plain;charset=utf-8" },
-    body:JSON.stringify({ action:"getCurrentSlot" })
-  })
-  .then(r=>r.json())
-  .then(res=>{
-    const indicator=document.getElementById("liveIndicator");
-    if(res.success && res.data){
-      indicator.innerHTML="🟢 Live Class";
-      indicator.style.color="green";
-    }else{
-      indicator.innerHTML="🔴 No Active Class";
-      indicator.style.color="red";
+
+/* ===========================================================
+   PAGE INFO
+=========================================================== */
+
+function loadFacultyInfo(){
+
+    document.getElementById("welcomeName").innerHTML=
+
+    facultyName;
+
+    document.getElementById("facultyEmail").innerHTML=
+
+    facultyEmail;
+
+}
+
+/* ===========================================================
+   QR TIMER
+=========================================================== */
+
+function startQrTimer(){
+
+    setInterval(()=>{
+
+        if(qrSeconds<=0) return;
+
+        qrSeconds--;
+
+        const m=Math.floor(qrSeconds/60);
+
+        const s=qrSeconds%60;
+
+        document.getElementById("qrTimer").innerHTML=
+
+        String(m).padStart(2,"0")
+
+        +":"
+
+        +String(s).padStart(2,"0");
+
+    },1000);
+
+}
+
+/* ===========================================================
+   LIVE STATUS
+=========================================================== */
+
+async function checkLiveStatus(){
+
+    const res=
+
+    await api(
+
+        "getCurrentSlot",
+
+        {
+
+            email:facultyEmail
+
+        }
+
+    );
+
+    const badge=
+
+    document.getElementById("liveIndicator");
+
+    if(
+
+        res.success &&
+
+        res.data
+
+    ){
+
+        badge.innerHTML=
+
+        "🟢 Live Class";
+
+        badge.style.color="green";
+
     }
-  });
+
+    else{
+
+        badge.innerHTML=
+
+        "🔴 No Active Class";
+
+        badge.style.color="red";
+
+    }
+
 }
+
+/* ===========================================================
+   CURRENT SESSION
+=========================================================== */
+
+async function loadCurrentSession(){
+
+    const res=
+
+    await api(
+
+        "getCurrentSession",
+
+        {
+
+            email:facultyEmail
+
+        }
+
+    );
+
+    if(
+
+        res.success &&
+
+        res.sessionId
+
+    ){
+
+        currentSession=
+
+        res.sessionId;
+
+    }
+
+}
+
+/* ===========================================================
+   STILL TEACHING
+=========================================================== */
+
+async function stillTeaching(){
+
+    if(!currentSession){
+
+        alert(
+
+        "No Active Session"
+
+        );
+
+        return;
+
+    }
+
+    const res=
+
+    await api(
+
+        "confirmAttendance",
+
+        {
+
+            sessionId:currentSession
+
+        }
+
+    );
+
+    if(res.success){
+
+        alert(
+
+        "Attendance Finalized"
+
+        );
+
+    }
+
+}
+
+/* ===========================================================
+   INITIAL COMMON FUNCTIONS
+=========================================================== */
+
+loadFacultyInfo();
+
+updateClock();
+
+setInterval(updateClock,1000);
 
 checkLiveStatus();
-setInterval(checkLiveStatus,30000);
-  <script src="api.js"></script>
- 
-</script>
 
+setInterval(checkLiveStatus,30000);
+
+loadCurrentSession();
+
+startQrTimer();
+          /* ===========================================================
+   PART-2
+   BLOCK-2 / BLOCK-3 / BLOCK-4
+===========================================================*/
+
+/* ===========================================================
+   LOAD FACULTY DASHBOARD
+===========================================================*/
+
+async function loadFacultyDashboard(){
+
+    const res = await api(
+        "getFacultyDashboard",
+        {
+            email:facultyEmail
+        }
+    );
+
+    if(!res.success){
+
+        console.error(res.message);
+
+        return;
+
+    }
+
+    const d = res.dashboard;
+
+    /* ---------- Welcome ---------- */
+
+    document.getElementById("facultyId").innerHTML =
+    d.facultyId || "--";
+
+    document.getElementById("facultyDept").innerHTML =
+    d.department || "--";
+
+    document.getElementById("todayClasses").innerHTML =
+    d.todayClasses || 0;
+
+    document.getElementById("runningClasses").innerHTML =
+    d.runningClasses || 0;
+
+    document.getElementById("nextClass").innerHTML =
+    d.nextClass || "--:--";
+
+    document.getElementById("attendanceToday").innerHTML =
+    (d.attendanceToday || 0)+"%";
+
+    /* ---------- Dashboard Cards ---------- */
+
+    animateCounter(
+        "cardStudents",
+        d.totalStudents || 0
+    );
+
+    animateCounter(
+        "cardPresent",
+        d.presentStudents || 0
+    );
+
+    animateCounter(
+        "cardAbsent",
+        d.absentStudents || 0
+    );
+
+    document.getElementById("cardQR").innerHTML =
+    d.liveQr
+    ? "ACTIVE"
+    : "INACTIVE";
+
+    animateCounter(
+        "cardClasses",
+        d.todayClasses || 0
+    );
+
+    document.getElementById("cardNext").innerHTML =
+    d.nextClass || "--:--";
+
+}
+
+/* ===========================================================
+   LIVE CLASS PANEL
+===========================================================*/
+
+async function loadLiveClass(){
+
+    const res = await api(
+        "getFacultyLiveClass",
+        {
+            email:facultyEmail
+        }
+    );
+
+    if(!res.success){
+
+        document.getElementById("liveStatusBadge").innerHTML =
+        "NO ACTIVE CLASS";
+
+        return;
+
+    }
+
+    document.getElementById("liveStatusBadge").innerHTML =
+    res.active
+    ? "LIVE"
+    : "NO ACTIVE CLASS";
+
+    document.getElementById("liveSubject").innerHTML =
+    res.subject || "--";
+
+    document.getElementById("liveRoom").innerHTML =
+    res.room || "--";
+
+    document.getElementById("liveTime").innerHTML =
+    res.time || "--";
+
+    qrSeconds = res.remainingSeconds || 0;
+
+}
+
+/* ===========================================================
+   REFRESH QR
+===========================================================*/
+
+async function refreshQR(){
+
+    const res = await api(
+        "refreshFacultyQR",
+        {
+            email:facultyEmail
+        }
+    );
+
+    if(res.success){
+
+        alert("QR Refreshed Successfully");
+
+        loadLiveClass();
+
+    }else{
+
+        alert(res.message);
+
+    }
+
+}
+
+/* ===========================================================
+   END LECTURE
+===========================================================*/
+
+async function endLecture(){
+
+    if(!confirm("End Current Lecture?"))
+        return;
+
+    const res = await api(
+        "endFacultyLecture",
+        {
+            email:facultyEmail
+        }
+    );
+
+    if(res.success){
+
+        alert("Lecture Ended");
+
+        loadLiveClass();
+
+    }else{
+
+        alert(res.message);
+
+    }
+
+}
+
+/* ===========================================================
+   INITIAL LOAD
+===========================================================*/
+
+loadFacultyDashboard();
+
+loadLiveClass();
+          /* ===========================================================
+   PART-3
+   BLOCK-5
+   ATTENDANCE ANALYTICS
+===========================================================*/
+
+document.getElementById("attendancePercent").innerHTML="91%";
+
+document.getElementById("presentStudents").innerHTML="38";
+
+document.getElementById("absentStudents").innerHTML="4";
+
+document.getElementById("lateStudents").innerHTML="2";
+
+attendanceChart = new Chart(
+
+document.getElementById("attendanceChart"),
+
+{
+
+type:"doughnut",
+
+data:{
+
+labels:[
+
+"Present",
+
+"Absent",
+
+"Late"
+
+],
+
+datasets:[{
+
+data:[38,4,2]
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+maintainAspectRatio:false,
+
+plugins:{
+
+legend:{
+
+position:"bottom"
+
+}
+
+}
+
+}
+
+});
+
+/* ===========================================================
+   BLOCK-6
+   TODAY TIMETABLE
+===========================================================*/
+
+const timetableDemo=[
+
+{
+
+time:"09:00 - 09:50",
+
+subject:"BST4411",
+
+room:"603",
+
+status:"Completed"
+
+},
+
+{
+
+time:"09:50 - 10:40",
+
+subject:"BSP4410",
+
+room:"603",
+
+status:"Running"
+
+},
+
+{
+
+time:"10:40 - 11:30",
+
+subject:"NVAC211",
+
+room:"603",
+
+status:"Upcoming"
+
+},
+
+{
+
+time:"11:35 - 12:25",
+
+subject:"MBA107",
+
+room:"603",
+
+status:"Not Taken"
+
+}
+
+];
+
+const timetableBox=
+
+document.getElementById("todayTimetableCards");
+
+timetableBox.innerHTML="";
+
+timetableDemo.forEach(item=>{
+
+let cls="status-upcoming";
+
+switch(item.status){
+
+case "Running":
+
+cls="status-running";
+
+break;
+
+case "Completed":
+
+cls="status-completed";
+
+break;
+
+case "Upcoming":
+
+cls="status-upcoming";
+
+break;
+
+case "Not Taken":
+
+cls="status-nottaken";
+
+break;
+
+}
+
+timetableBox.innerHTML+=`
+
+<div class="lecture-card">
+
+<div class="lecture-time">
+
+🕒 ${item.time}
+
+</div>
+
+<div class="lecture-subject">
+
+${item.subject}
+
+</div>
+
+<div class="lecture-room">
+
+🏫 Room : ${item.room}
+
+</div>
+
+<div class="lecture-status ${cls}">
+
+${item.status}
+
+</div>
+
+</div>
+
+`;
+
+});
+
+/* ===========================================================
+   BLOCK-7
+   LIVE STUDENT MONITOR
+===========================================================*/
+
+const demoStudents=[
+
+{
+
+id:"22MBA001",
+
+name:"Rahul",
+
+status:"Present"
+
+},
+
+{
+
+id:"22MBA002",
+
+name:"Priya",
+
+status:"Present"
+
+},
+
+{
+
+id:"22MBA003",
+
+name:"Aman",
+
+status:"Absent"
+
+},
+
+{
+
+id:"22MBA004",
+
+name:"Riya",
+
+status:"Late"
+
+},
+
+{
+
+id:"22MBA005",
+
+name:"Kunal",
+
+status:"Present"
+
+}
+
+];
+
+let present=0;
+
+let absent=0;
+
+let late=0;
+
+const grid=
+
+document.getElementById("liveStudentGrid");
+
+grid.innerHTML="";
+
+demoStudents.forEach(s=>{
+
+let cls="status-present";
+
+if(s.status=="Late"){
+
+cls="status-late";
+
+late++;
+
+}
+
+else if(s.status=="Absent"){
+
+cls="status-absent";
+
+absent++;
+
+}
+
+else{
+
+present++;
+
+}
+
+grid.innerHTML+=`
+
+<div class="student-card">
+
+<div class="student-left">
+
+<div class="student-avatar">
+
+${s.name.charAt(0)}
+
+</div>
+
+<div>
+
+<div class="student-name">
+
+${s.name}
+
+</div>
+
+<div class="student-id">
+
+${s.id}
+
+</div>
+
+</div>
+
+</div>
+
+<div class="student-status ${cls}">
+
+${s.status}
+
+</div>
+
+</div>
+
+`;
+
+});
+
+document.getElementById("studentPresentCount").innerHTML=present;
+
+document.getElementById("studentLateCount").innerHTML=late;
+
+document.getElementById("studentAbsentCount").innerHTML=absent;
+          /* ===========================================================
+   PART-4
+   BLOCK-8
+   QUICK ACTIONS
+=========================================================== */
+
+function updateGPS(){
+
+    alert("GPS Update will be connected with Apps Script.");
+
+}
+
+function downloadAttendanceReport(){
+
+    alert("Excel / PDF Download will be connected later.");
+
+}
+
+/* ===========================================================
+   BLOCK-9
+   TEACHING PROGRESS
+=========================================================== */
+
+const teachingProgress=[
+
+{
+time:"09:00 AM",
+icon:"📡",
+title:"QR Generated",
+desc:"Attendance QR created for BST4411."
+},
+
+{
+time:"09:08 AM",
+icon:"👨‍🎓",
+title:"Attendance Submitted",
+desc:"38 Students marked attendance."
+},
+
+{
+time:"09:50 AM",
+icon:"✔",
+title:"Lecture Completed",
+desc:"BST4411 completed successfully."
+},
+
+{
+time:"10:10 AM",
+icon:"📊",
+title:"Attendance Report Viewed",
+desc:"Faculty viewed attendance analytics."
+},
+
+{
+time:"11:20 AM",
+icon:"📝",
+title:"Marks Updated",
+desc:"Internal marks uploaded."
+}
+
+];
+
+const timeline=document.getElementById("teachingTimeline");
+
+timeline.innerHTML="";
+
+teachingProgress.forEach(item=>{
+
+timeline.innerHTML+=`
+
+<div class="timeline-item">
+
+<div class="timeline-icon">
+
+${item.icon}
+
+</div>
+
+<div class="timeline-content">
+
+<div class="timeline-time">
+
+${item.time}
+
+</div>
+
+<div class="timeline-title">
+
+${item.title}
+
+</div>
+
+<div class="timeline-desc">
+
+${item.desc}
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+/* ===========================================================
+   BLOCK-10
+   FACULTY PERFORMANCE
+=========================================================== */
+
+document.getElementById("classesTaken").innerHTML="4";
+
+document.getElementById("studentsHandled").innerHTML="182";
+
+document.getElementById("qrGenerated").innerHTML="4";
+
+document.getElementById("lateClasses").innerHTML="0";
+
+document.getElementById("leaveCount").innerHTML="0";
+
+document.getElementById("facultyScore").innerHTML="98%";
+
+/* ===========================================================
+   ANIMATE PERFORMANCE CARDS
+=========================================================== */
+
+animateCounter("classesTaken",4);
+
+animateCounter("studentsHandled",182);
+
+animateCounter("qrGenerated",4);
+
+animateCounter("lateClasses",0);
+
+animateCounter("leaveCount",0);
+
+/* ===========================================================
+   PERFORMANCE COLOR
+=========================================================== */
+
+const score=document.getElementById("facultyScore");
+
+if(parseInt(score.innerHTML)>=90){
+
+score.style.color="#2ecc71";
+
+}
+else if(parseInt(score.innerHTML)>=75){
+
+score.style.color="#f39c12";
+
+}
+else{
+
+score.style.color="#e74c3c";
+
+}
+          /* ===========================================================
+   PART-5
+   BLOCK-11
+   NOTIFICATIONS
+=========================================================== */
+
+const notifications=[
+
+{
+icon:"📷",
+title:"QR Session",
+message:"Current QR expires in 3 minutes.",
+time:"Just Now"
+},
+
+{
+icon:"📚",
+title:"Next Lecture",
+message:"MBA107 starts at 11:35 AM.",
+time:"10 Minutes Left"
+},
+
+{
+icon:"⚠️",
+title:"Low Attendance",
+message:"4 students are below 75% attendance.",
+time:"Today"
+},
+
+{
+icon:"📝",
+title:"Marks Pending",
+message:"Upload Internal Assessment Marks.",
+time:"Today"
+},
+
+{
+icon:"🌴",
+title:"Leave",
+message:"Your Leave Request has been Approved.",
+time:"Yesterday"
+}
+
+];
+
+document.getElementById("notificationCount").innerHTML =
+notifications.length;
+
+const notificationBox =
+document.getElementById("notificationList");
+
+notificationBox.innerHTML="";
+
+notifications.forEach(n=>{
+
+notificationBox.innerHTML += `
+
+<div class="notification-item">
+
+<div class="notification-icon">
+
+${n.icon}
+
+</div>
+
+<div class="notification-body">
+
+<div class="notification-title">
+
+${n.title}
+
+</div>
+
+<div class="notification-message">
+
+${n.message}
+
+</div>
+
+<div class="notification-time">
+
+${n.time}
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+
+/* ===========================================================
+   BLOCK-12
+   FLOATING ACTION BUTTONS
+=========================================================== */
+
+function callHOD(){
+
+alert("Call HOD feature will be connected with Apps Script.");
+
+}
+
+function openWhatsAppAdmin(){
+
+alert("WhatsApp integration will be connected later.");
+
+}
+
+function openFacultyHelp(){
+
+alert("Faculty Help Center will be available soon.");
+
+}
+
+
+/* ===========================================================
+   AUTO REFRESH
+=========================================================== */
+
+function refreshFacultyDashboard(){
+
+console.log("Faculty Dashboard Refreshed");
+
+// Backend integration will be added later.
+
+}
+
+setInterval(refreshFacultyDashboard,60000);
+
+
+/* ===========================================================
+   PAGE INITIALIZATION
+=========================================================== */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+console.log("Faculty Dashboard Loaded Successfully");
+
+updateClock();
+
+loadFacultyInfo();
+
+checkLiveStatus();
+
+loadCurrentSession();
+
+});
+
+
+/* ===========================================================
+   WINDOW LOAD
+=========================================================== */
+
+window.onload=function(){
+
+console.log("GO GREEN Faculty Dashboard ");
+
+};
+
+
+/* ===========================================================
+   END OF FACULTY DASHBOARD
+=========================================================== */
+    </script>      
 </body>
 </html>
 
