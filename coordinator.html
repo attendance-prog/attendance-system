@@ -317,7 +317,74 @@ font-weight:700;
 color:#d32f2f;
 font-weight:700;
 }
+.badge-success{
 
+background:#4CAF50;
+color:#fff;
+padding:6px 14px;
+border-radius:20px;
+font-size:13px;
+font-weight:600;
+
+}
+
+.badge-warning{
+
+background:#ff9800;
+color:#fff;
+padding:6px 14px;
+border-radius:20px;
+font-size:13px;
+font-weight:600;
+
+}
+
+.badge-danger{
+
+background:#f44336;
+color:#fff;
+padding:6px 14px;
+border-radius:20px;
+font-size:13px;
+font-weight:600;
+
+}
+
+.badge-secondary{
+
+background:#607D8B;
+color:#fff;
+padding:6px 14px;
+border-radius:20px;
+font-size:13px;
+font-weight:600;
+
+}
+  #recentActivityTable{
+
+width:100%;
+border-collapse:collapse;
+
+}
+
+#recentActivityTable th,
+#recentActivityTable td{
+
+padding:12px 15px;
+text-align:left;
+white-space:nowrap;
+border-bottom:1px solid #eee;
+
+}
+
+#recentActivityTable th{
+
+background:#1f4fa3;
+color:#fff;
+position:sticky;
+top:0;
+
+}
 /* ================= MOBILE ================= */
 
 @media(max-width:1200px){
@@ -841,46 +908,50 @@ grid-template-columns:1fr;
 
 <!-- ================= SIXTH ROW ================= -->
 
-<div class="dashboard-row">
+<div class="panel">
 
-    <!-- Recent Activity -->
+    <div class="panel-header">
+
+        <h3>📋 Recent Activity</h3>
+
+    </div>
 
     <div style="overflow:auto;max-height:350px;">
 
-<table id="recentActivityTable">
+        <table class="dashboard-table" id="recentActivityTable">
 
-<thead>
+            <thead>
 
-<tr>
+                <tr>
 
-<th>Date</th>
-<th>Student</th>
-<th>Subject</th>
-<th>Status</th>
+                    <th>Date</th>
+                    <th>Student</th>
+                    <th>Subject</th>
+                    <th>Status</th>
 
-</tr>
+                </tr>
 
-</thead>
+            </thead>
 
-<tbody>
+            <tbody>
 
-<tr>
+                <tr>
 
-<td colspan="4" style="text-align:center;padding:25px;">
+                    <td colspan="4" style="text-align:center">
 
-Loading...
+                        Loading...
 
-</td>
+                    </td>
 
-</tr>
+                </tr>
 
-</tbody>
+            </tbody>
 
-</table>
+        </table>
 
-</div>
     </div>
 
+</div>
     <!-- Coordinator Performance -->
 
     <div class="panel">
@@ -1339,31 +1410,37 @@ async function loadRecentActivity(){
 
             }
 
-            tbody.innerHTML+=`
+            let html = "";
 
-            <tr>
+res.data.forEach(item=>{
 
-                <td>${item.date}</td>
+    html += `
 
-                <td>${item.student}</td>
+<tr>
 
-                <td>${item.subject}</td>
+<td>${item.date}</td>
 
-                <td>
+<td>${item.student}</td>
 
-                    <span class="${badge}">
+<td>${item.subject}</td>
 
-                        ${item.status}
+<td>
 
-                    </span>
+<span class="${badge}">
 
-                </td>
+${item.status}
 
-            </tr>`;
+</span>
 
-        });
+</td>
 
-    }
+</tr>
+
+`;
+
+});
+
+tbody.innerHTML = html;
 
     catch(err){
 
