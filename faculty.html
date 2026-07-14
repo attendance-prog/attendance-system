@@ -3019,75 +3019,61 @@ startQrTimer();
 
 async function loadFacultyDashboard(){
 
-    const res = await api(
-        "getFacultyDashboard",
-        {
-            email:facultyEmail
-        }
-    );
+const res=await api(
 
-    if(!res.success){
+"getFacultyDashboard",
 
-        console.error(res.message);
+{
 
-        return;
-
-    }
-
-    const d = res.dashboard;
-
-    /* ---------- Welcome ---------- */
-
-    document.getElementById("facultyId").innerHTML =
-    d.facultyId || "--";
-
-    document.getElementById("facultyDept").innerHTML =
-    d.department || "--";
-
-    document.getElementById("todayClasses").innerHTML =
-    d.todayClasses || 0;
-
-    document.getElementById("runningClasses").innerHTML =
-    d.runningClasses || 0;
-
-    document.getElementById("nextClass").innerHTML =
-    d.nextClass || "--:--";
-
-    document.getElementById("attendanceToday").innerHTML =
-    (d.attendanceToday || 0)+"%";
-
-    /* ---------- Dashboard Cards ---------- */
-
-    animateCounter(
-        "cardStudents",
-        d.totalStudents || 0
-    );
-
-    animateCounter(
-        "cardPresent",
-        d.presentStudents || 0
-    );
-
-    animateCounter(
-        "cardAbsent",
-        d.absentStudents || 0
-    );
-
-    document.getElementById("cardQR").innerHTML =
-    d.liveQr
-    ? "ACTIVE"
-    : "INACTIVE";
-
-    animateCounter(
-        "cardClasses",
-        d.todayClasses || 0
-    );
-
-    document.getElementById("cardNext").innerHTML =
-    d.nextClass || "--:--";
+email:localStorage.getItem("email")
 
 }
 
+);
+
+if(!res.success) return;
+
+document.getElementById("cardStudents").innerHTML=
+
+res.totalStudents;
+
+document.getElementById("cardPresent").innerHTML=
+
+res.presentToday;
+
+document.getElementById("cardAbsent").innerHTML=
+
+res.absentToday;
+
+document.getElementById("cardQR").innerHTML=
+
+res.activeQR
+
+?"ACTIVE"
+
+:"INACTIVE";
+
+document.getElementById("cardClasses").innerHTML=
+
+res.todayClasses;
+
+document.getElementById("cardNext").innerHTML=
+
+res.nextClass;
+
+document.getElementById("todayClasses").innerHTML=
+
+res.todayClasses;
+
+document.getElementById("runningClasses").innerHTML=
+
+res.runningClasses;
+
+document.getElementById("nextClass").innerHTML=
+
+res.nextClass;
+
+}
 /* ===========================================================
    LIVE CLASS PANEL
 ===========================================================*/
