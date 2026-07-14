@@ -1806,7 +1806,15 @@ document.addEventListener("DOMContentLoaded", async()=>{
     startAutoRefresh();
 
 });
-    
+   function startAutoRefresh(){
+
+    setInterval(()=>{
+
+        initializeDashboard();
+
+    },30000);
+
+} 
   </script>
 
 </body>
