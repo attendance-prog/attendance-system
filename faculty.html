@@ -3214,9 +3214,10 @@ res.absent;
 document.getElementById("lateStudents").innerHTML=
 res.late;
 
-if(window.attendanceChart){
+if(attendanceChart){
 
 attendanceChart.destroy();
+attendanceChart = null;
 
 }
 
@@ -3723,19 +3724,7 @@ score.style.color="#e74c3c";
 
 }
 
-/* ===========================================================
-   ANIMATE PERFORMANCE CARDS
-=========================================================== */
 
-animateCounter("classesTaken",4);
-
-animateCounter("studentsHandled",182);
-
-animateCounter("qrGenerated",4);
-
-animateCounter("lateClasses",0);
-
-animateCounter("leaveCount",0);
 
 /* ===========================================================
    PERFORMANCE COLOR
