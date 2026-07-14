@@ -1355,92 +1355,72 @@ async function loadRecentActivity(){
         const res = await api(
             "getCoordinatorRecentActivity",
             {
-                email:localStorage.getItem("email")
+                email: localStorage.getItem("email")
             }
         );
 
         const tbody =
-        document.querySelector("#recentActivityTable tbody");
+            document.querySelector("#recentActivityTable tbody");
 
-        tbody.innerHTML="";
+        tbody.innerHTML = "";
 
         if(!res.success){
 
-            tbody.innerHTML=`
+            tbody.innerHTML = `
             <tr>
-            <td colspan="4"
-            style="text-align:center;padding:25px;">
-            Unable to load activity
-            </td>
+                <td colspan="4" style="text-align:center;padding:20px;">
+                    Unable to load activity
+                </td>
             </tr>`;
+
             return;
 
         }
 
         if(!res.data || res.data.length===0){
 
-            tbody.innerHTML=`
+            tbody.innerHTML = `
             <tr>
-            <td colspan="4"
-            style="text-align:center;padding:25px;">
-            No Recent Activity
-            </td>
+                <td colspan="4" style="text-align:center;padding:20px;">
+                    No Recent Activity
+                </td>
             </tr>`;
+
             return;
 
         }
 
+        let html = "";
+
         res.data.forEach(item=>{
 
-            let badge="badge-secondary";
+            let badge = "badge-secondary";
 
-            switch(item.status){
+            if(item.status=="PRESENT")
+                badge="badge-success";
 
-                case "PRESENT":
-                    badge="badge-success";
-                    break;
+            else if(item.status=="LATE")
+                badge="badge-warning";
 
-                case "LATE":
-                    badge="badge-warning";
-                    break;
+            else if(item.status=="ABSENT")
+                badge="badge-danger";
 
-                case "ABSENT":
-                    badge="badge-danger";
-                    break;
+            html += `
+            <tr>
+                <td>${item.date}</td>
+                <td>${item.student}</td>
+                <td>${item.subject}</td>
+                <td>
+                    <span class="${badge}">
+                        ${item.status}
+                    </span>
+                </td>
+            </tr>`;
+        });
 
-            }
+        tbody.innerHTML = html;
 
-            let html = "";
-
-res.data.forEach(item=>{
-
-    html += `
-
-<tr>
-
-<td>${item.date}</td>
-
-<td>${item.student}</td>
-
-<td>${item.subject}</td>
-
-<td>
-
-<span class="${badge}">
-
-${item.status}
-
-</span>
-
-</td>
-
-</tr>
-
-`;
-
-});
-
-tbody.innerHTML = html;
+    }
 
     catch(err){
 
@@ -1793,18 +1773,7 @@ async function refreshDashboard(){
     }
 
 }
-    /* =========================================================
-   BLOCK-6C
-   AUTO REFRESH
-=========================================================*/
-
-async function refreshDashboard(){
-
-    await initializeDashboard();
-
-    updateTime();
-
-}
+  
     /* =========================================================
    BLOCK-6D
    PAGE LOAD
