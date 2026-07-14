@@ -2283,7 +2283,13 @@ BLOCK-7 : LIVE STUDENT MONITOR
     </div>
 
 </div>
+<div class="ai-card">
 
+<h2>🤖 AI Insights</h2>
+
+<div id="aiInsightBox"></div>
+
+</div>
        <!-- =========================================
 BLOCK-8 : QUICK ACTIONS
 ========================================= -->
@@ -2956,44 +2962,37 @@ async function loadCurrentSession(){
 
 async function stillTeaching(){
 
-    if(!currentSession){
+if(!currentSession){
 
-        alert(
+alert("No Active Session");
 
-        "No Active Session"
-
-        );
-
-        return;
-
-    }
-
-    const res=
-
-    await api(
-
-        "confirmAttendance",
-
-        {
-
-            sessionId:currentSession
-
-        }
-
-    );
-
-    if(res.success){
-
-        alert(
-
-        "Attendance Finalized"
-
-        );
-
-    }
+return;
 
 }
 
+const res=await api(
+
+"confirmAttendance",
+
+{
+
+sessionId:currentSession
+
+}
+
+);
+
+alert(
+
+res.message ||
+
+"Attendance Finalized"
+
+);
+
+await refreshFacultyDashboard();
+
+}
 /* ===========================================================
    INITIAL COMMON FUNCTIONS
 =========================================================== */
@@ -3005,8 +3004,6 @@ updateClock();
 setInterval(updateClock,1000);
 
 checkLiveStatus();
-
-setInterval(checkLiveStatus,30000);
 
 loadCurrentSession();
 
@@ -3137,57 +3134,46 @@ async function loadLiveClass(){
 
 async function refreshQR(){
 
-    const res = await api(
-        "refreshFacultyQR",
-        {
-            email:facultyEmail
-        }
-    );
+const res=await api(
 
-    if(res.success){
+"refreshFacultyQR",
 
-        alert("QR Refreshed Successfully");
+{
 
-        loadLiveClass();
-
-    }else{
-
-        alert(res.message);
-
-    }
+email:localStorage.getItem("email")
 
 }
 
+);
+
+alert(res.message);
+
+await refreshFacultyDashboard();
+
+}
 /* ===========================================================
    END LECTURE
 ===========================================================*/
 
 async function endLecture(){
 
-    if(!confirm("End Current Lecture?"))
-        return;
+const res=await api(
 
-    const res = await api(
-        "endFacultyLecture",
-        {
-            email:facultyEmail
-        }
-    );
+"endFacultyLecture",
 
-    if(res.success){
+{
 
-        alert("Lecture Ended");
-
-        loadLiveClass();
-
-    }else{
-
-        alert(res.message);
-
-    }
+email:localStorage.getItem("email")
 
 }
 
+);
+
+alert(res.message);
+
+await refreshFacultyDashboard();
+
+}
 /* ===========================================================
    INITIAL LOAD
 ===========================================================*/
@@ -3200,16 +3186,41 @@ loadLiveClass();
    BLOCK-5
    ATTENDANCE ANALYTICS
 ===========================================================*/
+async function loadFacultyAttendanceAnalytics(){
 
-document.getElementById("attendancePercent").innerHTML="91%";
+const res=await api(
 
-document.getElementById("presentStudents").innerHTML="38";
+"getFacultyAttendanceAnalytics",
 
-document.getElementById("absentStudents").innerHTML="4";
+{
 
-document.getElementById("lateStudents").innerHTML="2";
+email:localStorage.getItem("email")
 
-attendanceChart = new Chart(
+}
+
+);
+
+if(!res.success) return;
+
+document.getElementById("attendancePercent").innerHTML=
+res.attendance+"%";
+
+document.getElementById("presentStudents").innerHTML=
+res.present;
+
+document.getElementById("absentStudents").innerHTML=
+res.absent;
+
+document.getElementById("lateStudents").innerHTML=
+res.late;
+
+if(window.attendanceChart){
+
+attendanceChart.destroy();
+
+}
+
+attendanceChart=new Chart(
 
 document.getElementById("attendanceChart"),
 
@@ -3219,19 +3230,11 @@ type:"doughnut",
 
 data:{
 
-labels:[
-
-"Present",
-
-"Absent",
-
-"Late"
-
-],
+labels:res.labels,
 
 datasets:[{
 
-data:[38,4,2]
+data:res.values
 
 }]
 
@@ -3257,84 +3260,72 @@ position:"bottom"
 
 });
 
+}
+
+
+
 /* ===========================================================
    BLOCK-6
    TODAY TIMETABLE
 ===========================================================*/
 
-const timetableDemo=[
+async function loadTodayTimetable(){
+
+const res=await api(
+
+"getFacultyTodayTimetable",
 
 {
 
-time:"09:00 - 09:50",
-
-subject:"BST4411",
-
-room:"603",
-
-status:"Completed"
-
-},
-
-{
-
-time:"09:50 - 10:40",
-
-subject:"BSP4410",
-
-room:"603",
-
-status:"Running"
-
-},
-
-{
-
-time:"10:40 - 11:30",
-
-subject:"NVAC211",
-
-room:"603",
-
-status:"Upcoming"
-
-},
-
-{
-
-time:"11:35 - 12:25",
-
-subject:"MBA107",
-
-room:"603",
-
-status:"Not Taken"
+email:localStorage.getItem("email")
 
 }
 
-];
+);
 
-const timetableBox=
+const box=document.getElementById(
 
-document.getElementById("todayTimetableCards");
+"todayTimetableCards"
 
-timetableBox.innerHTML="";
+);
 
-timetableDemo.forEach(item=>{
+box.innerHTML="";
+
+if(!res.success){
+
+box.innerHTML=
+
+"<p>No timetable available.</p>";
+
+return;
+
+}
+
+if(res.data.length==0){
+
+box.innerHTML=
+
+"<p>No class today.</p>";
+
+return;
+
+}
+
+res.data.forEach(item=>{
 
 let cls="status-upcoming";
 
 switch(item.status){
 
-case "Running":
-
-cls="status-running";
-
-break;
-
 case "Completed":
 
 cls="status-completed";
+
+break;
+
+case "Running":
+
+cls="status-running";
 
 break;
 
@@ -3344,21 +3335,15 @@ cls="status-upcoming";
 
 break;
 
-case "Not Taken":
-
-cls="status-nottaken";
-
-break;
-
 }
 
-timetableBox.innerHTML+=`
+box.innerHTML+=`
 
 <div class="lecture-card">
 
 <div class="lecture-time">
 
-🕒 ${item.time}
+🕒 ${item.start} - ${item.end}
 
 </div>
 
@@ -3370,7 +3355,7 @@ ${item.subject}
 
 <div class="lecture-room">
 
-🏫 Room : ${item.room}
+🏫 Room ${item.room}
 
 </div>
 
@@ -3386,100 +3371,81 @@ ${item.status}
 
 });
 
-/* ===========================================================
+}
+    /* ===========================================================
    BLOCK-7
    LIVE STUDENT MONITOR
 ===========================================================*/
 
-const demoStudents=[
+async function loadLiveStudents(){
+
+const res=await api(
+
+"getFacultyLiveStudents",
 
 {
 
-id:"22MBA001",
-
-name:"Rahul",
-
-status:"Present"
-
-},
-
-{
-
-id:"22MBA002",
-
-name:"Priya",
-
-status:"Present"
-
-},
-
-{
-
-id:"22MBA003",
-
-name:"Aman",
-
-status:"Absent"
-
-},
-
-{
-
-id:"22MBA004",
-
-name:"Riya",
-
-status:"Late"
-
-},
-
-{
-
-id:"22MBA005",
-
-name:"Kunal",
-
-status:"Present"
+email:localStorage.getItem("email")
 
 }
 
-];
+);
 
-let present=0;
+const grid=document.getElementById(
 
-let absent=0;
+"liveStudentGrid"
 
-let late=0;
-
-const grid=
-
-document.getElementById("liveStudentGrid");
+);
 
 grid.innerHTML="";
 
-demoStudents.forEach(s=>{
+if(!res.success){
+
+grid.innerHTML="<p>No Data</p>";
+
+return;
+
+}
+
+document.getElementById(
+
+"studentPresentCount"
+
+).innerHTML=res.present;
+
+document.getElementById(
+
+"studentLateCount"
+
+).innerHTML=res.late;
+
+document.getElementById(
+
+"studentAbsentCount"
+
+).innerHTML=res.absent;
+
+if(res.data.length==0){
+
+grid.innerHTML="<p>No Active Session</p>";
+
+return;
+
+}
+
+res.data.forEach(s=>{
 
 let cls="status-present";
 
-if(s.status=="Late"){
-
-cls="status-late";
-
-late++;
-
-}
-
-else if(s.status=="Absent"){
+if(s.status=="ABSENT"){
 
 cls="status-absent";
 
-absent++;
-
 }
 
-else{
+else if(s.status=="LATE"){
 
-present++;
+cls="status-late";
 
 }
 
@@ -3525,78 +3491,111 @@ ${s.status}
 
 });
 
-document.getElementById("studentPresentCount").innerHTML=present;
-
-document.getElementById("studentLateCount").innerHTML=late;
-
-document.getElementById("studentAbsentCount").innerHTML=absent;
-          /* ===========================================================
+}
+        
+    /* ===========================================================
    PART-4
    BLOCK-8
    QUICK ACTIONS
 =========================================================== */
 
-function updateGPS(){
+async function updateGPS(){
 
-    alert("GPS Update will be connected with Apps Script.");
+const res=await api(
+
+"updateFacultyGPS",
+
+{
+
+email:localStorage.getItem("email")
 
 }
 
-function downloadAttendanceReport(){
+);
 
-    alert("Excel / PDF Download will be connected later.");
+alert(res.message);
+
+await refreshFacultyDashboard();
 
 }
 
+async function downloadAttendanceReport(){
+
+const res=await api(
+
+"downloadFacultyAttendance",
+
+{
+
+email:localStorage.getItem("email")
+
+}
+
+);
+
+if(res.success){
+
+console.log(res.data);
+
+alert("Attendance downloaded successfully.");
+
+}else{
+
+alert(res.message);
+
+}
+
+}
 /* ===========================================================
    BLOCK-9
    TEACHING PROGRESS
 =========================================================== */
 
-const teachingProgress=[
+async function loadTeachingProgress(){
+
+const res=await api(
+
+"getFacultyRecentActivity",
 
 {
-time:"09:00 AM",
-icon:"📡",
-title:"QR Generated",
-desc:"Attendance QR created for BST4411."
-},
 
-{
-time:"09:08 AM",
-icon:"👨‍🎓",
-title:"Attendance Submitted",
-desc:"38 Students marked attendance."
-},
+email:localStorage.getItem("email")
 
-{
-time:"09:50 AM",
-icon:"✔",
-title:"Lecture Completed",
-desc:"BST4411 completed successfully."
-},
-
-{
-time:"10:10 AM",
-icon:"📊",
-title:"Attendance Report Viewed",
-desc:"Faculty viewed attendance analytics."
-},
-
-{
-time:"11:20 AM",
-icon:"📝",
-title:"Marks Updated",
-desc:"Internal marks uploaded."
 }
 
-];
+);
 
-const timeline=document.getElementById("teachingTimeline");
+const timeline=
+
+document.getElementById(
+
+"teachingTimeline"
+
+);
 
 timeline.innerHTML="";
 
-teachingProgress.forEach(item=>{
+if(!res.success){
+
+timeline.innerHTML=
+
+"<p>No Activity Found</p>";
+
+return;
+
+}
+
+if(res.data.length==0){
+
+timeline.innerHTML=
+
+"<p>No Recent Activity</p>";
+
+return;
+
+}
+
+res.data.forEach(item=>{
 
 timeline.innerHTML+=`
 
@@ -3636,22 +3635,93 @@ ${item.desc}
 
 });
 
+}
 /* ===========================================================
    BLOCK-10
    FACULTY PERFORMANCE
 =========================================================== */
 
-document.getElementById("classesTaken").innerHTML="4";
+async function loadFacultyPerformance(){
 
-document.getElementById("studentsHandled").innerHTML="182";
+const res=await api(
 
-document.getElementById("qrGenerated").innerHTML="4";
+"getFacultyPerformance",
 
-document.getElementById("lateClasses").innerHTML="0";
+{
 
-document.getElementById("leaveCount").innerHTML="0";
+email:localStorage.getItem("email")
 
-document.getElementById("facultyScore").innerHTML="98%";
+}
+
+);
+
+if(!res.success) return;
+
+document.getElementById(
+
+"classesTaken"
+
+).innerHTML=res.classesTaken;
+
+document.getElementById(
+
+"studentsHandled"
+
+).innerHTML=res.studentsHandled;
+
+document.getElementById(
+
+"qrGenerated"
+
+).innerHTML=res.qrGenerated;
+
+document.getElementById(
+
+"lateClasses"
+
+).innerHTML=res.lateClasses;
+
+document.getElementById(
+
+"leaveCount"
+
+).innerHTML=res.leaveCount;
+
+document.getElementById(
+
+"facultyScore"
+
+).innerHTML=
+
+res.attendancePercent+"%";
+
+const score=document.getElementById(
+
+"facultyScore"
+
+);
+
+const value=res.attendancePercent;
+
+if(value>=90){
+
+score.style.color="#27ae60";
+
+}
+
+else if(value>=75){
+
+score.style.color="#f39c12";
+
+}
+
+else{
+
+score.style.color="#e74c3c";
+
+}
+
+}
 
 /* ===========================================================
    ANIMATE PERFORMANCE CARDS
@@ -3694,56 +3764,47 @@ score.style.color="#e74c3c";
    NOTIFICATIONS
 =========================================================== */
 
-const notifications=[
+async function loadNotifications(){
+
+const res=await api(
+
+"getFacultyNotifications",
 
 {
-icon:"📷",
-title:"QR Session",
-message:"Current QR expires in 3 minutes.",
-time:"Just Now"
-},
 
-{
-icon:"📚",
-title:"Next Lecture",
-message:"MBA107 starts at 11:35 AM.",
-time:"10 Minutes Left"
-},
+email:localStorage.getItem("email")
 
-{
-icon:"⚠️",
-title:"Low Attendance",
-message:"4 students are below 75% attendance.",
-time:"Today"
-},
-
-{
-icon:"📝",
-title:"Marks Pending",
-message:"Upload Internal Assessment Marks.",
-time:"Today"
-},
-
-{
-icon:"🌴",
-title:"Leave",
-message:"Your Leave Request has been Approved.",
-time:"Yesterday"
 }
 
-];
+);
 
-document.getElementById("notificationCount").innerHTML =
-notifications.length;
+const box=document.getElementById(
 
-const notificationBox =
-document.getElementById("notificationList");
+"notificationList"
 
-notificationBox.innerHTML="";
+);
 
-notifications.forEach(n=>{
+box.innerHTML="";
 
-notificationBox.innerHTML += `
+if(!res.success){
+
+box.innerHTML="<p>No Notifications</p>";
+
+return;
+
+}
+
+document.getElementById(
+
+"notificationCount"
+
+).innerHTML=
+
+res.data.length;
+
+res.data.forEach(n=>{
+
+box.innerHTML+=`
 
 <div class="notification-item">
 
@@ -3781,7 +3842,66 @@ ${n.time}
 
 });
 
+}
+async function loadAIInsights(){
 
+const res=await api(
+
+"getFacultyAIInsights",
+
+{
+
+email:localStorage.getItem("email")
+
+}
+
+);
+
+const box=
+
+document.getElementById(
+
+"aiInsightBox"
+
+);
+
+box.innerHTML="";
+
+if(!res.success){
+
+box.innerHTML=
+
+"<p>No Insights</p>";
+
+return;
+
+}
+
+res.data.forEach(i=>{
+
+box.innerHTML+=`
+
+<div class="ai-item">
+
+<div class="ai-icon">
+
+${i.icon}
+
+</div>
+
+<div>
+
+${i.text}
+
+</div>
+
+</div>
+
+`;
+
+});
+
+}
 /* ===========================================================
    BLOCK-12
    FLOATING ACTION BUTTONS
@@ -3810,34 +3930,102 @@ alert("Faculty Help Center will be available soon.");
    AUTO REFRESH
 =========================================================== */
 
-function refreshFacultyDashboard(){
+/* ===========================================================
+   FACULTY DASHBOARD REFRESH
+=========================================================== */
 
-console.log("Faculty Dashboard Refreshed");
+async function refreshFacultyDashboard(){
 
-// Backend integration will be added later.
+    try{
+
+        await Promise.all([
+
+            loadFacultyDashboard(),
+
+            loadLiveClass(),
+
+            loadFacultyAttendanceAnalytics(),
+
+            loadTodayTimetable(),
+
+            loadLiveStudents(),
+
+            loadAIInsights(),
+
+            loadTeachingProgress(),
+
+            loadNotifications(),
+
+            loadFacultyPerformance()
+
+        ]);
+
+    }
+
+    catch(err){
+
+        console.error(
+
+            "Dashboard Refresh Error",
+
+            err
+
+        );
+
+    }
 
 }
+/* Dashboard */
 
-setInterval(refreshFacultyDashboard,60000);
+setInterval(
 
+refreshFacultyDashboard,
 
+60000
+
+);
+
+/* Live Badge */
+
+setInterval(
+
+checkLiveStatus,
+
+15000
+
+);
+
+/* Clock */
+
+setInterval(
+
+updateClock,
+
+1000
+
+);
 /* ===========================================================
    PAGE INITIALIZATION
 =========================================================== */
 
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener(
 
-console.log("Faculty Dashboard Loaded Successfully");
+"DOMContentLoaded",
 
-updateClock();
+async function(){
 
-loadFacultyInfo();
+    loadFacultyInfo();
 
-checkLiveStatus();
+    updateClock();
 
-loadCurrentSession();
+    loadCurrentSession();
 
-});
+    await refreshFacultyDashboard();
+
+    checkLiveStatus();
+
+}
+);
 
 
 /* ===========================================================
