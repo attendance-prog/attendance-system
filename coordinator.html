@@ -1570,8 +1570,13 @@ async function loadTimetable(){
 
 async function loadFacultyStatus(){
 
-    const data =
-        await api("getCoordinatorFacultyStatus");
+   const data =
+await api(
+    "getCoordinatorFacultyStatus",
+    {
+        email:localStorage.getItem("email")
+    }
+);
 
     const body =
         document.getElementById("facultyStatusBody");
@@ -1616,8 +1621,12 @@ async function loadFacultyStatus(){
 
 async function loadStudentAttendance(){
 
-    const data =
-        await api("getCoordinatorStudentAttendance");
+    const data = await api(
+    "getCoordinatorStudentAttendance",
+    {
+        email: localStorage.getItem("email")
+    }
+);
 
     const body =
         document.getElementById("studentAttendanceBody");
@@ -1639,7 +1648,7 @@ body.innerHTML +=`
 
 <tr>
 
-<td>${r.name}</td>
+<td>${r.section}</td>
 
 <td>${r.attendance}</td>
 
@@ -1655,7 +1664,12 @@ body.innerHTML +=`
 async function loadCoordinatorPerformance(){
 
     const data =
-        await api("getCoordinatorPerformance");
+await api(
+    "getCoordinatorPerformance",
+    {
+        email:localStorage.getItem("email")
+    }
+);
 
     if(!data.success) return;
 
@@ -1728,7 +1742,11 @@ async function initializeDashboard(){
 
         await loadFacultyStatus();
 
-        console.log("Coordinator Dashboard Loaded Successfully");
+await loadStudentAttendance();
+
+await loadCoordinatorPerformance();
+
+console.log("Coordinator Dashboard Loaded Successfully");
 
     }
 
@@ -1750,7 +1768,7 @@ async function refreshDashboard(){
 
         await loadDashboardSummary();
 
-        await loadDepartmentStatus();
+       await loadLiveDepartment();
 
         await loadAttendanceChart();
 
@@ -1763,7 +1781,9 @@ async function refreshDashboard(){
         await loadTimetable();
 
         await loadFacultyStatus();
+await loadStudentAttendance();
 
+await loadCoordinatorPerformance();
     }
 
     catch(err){
