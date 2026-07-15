@@ -2997,15 +2997,15 @@ await refreshFacultyDashboard();
    INITIAL COMMON FUNCTIONS
 =========================================================== */
 
-loadFacultyInfo();
+
 
 updateClock();
 
 setInterval(updateClock,1000);
 
-checkLiveStatus();
 
-loadCurrentSession();
+
+
 
 startQrTimer();
           /* ===========================================================
@@ -3181,18 +3181,18 @@ loadLiveClass();
 async function loadFacultyAttendanceAnalytics(){
 
 const res=await api(
-
 "getFacultyAttendanceAnalytics",
-
 {
-
 email:localStorage.getItem("email")
-
 }
-
 );
 
 if(!res.success) return;
+
+document.getElementById("attendancePercent").innerHTML=res.percent+"%";
+document.getElementById("presentStudents").innerHTML=res.present;
+document.getElementById("absentStudents").innerHTML=res.absent;
+document.getElementById("lateStudents").innerHTML=res.late;
 
 const canvas=document.getElementById("attendanceChart");
 
@@ -3204,68 +3204,31 @@ if(
 window.attendanceChart &&
 typeof window.attendanceChart.destroy==="function"
 ){
-
 window.attendanceChart.destroy();
-
 }
-
-window.attendanceChart=null;
 
 window.attendanceChart=new Chart(ctx,{
-
 type:"doughnut",
-
 data:{
-
 labels:["Present","Absent","Late"],
-
 datasets:[{
-
 data:[
-
 res.present,
-
 res.absent,
-
 res.late
-
 ],
-
 backgroundColor:[
-
 "#2ecc71",
-
 "#e74c3c",
-
 "#f1c40f"
-
 ]
-
 }]
-
 },
-
 options:{
-
 responsive:true,
-
 maintainAspectRatio:false
-
 }
-const ctx=
-
-document.getElementById("attendanceChart")
-
-.getContext("2d");
 });
-
-document.getElementById("attendancePercent").innerHTML=res.percent+"%";
-
-document.getElementById("presentStudents").innerHTML=res.present;
-
-document.getElementById("absentStudents").innerHTML=res.absent;
-
-document.getElementById("lateStudents").innerHTML=res.late;
 
 }
 
@@ -3989,13 +3952,6 @@ checkLiveStatus,
 
 );
 
-/* Clock */
-
-setInterval(
-
-updateClock,
-
-1000
 
 );
 /* ===========================================================
