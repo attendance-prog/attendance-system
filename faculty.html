@@ -3797,61 +3797,52 @@ ${n.time}
 }
 async function loadAIInsights(){
 
-const res=await api(
+    const res = await api(
+        "getFacultyAIInsights",
+        {
+            email: localStorage.getItem("email")
+        }
+    );
 
-"getFacultyAIInsights",
+    const box = document.getElementById("aiInsightBox");
 
-{
+    if(!box) return;
 
-email:localStorage.getItem("email")
+    box.innerHTML = "";
 
-}
+    if(!res || !res.success){
 
-);
+        box.innerHTML = "<p>No Insights</p>";
+        return;
 
-const box=
+    }
 
-document.getElementById(
+    // Support both "insights" and "data"
+    const insights = Array.isArray(res.insights)
+        ? res.insights
+        : (Array.isArray(res.data) ? res.data : []);
 
-"aiInsightBox"
+    if(insights.length === 0){
 
-);
+        box.innerHTML = "<p>No Insights</p>";
+        return;
 
-box.innerHTML="";
+    }
 
-if(!res.success){
+    insights.forEach(i=>{
 
-box.innerHTML=
+        box.innerHTML += `
+            <div class="ai-item">
+                <div class="ai-icon">
+                    ${i.icon || "🤖"}
+                </div>
+                <div>
+                    ${i.text || ""}
+                </div>
+            </div>
+        `;
 
-"<p>No Insights</p>";
-
-return;
-
-}
-
-res.data.forEach(i=>{
-
-box.innerHTML+=`
-
-<div class="ai-item">
-
-<div class="ai-icon">
-
-${i.icon}
-
-</div>
-
-<div>
-
-${i.text}
-
-</div>
-
-</div>
-
-`;
-
-});
+    });
 
 }
 /* ===========================================================
