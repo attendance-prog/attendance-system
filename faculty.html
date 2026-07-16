@@ -3071,15 +3071,14 @@ res.runningClasses;
 
 document.getElementById("nextClass").innerHTML=
 
-res.nextClass;
-document.getElementById("facultyId").innerHTML=
+document.getElementById("facultyId").innerText =
+    res.profile.id || "--";
 
-res.facultyId || "-";
+document.getElementById("department").innerText =
+    res.profile.department || "--";
 
-document.getElementById("facultyDept").innerHTML=
-
-res.department || "-";
-}
+document.getElementById("facultyName").innerText =
+    res.profile.name || "";}
 /* ===========================================================
    LIVE CLASS PANEL
 ===========================================================*/
