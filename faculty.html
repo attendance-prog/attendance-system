@@ -3086,40 +3086,35 @@ res.department || "-";
 
 async function loadLiveClass(){
 
-    const res = await api(
-        "getFacultyLiveClass",
-        {
-            email:facultyEmail
-        }
-    );
+const res=await api(
+"getFacultyLiveClass",
+{
+email:localStorage.getItem("email")
+}
+);
 
-    if(!res.success){
+if(!res.success){
 
-        document.getElementById("liveStatusBadge").innerHTML =
-        "NO ACTIVE CLASS";
-
-        return;
-
-    }
-
-    document.getElementById("liveStatusBadge").innerHTML =
-    res.active
-    ? "LIVE"
-    : "NO ACTIVE CLASS";
-
-    document.getElementById("liveSubject").innerHTML =
-    res.subject || "--";
-
-    document.getElementById("liveRoom").innerHTML =
-    res.room || "--";
-
-    document.getElementById("liveTime").innerHTML =
-    res.time || "--";
-
-    qrSeconds = res.remainingSeconds || 0;
+document.getElementById("liveStatusBadge").innerHTML="NO ACTIVE CLASS";
+return;
 
 }
 
+document.getElementById("liveStatusBadge").innerHTML=
+res.live?"LIVE":"NO ACTIVE CLASS";
+
+document.getElementById("liveSubject").innerHTML=
+res.subjectId||"--";
+
+document.getElementById("liveRoom").innerHTML=
+res.room||"--";
+
+document.getElementById("liveTime").innerHTML=
+(res.startTime||"--")+" - "+(res.endTime||"--");
+
+qrSeconds=res.qrRemaining||0;
+
+}
 /* ===========================================================
    REFRESH QR
 ===========================================================*/
@@ -3394,7 +3389,7 @@ document.getElementById(
 
 ).innerHTML=res.absent;
 
-if(res.data.length==0){
+if(res.students.length==0){
 
 grid.innerHTML="<p>No Active Session</p>";
 
@@ -3402,7 +3397,7 @@ return;
 
 }
 
-res.data.forEach(s=>{
+res.students.forEach(s=>{
 
 let cls="status-present";
 
@@ -3440,7 +3435,7 @@ ${s.name}
 
 <div class="student-id">
 
-${s.id}
+${s.studentId}
 
 </div>
 
@@ -3662,7 +3657,7 @@ document.getElementById(
 
 ).innerHTML=
 
-res.attendancePercent+"%";
+res.facultyScore+"%";
 
 const score=document.getElementById(
 
@@ -3757,9 +3752,9 @@ document.getElementById(
 
 ).innerHTML=
 
-res.data.length;
+res.notifications.length;
 
-res.data.forEach(n=>{
+res.notifications.forEach(n=>{
 
 box.innerHTML+=`
 
