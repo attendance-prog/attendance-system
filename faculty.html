@@ -3012,73 +3012,64 @@ startQrTimer();
    PART-2
    BLOCK-2 / BLOCK-3 / BLOCK-4
 ===========================================================*/
-
 /* ===========================================================
    LOAD FACULTY DASHBOARD
 ===========================================================*/
 
 async function loadFacultyDashboard(){
 
-const res=await api(
+  const res = await api(
+    "getFacultyDashboard",
+    {
+      email: localStorage.getItem("email")
+    }
+  );
 
-"getFacultyDashboard",
+  if(!res.success) return;
 
-{
+  // Top Cards
+  document.getElementById("cardStudents").innerHTML =
+    res.totalStudents || 0;
 
-email:localStorage.getItem("email")
+  document.getElementById("cardPresent").innerHTML =
+    res.presentToday || 0;
+
+  document.getElementById("cardAbsent").innerHTML =
+    res.absentToday || 0;
+
+  document.getElementById("cardQR").innerHTML =
+    res.activeQR ? "ACTIVE" : "INACTIVE";
+
+  document.getElementById("cardClasses").innerHTML =
+    res.todayClasses || 0;
+
+  document.getElementById("cardNext").innerHTML =
+    res.nextClass || "--:--";
+
+  document.getElementById("todayClasses").innerHTML =
+    res.todayClasses || 0;
+
+  document.getElementById("runningClasses").innerHTML =
+    res.runningClasses || 0;
+
+  document.getElementById("nextClass").innerHTML =
+    res.nextClass || "--:--";
+
+  // Faculty Profile
+  if(res.profile){
+
+    document.getElementById("facultyId").innerText =
+      res.profile.id || "--";
+
+    document.getElementById("department").innerText =
+      res.profile.department || "--";
+
+    document.getElementById("facultyName").innerText =
+      res.profile.name || "";
+
+  }
 
 }
-
-);
-
-if(!res.success) return;
-
-document.getElementById("cardStudents").innerHTML=
-
-res.totalStudents;
-
-document.getElementById("cardPresent").innerHTML=
-
-res.presentToday;
-
-document.getElementById("cardAbsent").innerHTML=
-
-res.absentToday;
-
-document.getElementById("cardQR").innerHTML=
-
-res.activeQR
-
-?"ACTIVE"
-
-:"INACTIVE";
-
-document.getElementById("cardClasses").innerHTML=
-
-res.todayClasses;
-
-document.getElementById("cardNext").innerHTML=
-
-res.nextClass;
-
-document.getElementById("todayClasses").innerHTML=
-
-res.todayClasses;
-
-document.getElementById("runningClasses").innerHTML=
-
-res.runningClasses;
-
-document.getElementById("nextClass").innerHTML=
-
-document.getElementById("facultyId").innerText =
-    res.profile.id || "--";
-
-document.getElementById("department").innerText =
-    res.profile.department || "--";
-
-document.getElementById("facultyName").innerText =
-    res.profile.name || "";}
 /* ===========================================================
    LIVE CLASS PANEL
 ===========================================================*/
