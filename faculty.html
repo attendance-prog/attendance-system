@@ -3063,9 +3063,7 @@ async function loadFacultyDashboard(){
 
    document.getElementById("facultyDept").innerText =
 res.profile.department || "--";
-    document.getElementById("facultyName").innerText =
-      res.profile.name || "";
-
+   
   }
 
 }
@@ -3215,8 +3213,6 @@ maintainAspectRatio:false
 });
 
 }
-
-
 /* ===========================================================
    BLOCK-6
    TODAY TIMETABLE
@@ -3224,225 +3220,180 @@ maintainAspectRatio:false
 
 async function loadTodayTimetable(){
 
-const res=await api(
+    const res = await api(
+        "getFacultyTodayTimetable",
+        {
+            email: localStorage.getItem("email")
+        }
+    );
 
-"getFacultyTodayTimetable",
+    const box = document.getElementById("todayTimetableCards");
 
-{
+    if(!box) return;
 
-email:localStorage.getItem("email")
+    box.innerHTML = "";
 
-}
+    if(!res.success){
 
-);
+        box.innerHTML = "<p>No timetable available.</p>";
+        return;
 
-const box=document.getElementById(
+    }
 
-"todayTimetableCards"
+    const timetable = Array.isArray(res.timetable)
+        ? res.timetable
+        : (Array.isArray(res.data) ? res.data : []);
 
-);
+    if(timetable.length === 0){
 
-box.innerHTML="";
+        box.innerHTML = "<p>No class today.</p>";
+        return;
 
-if(!res.success){
+    }
 
-box.innerHTML=
+    timetable.forEach(item=>{
 
-"<p>No timetable available.</p>";
+        let cls = "status-upcoming";
 
-return;
+        if(item.status==="Running"){
 
-}
+            cls="status-running";
 
-if(res.data.length==0){
+        }else if(item.status==="Completed"){
 
-box.innerHTML=
+            cls="status-completed";
 
-"<p>No class today.</p>";
+        }
 
-return;
+        box.innerHTML += `
 
-}
+        <div class="lecture-card">
 
-res.data.forEach(item=>{
+            <div class="lecture-time">
+                🕒 ${item.startTime || item.start} - ${item.endTime || item.end}
+            </div>
 
-let cls="status-upcoming";
+            <div class="lecture-subject">
+                ${item.subject || item.subjectId}
+            </div>
 
-switch(item.status){
+            <div class="lecture-room">
+                🏫 Room ${item.room || "--"}
+            </div>
 
-case "Completed":
+            <div class="lecture-status ${cls}">
+                ${item.status}
+            </div>
 
-cls="status-completed";
+        </div>
 
-break;
+        `;
 
-case "Running":
-
-cls="status-running";
-
-break;
-
-case "Upcoming":
-
-cls="status-upcoming";
-
-break;
-
-}
-
-box.innerHTML+=`
-
-<div class="lecture-card">
-
-<div class="lecture-time">
-
-🕒 ${item.start} - ${item.end}
-
-</div>
-
-<div class="lecture-subject">
-
-${item.subject}
-
-</div>
-
-<div class="lecture-room">
-
-🏫 Room ${item.room}
-
-</div>
-
-<div class="lecture-status ${cls}">
-
-${item.status}
-
-</div>
-
-</div>
-
-`;
-
-});
+    });
 
 }
-    /* ===========================================================
+   /* ===========================================================
    BLOCK-7
    LIVE STUDENT MONITOR
 ===========================================================*/
 
 async function loadLiveStudents(){
 
-const res=await api(
+    const res = await api(
+        "getFacultyLiveStudents",
+        {
+            email: localStorage.getItem("email")
+        }
+    );
 
-"getFacultyLiveStudents",
+    const grid = document.getElementById("liveStudentGrid");
 
-{
+    if(!grid) return;
 
-email:localStorage.getItem("email")
+    grid.innerHTML = "";
 
-}
+    if(!res.success){
 
-);
+        grid.innerHTML = "<p>No Data</p>";
+        return;
 
-const grid=document.getElementById(
+    }
 
-"liveStudentGrid"
+    document.getElementById("studentPresentCount").innerHTML =
+        res.present || 0;
 
-);
+    document.getElementById("studentLateCount").innerHTML =
+        res.late || 0;
 
-grid.innerHTML="";
+    document.getElementById("studentAbsentCount").innerHTML =
+        res.absent || 0;
 
-if(!res.success){
+    const students = Array.isArray(res.students)
+        ? res.students
+        : [];
 
-grid.innerHTML="<p>No Data</p>";
+    if(students.length===0){
 
-return;
+        grid.innerHTML = "<p>No Active Session</p>";
+        return;
 
-}
+    }
 
-document.getElementById(
+    students.forEach(s=>{
 
-"studentPresentCount"
+        let cls="status-present";
 
-).innerHTML=res.present;
+        if(s.status==="ABSENT"){
 
-document.getElementById(
+            cls="status-absent";
 
-"studentLateCount"
+        }else if(s.status==="LATE"){
 
-).innerHTML=res.late;
+            cls="status-late";
 
-document.getElementById(
+        }
 
-"studentAbsentCount"
+        grid.innerHTML += `
 
-).innerHTML=res.absent;
+        <div class="student-card">
 
-if(res.students.length==0){
+            <div class="student-left">
 
-grid.innerHTML="<p>No Active Session</p>";
+                <div class="student-avatar">
 
-return;
+                    ${(s.name || "?").charAt(0).toUpperCase()}
 
-}
+                </div>
 
-res.students.forEach(s=>{
+                <div>
 
-let cls="status-present";
+                    <div class="student-name">
 
-if(s.status=="ABSENT"){
+                        ${s.name || "--"}
 
-cls="status-absent";
+                    </div>
 
-}
+                    <div class="student-id">
 
-else if(s.status=="LATE"){
+                        ${s.studentId || "--"}
 
-cls="status-late";
+                    </div>
 
-}
+                </div>
 
-grid.innerHTML+=`
+            </div>
 
-<div class="student-card">
+            <div class="student-status ${cls}">
 
-<div class="student-left">
+                ${s.status || "ABSENT"}
 
-<div class="student-avatar">
+            </div>
 
-${s.name.charAt(0)}
+        </div>
 
-</div>
+        `;
 
-<div>
-
-<div class="student-name">
-
-${s.name}
-
-</div>
-
-<div class="student-id">
-
-${s.studentId}
-
-</div>
-
-</div>
-
-</div>
-
-<div class="student-status ${cls}">
-
-${s.status}
-
-</div>
-
-</div>
-
-`;
-
-});
+    });
 
 }
         
@@ -3654,7 +3605,7 @@ const score=document.getElementById(
 
 );
 
-const value=res.attendancePercent;
+const value=res.facultyScore;
 
 if(value>=90){
 
@@ -3699,92 +3650,93 @@ else{
 score.style.color="#e74c3c";
 
 }
-          /* ===========================================================
-   PART-5
+/* ===========================================================
    BLOCK-11
    NOTIFICATIONS
-=========================================================== */
+===========================================================*/
 
 async function loadNotifications(){
 
-const res=await api(
+    const res = await api(
+        "getFacultyNotifications",
+        {
+            email: localStorage.getItem("email")
+        }
+    );
 
-"getFacultyNotifications",
+    const box = document.getElementById("notificationList");
 
-{
+    if(!box) return;
 
-email:localStorage.getItem("email")
+    box.innerHTML = "";
+
+    if(!res.success){
+
+        document.getElementById("notificationCount").innerHTML = 0;
+
+        box.innerHTML = "<p>No Notifications</p>";
+
+        return;
+
+    }
+
+    const notifications = Array.isArray(res.notifications)
+        ? res.notifications
+        : [];
+
+    document.getElementById("notificationCount").innerHTML =
+        notifications.length;
+
+    if(notifications.length===0){
+
+        box.innerHTML = "<p>No Notifications</p>";
+
+        return;
+
+    }
+
+    notifications.forEach(n=>{
+
+        box.innerHTML += `
+
+        <div class="notification-item">
+
+            <div class="notification-icon">
+
+                ${n.icon || "🔔"}
+
+            </div>
+
+            <div class="notification-body">
+
+                <div class="notification-title">
+
+                    ${n.title || ""}
+
+                </div>
+
+                <div class="notification-message">
+
+                    ${n.message || ""}
+
+                </div>
+
+                <div class="notification-time">
+
+                    ${n.time || ""}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        `;
+
+    });
 
 }
-
-);
-
-const box=document.getElementById(
-
-"notificationList"
-
-);
-
-box.innerHTML="";
-
-if(!res.success){
-
-box.innerHTML="<p>No Notifications</p>";
-
-return;
-
-}
-
-document.getElementById(
-
-"notificationCount"
-
-).innerHTML=
-
-res.notifications.length;
-
-res.notifications.forEach(n=>{
-
-box.innerHTML+=`
-
-<div class="notification-item">
-
-<div class="notification-icon">
-
-${n.icon}
-
-</div>
-
-<div class="notification-body">
-
-<div class="notification-title">
-
-${n.title}
-
-</div>
-
-<div class="notification-message">
-
-${n.message}
-
-</div>
-
-<div class="notification-time">
-
-${n.time}
-
-</div>
-
-</div>
-
-</div>
-
-`;
-
-});
-
-}
-async function loadAIInsights(){
+    async function loadAIInsights(){
 
     const res = await api(
         "getFacultyAIInsights",
