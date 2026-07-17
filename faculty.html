@@ -3061,9 +3061,8 @@ async function loadFacultyDashboard(){
     document.getElementById("facultyId").innerText =
       res.profile.id || "--";
 
-    document.getElementById("department").innerText =
-      res.profile.department || "--";
-
+   document.getElementById("facultyDept").innerText =
+res.profile.department || "--";
     document.getElementById("facultyName").innerText =
       res.profile.name || "";
 
